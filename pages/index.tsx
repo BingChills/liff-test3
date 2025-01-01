@@ -2,12 +2,19 @@ import type { Liff } from "@line/liff";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
+import jwt from "jsonwebtoken";
 
-const Home: NextPage<{ liff: Liff | null; liffError: string | null }> = ({
+const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken: string | null }> = ({
   liff,
-  liffError
+  liffError,
+  liffIDToken
 }) => {
+  let decodedToken: any = null;
+  if (liffIDToken) {
+    decodedToken = jwt.decode(liffIDToken);
+  }
   return (
+    
     <div>
       <Head>
         <title>LIFF App</title>
@@ -16,8 +23,16 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null }> = ({
       </Head>
 
       <main className={styles.main}>
-        <h1>create-liff-app</h1>
+        <h1>Profile</h1>
         {liff && <p>LIFF init succeeded.</p>}
+
+        {liffIDToken && (
+          <>
+            <p>LIFF ID Token: {liffIDToken}</p>
+            <p>decodedToken: {JSON.stringify(decodedToken)}</p>
+          </>
+        )}
+
         {liffError && (
           <>
             <p>LIFF init failed.</p>
@@ -26,6 +41,7 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null }> = ({
             </p>
           </>
         )}
+        
         <a
           href="https://developers.line.biz/ja/docs/liff/"
           target="_blank"
