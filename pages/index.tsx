@@ -2,19 +2,38 @@ import type { Liff } from "@line/liff";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import jwt from "jsonwebtoken";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken: string | null }> = ({
   liff,
   liffError,
   liffIDToken
 }) => {
-  let decodedToken: any = null;
-  if (liffIDToken) {
-    decodedToken = jwt.decode(liffIDToken);
-  }
+
+  // Post liffIDToken to server to verify
+  // Get decoded token (user profile) from server
+
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (liffIDToken) {
+        try {
+          const response = await axios.post('/api/auth', { idToken: liffIDToken });
+          setUserProfile(response.data);
+        } catch (err) {
+          setError('Failed to verify token');
+        }
+      }
+    };
+    verifyToken();
+  }, [liffIDToken]);
+
+
   return (
-    
+
     <div>
       <Head>
         <title>LIFF App</title>
@@ -24,14 +43,9 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
 
       <main className={styles.main}>
         <h1>Profile</h1>
+
         {liff && <p>LIFF init succeeded.</p>}
 
-        {liffIDToken && (
-          <>
-            <p>LIFF ID Token: {liffIDToken}</p>
-            <p>decodedToken: {JSON.stringify(decodedToken)}</p>
-          </>
-        )}
 
         {liffError && (
           <>
@@ -41,14 +55,16 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
             </p>
           </>
         )}
-        
-        <a
-          href="https://developers.line.biz/ja/docs/liff/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          LIFF Documentation
-        </a>
+
+        {error && <p>{error}</p>}
+        {userProfile && (
+          <div>
+            <p>User ID: {userProfile.userId}</p>
+            <p>Name: {userProfile.name}</p>
+            <p>Email: {userProfile.email}</p>
+          </div>
+        )}
+
       </main>
     </div>
   );

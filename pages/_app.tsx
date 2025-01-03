@@ -16,18 +16,19 @@ function MyApp({ Component, pageProps }: AppProps) {
       .then((liff) => {
         console.log("LIFF init...");
         liff
-          .init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID!
-           })
+          .init({
+            liffId: process.env.NEXT_PUBLIC_LIFF_ID!
+          })
           .then(() => {
             console.log("LIFF init succeeded.");
           })
           .then(() => {
-          if (!liff.isLoggedIn()) {
-            liff.login({ redirectUri: process.env.NEXT_PUBLIC_LOCAL_URI! }); // ! Local URI from ngrok
-          } else {
-            setLiffObject(liff);
-            setLiffIDToken(liff.getIDToken());
-          }
+            if (!liff.isLoggedIn()) {
+              liff.login(); // ! Local URI from ngrok
+            } else {
+              setLiffObject(liff);
+              setLiffIDToken(liff.getIDToken());
+            }
           })
           .catch((error: Error) => {
             console.log("LIFF init failed.");

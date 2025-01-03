@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
@@ -18,23 +19,32 @@ const User = mongoose.model('User', new mongoose.Schema({
 }));
 
 // Route to handle ID token
-app.post('/api/auth', (req, res) => {
+app.post('/api/auth', async (req, res) => {
   const { idToken } = req.body;
-  const decodedToken = jwt.decode(idToken);
 
-  if (!decodedToken) {
-    return res.status(400).send('Invalid token');
+  try {
+    const response = await axios.post('https://api.line.me/oauth2/v2.1/verify', {
+      id_token: idToken,
+      client_id: '2006705425' // Channel ID from console
+    });
+
+    const decodedToken = response.data;
+
+    if (!decodedToken) {
+      return res.status(400).send('Invalid token');
+    }
+
+    const { sub: userId, name, email } = decodedToken;
+
+    // Find or create user
+    let user = await User.findOne({ userId });
+    if (!user) {
+      user = new User({ userId, name, email });
+      await user.save();
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    res.status(400).send('Invalid token');
   }
-
-  const { sub: userId, name, email } = decodedToken;
-
-  // Find or create user
-  User.findOneAndUpdate({ userId }, { name, email }, { upsert: true, new: true }, (err, user) => {
-    if (err) return res.status(500).send(err);
-    res.send(user);
-  });
-});
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
 });
