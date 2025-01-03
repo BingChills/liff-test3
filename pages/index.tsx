@@ -23,7 +23,7 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
         try {
           const response = await axios.post('/api/auth', { idToken: liffIDToken });
           setUserProfile(response.data);
-        } catch (err) {
+        } catch {
           setError('Failed to verify token');
         }
       }
