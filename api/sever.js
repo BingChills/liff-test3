@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const axios = require("axios");
+const qs = require("qs");
 
 const app = express();
 app.use(bodyParser.json());
@@ -29,10 +30,14 @@ app.post("/api/auth", async (req, res) => {
   try {
     const response = await axios.post(
       "https://api.line.me/oauth2/v2.1/verify",
-      {
-        id_token:
-          "eyJraWQiOiJjY2Q1OGMyZjI2NDZmNDVmZTBiNGJiYjAyMzdkNjJmMGRkN2JiMTY2OWQ0MGMxMjFiODQ4OGYxMGJmMzYzOTAwIiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTA1OTkwYWY1MTU5N2YwNmVmNDI5M2NjMjc4NGEwYzk3IiwiYXVkIjoiMjAwNjcwNTQyNSIsImV4cCI6MTczNzE4NjY4MywiaWF0IjoxNzM3MTgzMDgzLCJhbXIiOlsibGluZXNzbyJdLCJuYW1lIjoiVCIsInBpY3R1cmUiOiJodHRwczovL3Byb2ZpbGUubGluZS1zY2RuLm5ldC8waHpGUnpOSURxSldsdkF6WFdkSjFhUGxOR0t3UVlMU01oRnpKaVdrOEJjbHRDTldvNkFHRTRDQjREY2xrVk56YzJVR1k1VzA0TGYxc1IifQ.de4-vBYUC6lInNTDVxbp9ByUd8NzWJCJNPZyGdxcTcARmhvtT60Ms_bR3DOH0Jl8OAftkWewDyQseKrwTAgA3g",
+      qs.stringify({
+        id_token: idToken,
         client_id: "2006705425", // Channel ID from console
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
     );
 

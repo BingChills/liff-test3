@@ -31,7 +31,7 @@ const Home: NextPage<{
           });
           setUserProfile(response.data);
         } catch {
-          setError("Failed to verify token");
+          setError("API Error");
         }
       }
     };
