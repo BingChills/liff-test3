@@ -11,12 +11,11 @@ interface UserProfile {
   email: string;
 }
 
-const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken: string | null }> = ({
-  liff,
-  liffError,
-  liffIDToken
-}) => {
-
+const Home: NextPage<{
+  liff: Liff | null;
+  liffError: string | null;
+  liffIDToken: string | null;
+}> = ({ liff, liffError, liffIDToken }) => {
   // Post liffIDToken to server to verify
   // Get decoded token (user profile) from server
 
@@ -27,19 +26,19 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
     const verifyToken = async () => {
       if (liffIDToken) {
         try {
-          const response = await axios.post('/api/auth', { idToken: liffIDToken });
+          const response = await axios.post("/api/auth", {
+            idToken: liffIDToken,
+          });
           setUserProfile(response.data);
         } catch {
-          setError('Failed to verify token');
+          setError("Failed to verify token");
         }
       }
     };
     verifyToken();
   }, [liffIDToken]);
 
-
   return (
-
     <div>
       <Head>
         <title>LIFF App</title>
@@ -52,7 +51,6 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
 
         {liff && <p>LIFF init succeeded.</p>}
 
-
         {liffError && (
           <>
             <p>LIFF init failed.</p>
@@ -62,6 +60,8 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
           </>
         )}
 
+        {liffIDToken && <p>LIFF ID Token: {liffIDToken}</p>}
+
         {error && <p>{error}</p>}
         {userProfile && (
           <div>
@@ -70,7 +70,6 @@ const Home: NextPage<{ liff: Liff | null; liffError: string | null; liffIDToken:
             <p>Email: {userProfile.email}</p>
           </div>
         )}
-
       </main>
     </div>
   );

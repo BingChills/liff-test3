@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         console.log("LIFF init...");
         liff
           .init({
-            liffId: process.env.NEXT_PUBLIC_LIFF_ID!
+            liffId: "2006705425-ELaRLpLn", // ! LIFF ID from LINE Developers
           })
           .then(() => {
             console.log("LIFF init succeeded.");
@@ -36,9 +36,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           });
       });
   }, []);
-
-
-
 
   // Provide `liff` object and `liffError` object
   // to page component as property
