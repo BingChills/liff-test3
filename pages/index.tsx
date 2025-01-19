@@ -23,7 +23,9 @@ const Home: NextPage<{
           const response = await axios.post("/api/auth", {
             idToken: liffIDToken,
           });
+          console.log("API Response:", response.data);
           setUserProfile(response.data);
+          console.log("User Profile:", response.data);
         } catch (err) {
           const errorMessage = (err as AxiosError).response
             ? (err as AxiosError).response?.data
