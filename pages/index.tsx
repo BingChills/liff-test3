@@ -5,12 +5,6 @@ import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-interface UserProfile {
-  userId: string;
-  name: string;
-  email: string;
-}
-
 const Home: NextPage<{
   liff: Liff | null;
   liffError: string | null;
@@ -19,7 +13,7 @@ const Home: NextPage<{
   // Post liffIDToken to server to verify
   // Get decoded token (user profile) from server
 
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,9 +59,8 @@ const Home: NextPage<{
         {error && <p>{error}</p>}
         {userProfile && (
           <div>
-            <p>User ID: {userProfile.userId}</p>
-            <p>Name: {userProfile.name}</p>
-            <p>Email: {userProfile.email}</p>
+            <p>Profile:</p>
+            <pre>{JSON.stringify(userProfile, null, 2)}</pre>
           </div>
         )}
       </main>

@@ -1,37 +1,29 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const qs = require("qs");
 const axios = require("axios");
 
 const app = express();
 app.use(bodyParser.json());
-
-// Connect to MongoDB
-const uri =
-  "mongodb+srv://linkz:linkz2024@linkz.79c2i.mongodb.net/?retryWrites=true&w=majority&appName=Linkz";
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Define a User model
-const User = mongoose.model(
-  "User",
-  new mongoose.Schema({
-    userId: String,
-    name: String,
-    email: String,
-  })
-);
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Route to handle ID token
 app.post("/api/auth", async (req, res) => {
   const { idToken } = req.body;
 
+  const postData = {
+    id_token: idToken,
+    client_id: "2006705425", // Channel ID from console
+  };
+
   try {
     const response = await axios.post(
       "https://api.line.me/oauth2/v2.1/verify",
+      qs.stringify(postData),
       {
-        id_token: idToken,
-        client_id: "2006705425", // Channel ID from console
+        headers: {
+          "Content-Type": "x-www-form-urlencoded",
+        },
       }
     );
 
