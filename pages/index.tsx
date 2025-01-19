@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const Home: NextPage<{
   liff: Liff | null;
@@ -25,9 +25,9 @@ const Home: NextPage<{
           });
           setUserProfile(response.data);
         } catch (err) {
-          const errorMessage = (err as any).response
-            ? (err as any).response.data
-            : (err as any).message;
+          const errorMessage = (err as AxiosError).response
+            ? (err as AxiosError).response?.data
+            : (err as AxiosError).message;
           console.error("API Error:", errorMessage);
           setError("Failed to verify token");
         }

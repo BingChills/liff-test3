@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
-import qs from "qs";
-import axios from "axios";
+//import qs from "qs";
+//import axios from "axios";
 
 const app = express();
 app.use(bodyParser.json());
