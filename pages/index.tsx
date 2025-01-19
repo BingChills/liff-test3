@@ -24,7 +24,11 @@ const Home: NextPage<{
             idToken: liffIDToken,
           });
           setUserProfile(response.data);
-        } catch {
+        } catch (err) {
+          const errorMessage = (err as any).response
+            ? (err as any).response.data
+            : (err as any).message;
+          console.error("API Error:", errorMessage);
           setError("Failed to verify token");
         }
       }

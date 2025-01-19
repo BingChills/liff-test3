@@ -11,34 +11,40 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post("/api/auth", async (req, res) => {
   const { idToken } = req.body;
 
-  const postData = {
-    id_token: idToken,
-    client_id: "2006705425", // Channel ID from console
-  };
+  res.status(200).send(JSON.stringify(idToken));
 
-  try {
-    const response = await axios.post(
-      "https://api.line.me/oauth2/v2.1/verify",
-      qs.stringify(postData),
-      {
-        headers: {
-          "Content-Type": "x-www-form-urlencoded",
-        },
-      }
-    );
+  // const postData = {
+  //   id_token: idToken,
+  //   client_id: "2006705425", // Channel ID from console
+  // };
 
-    const decodedToken = response.data;
+  // try {
+  //   const response = await axios.post(
+  //     "https://api.line.me/oauth2/v2.1/verify",
+  //     qs.stringify(postData),
+  //     {
+  //       headers: {
+  //         "Content-Type": "x-www-form-urlencoded",
+  //       },
+  //     }
+  //   );
 
-    if (!decodedToken) {
-      return res.status(400).send("Invalid token");
-    }
+  //   const decodedToken = response.data;
 
-    res.status(200).send(JSON.stringify(decodedToken));
-  } catch (error) {
-    console.error(
-      "Error verifying token:",
-      error.response ? error.response.data : error.message
-    );
-    res.status(400).send("Invalid token");
-  }
+  //   if (!decodedToken) {
+  //     return res.status(400).send("Invalid token");
+  //   }
+
+  //   res.status(200).send(JSON.stringify(decodedToken));
+  // } catch (error) {
+  //   console.error(
+  //     "Error verifying token:",
+  //     error.response ? error.response.data : error.message
+  //   );
+  //   res.status(400).send("Invalid token");
+  // }
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });
