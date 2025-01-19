@@ -20,8 +20,8 @@ const Home: NextPage<{
     const verifyToken = async () => {
       if (liffIDToken) {
         try {
-          const response = await axios.post("/api/user", {
-            idToken: liffIDToken,
+          const response = await axios.post("/api/hello", {
+            name: liffIDToken,
           });
           console.log("API Response:", response.data);
           setUserProfile(response.data);
