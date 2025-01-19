@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const axios = require("axios");
-const qs = require("qs");
 
 const app = express();
 app.use(bodyParser.json());
@@ -30,14 +29,9 @@ app.post("/api/auth", async (req, res) => {
   try {
     const response = await axios.post(
       "https://api.line.me/oauth2/v2.1/verify",
-      qs.stringify({
+      {
         id_token: idToken,
         client_id: "2006705425", // Channel ID from console
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
       }
     );
 
@@ -47,16 +41,7 @@ app.post("/api/auth", async (req, res) => {
       return res.status(400).send("Invalid token");
     }
 
-    const { sub: userId, name, email } = decodedToken;
-
-    // Find or create user
-    let user = await User.findOne({ userId });
-    if (!user) {
-      user = new User({ userId, name, email });
-      await user.save();
-    }
-
-    res.status(200).send(user);
+    res.status(200).send(decodedToken);
   } catch (error) {
     res.status(400).send("Invalid token");
   }
