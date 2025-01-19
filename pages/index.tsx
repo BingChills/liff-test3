@@ -36,7 +36,7 @@ const Home: NextPage<{
       }
     };
     verifyToken();
-  }, []);
+  }, [liffIDToken]);
 
   return (
     <div>
