@@ -20,7 +20,7 @@ const Home: NextPage<{
     const verifyToken = async () => {
       if (liffIDToken) {
         try {
-          const response = await axios.post("/api/auth", {
+          const response = await axios.post("/api/user", {
             idToken: liffIDToken,
           });
           console.log("API Response:", response.data);
