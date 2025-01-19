@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post("/api/auth", async (req, res) => {
   const { idToken } = req.body;
 
-  res.status(200).send(JSON.stringify(idToken));
+  res.status(200).send(idToken);
 
   // const postData = {
   //   id_token: idToken,
