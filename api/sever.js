@@ -33,7 +33,7 @@ app.post("/api/auth", async (req, res) => {
       return res.status(400).send("Invalid token");
     }
 
-    res.status(200).send(decodedToken);
+    res.status(200).send(JSON.stringify(decodedToken));
   } catch (error) {
     res.status(400).send("Invalid token");
   }
