@@ -13,7 +13,7 @@ const Home: NextPage<{
   // Post liffIDToken to server to verify
   // Get decoded token (user profile) from server
 
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const Home: NextPage<{
         {userProfile && (
           <div>
             <p>Profile:</p>
-            <pre>{JSON.stringify(userProfile, null, 2)}</pre>
+            <pre>{userProfile}</pre>
           </div>
         )}
       </main>
