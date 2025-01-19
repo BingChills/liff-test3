@@ -1,7 +1,7 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const qs = require("qs");
-const axios = require("axios");
+import express from "express";
+import bodyParser from "body-parser";
+import qs from "qs";
+import axios from "axios";
 
 const app = express();
 app.use(bodyParser.json());
@@ -35,6 +35,10 @@ app.post("/api/auth", async (req, res) => {
 
     res.status(200).send(JSON.stringify(decodedToken));
   } catch (error) {
+    console.error(
+      "Error verifying token:",
+      error.response ? error.response.data : error.message
+    );
     res.status(400).send("Invalid token");
   }
 });
