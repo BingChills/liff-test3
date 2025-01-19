@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Route to handle ID token
-app.post("/api/auth", async (req, res) => {
+app.post("/server", async (req, res) => {
   const { idToken } = req.body;
 
   res.status(200).send(idToken);
