@@ -20,12 +20,11 @@ const Home: NextPage<{
     const verifyToken = async () => {
       if (liffIDToken) {
         try {
-          const response = await axios.post("/api/hello", {
-            name: liffIDToken,
+          const response = await axios.post("/api/authen", {
+            id_token: liffIDToken,
+            client_id: "2006705425",
           });
-          console.log("API Response:", response.data);
           setUserProfile(response.data);
-          console.log("User Profile:", response.data);
         } catch (err) {
           const errorMessage = (err as AxiosError).response
             ? (err as AxiosError).response?.data
