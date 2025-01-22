@@ -1,9 +1,10 @@
+"use client";
 import "../styles/globals.css";
-import type { AppProps } from "next/app";
+import { ReactNode, useState, useEffect } from "react";
 import type { Liff } from "@line/liff";
-import { useState, useEffect } from "react";
+import { LiffProvider } from "./context/LiffContext";
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffIDToken, setLiffIDToken] = useState<string | null>(null);
@@ -17,7 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         console.log("LIFF init...");
         liff
           .init({
-            liffId: "2006705425-ELaRLpLn"!,
+            liffId: "2006705425-ELaRLpLn",
           })
           .then(() => {
             console.log("LIFF init succeeded.");
@@ -31,18 +32,26 @@ function MyApp({ Component, pageProps }: AppProps) {
             }
           })
           .catch((error: Error) => {
-            console.log("LIFF init failed.");
+            console.log("LIFF init failed.", error);
             setLiffError(error.toString());
           });
       });
   }, []);
 
-  // Provide `liff` object and `liffError` object
-  // to page component as property
-  pageProps.liff = liffObject;
-  pageProps.liffError = liffError;
-  pageProps.liffIDToken = liffIDToken;
-  return <Component {...pageProps} />;
-}
+  const liffContextValue = {
+    liff: liffObject,
+    liffError,
+    liffIDToken,
+  };
 
-export default MyApp;
+  return (
+    <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body>
+        <LiffProvider value={liffContextValue}>{children}</LiffProvider>
+      </body>
+    </html>
+  );
+}
