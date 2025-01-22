@@ -7,7 +7,7 @@ import axios, { AxiosError } from "axios";
 import { useLiff } from "./context/LiffContext";
 
 const Home = () => {
-  const { liff, liffError, liffIDToken } = useLiff();
+  const { liff, liffError, liffIDToken, liffUserID } = useLiff();
   const [userProfile, setUserProfile] = useState<UserInformation | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +63,7 @@ const Home = () => {
             <pre>{userProfile.sub}</pre>
           </div>
         )}
+        {liffUserID && <p>LIFF User ID: {liffUserID}</p>}
       </main>
     </div>
   );

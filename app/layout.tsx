@@ -1,13 +1,15 @@
 "use client";
 import "../styles/globals.css";
 import { ReactNode, useState, useEffect } from "react";
-import type { Liff } from "@line/liff";
+import { liff, type Liff } from "@line/liff";
 import { LiffProvider } from "./context/LiffContext";
+import { get } from "http";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffIDToken, setLiffIDToken] = useState<string | null>(null);
+  const [liffUserID, setLiffUserID] = useState<string | null>(null);
 
   // Execute liff.init() when the app is initialized
   useEffect(() => {
@@ -26,6 +28,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           .then(() => {
             if (!liff.isLoggedIn()) {
               liff.login(); // ! Local URI from ngrok
+              async function getProfile() {
+                const profile = await liff.getProfile();
+                setLiffUserID(profile.userId);
+              }
+              getProfile();
             } else {
               setLiffObject(liff);
               setLiffIDToken(liff.getIDToken());
@@ -42,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     liff: liffObject,
     liffError,
     liffIDToken,
+    liffUserID,
   };
 
   return (
