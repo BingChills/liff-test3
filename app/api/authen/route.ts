@@ -5,9 +5,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  const postBody = await request.json();
+  const postData = new URLSearchParams();
+  postData.append("id_token", postBody.id_token);
+  postData.append("client_id", postBody.client_id);
 
-  return NextResponse.json("BODY:" + JSON.stringify(body));
+  const response = await fetch("https://api.line.me/oauth2/v2.1/verify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: postData.toString(),
+  });
+
+  return NextResponse.json(await response.json());
 }
 
 // const postData = new URLSearchParams();
