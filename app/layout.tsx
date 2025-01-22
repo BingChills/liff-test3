@@ -1,9 +1,8 @@
 "use client";
 import "../styles/globals.css";
 import { ReactNode, useState, useEffect } from "react";
-import { liff, type Liff } from "@line/liff";
+import { type Liff } from "@line/liff";
 import { LiffProvider } from "./context/LiffContext";
-import { get } from "http";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
