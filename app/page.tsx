@@ -1,5 +1,6 @@
 "use client";
 import Head from "next/head";
+import { UserInformation } from "@/types/types";
 import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
@@ -7,7 +8,7 @@ import { useLiff } from "./context/LiffContext";
 
 const Home = () => {
   const { liff, liffError, liffIDToken } = useLiff();
-  const [userProfile, setUserProfile] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserInformation | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const Home = () => {
         {userProfile && (
           <div>
             <p>Profile:</p>
-            <pre>{userProfile}</pre>
+            <pre>{userProfile.sub}</pre>
           </div>
         )}
       </main>

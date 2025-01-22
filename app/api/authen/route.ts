@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { UserInformation } from "@/types/types";
 
 export async function GET() {
   return NextResponse.json({ message: "Hello World" });
@@ -18,7 +19,9 @@ export async function POST(request: Request) {
     body: postData.toString(),
   });
 
-  return NextResponse.json(await response.json());
+  const decodedToken: UserInformation = await response.json();
+
+  return NextResponse.json(decodedToken);
 }
 
 // const postData = new URLSearchParams();
