@@ -1,19 +1,12 @@
 "use client";
-import type { Liff } from "@line/liff";
-import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
+import { useLiff } from "./context/LiffContext";
 
-const Home: NextPage<{
-  liff: Liff | null;
-  liffError: string | null;
-  liffIDToken: string | null;
-}> = ({ liff, liffError, liffIDToken }) => {
-  // Post liffIDToken to server to verify
-  // Get decoded token (user profile) from server
-
+const Home = () => {
+  const { liff, liffError, liffIDToken } = useLiff();
   const [userProfile, setUserProfile] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
