@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { UserInformation } from "@/types/types";
+//import { UserInformation } from "@/types/types";
 
 // Connect to MongoDB
 const uri =
