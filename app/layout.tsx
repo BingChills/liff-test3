@@ -3,12 +3,14 @@ import "../styles/globals.css";
 import { ReactNode, useState, useEffect } from "react";
 import { type Liff } from "@line/liff";
 import { LiffProvider } from "./context/LiffContext";
+import { JwtPayload } from "jsonwebtoken";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffIDToken, setLiffIDToken] = useState<string | null>(null);
   const [liffUserID, setLiffUserID] = useState<string | null>(null);
+  const [liffDecodedIDToken, setLiffDecodedIDToken] = useState<JwtPayload | null>(null);
 
   // Execute liff.init() when the app is initialized
   useEffect(() => {
@@ -23,6 +25,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           })
           .then(() => {
             console.log("LIFF init succeeded.");
+            const decodedIDToken = liff.getDecodedIDToken();
+            setLiffDecodedIDToken(decodedIDToken);
           })
           .then(() => {
             if (!liff.isLoggedIn()) {
@@ -49,6 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     liffError,
     liffIDToken,
     liffUserID,
+    liffDecodedIDToken,
   };
 
   return (

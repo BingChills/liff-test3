@@ -7,7 +7,7 @@ import axios, { AxiosError } from "axios";
 import { useLiff } from "./context/LiffContext";
 
 const Home = () => {
-  const { liff, liffError, liffIDToken, liffUserID } = useLiff();
+  const { liff, liffError, liffIDToken, liffUserID,liffDecodedIDToken } = useLiff();
   const [userProfile, setUserProfile] = useState<UserInformation | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +64,12 @@ const Home = () => {
           </div>
         )}
         {liffUserID && <p>LIFF User ID: {liffUserID}</p>}
+        {liffDecodedIDToken && (
+          <div>
+            <p>Decoded ID Token:</p>
+            <pre>{JSON.stringify(liffDecodedIDToken, null, 2)}</pre>
+          </div>
+        )}
       </main>
     </div>
   );
