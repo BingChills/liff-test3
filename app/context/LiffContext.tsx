@@ -1,21 +1,19 @@
 "use client";
 import { createContext, useContext, ReactNode } from "react";
 import type { Liff } from "@line/liff";
-import { JwtPayload } from "jsonwebtoken";
+import { UserInformation } from "@/types/types";
 
 interface LiffContextProps {
   liff: Liff | null;
   liffError: string | null;
   liffIDToken: string | null;
-  liffUserID: string | null;
-  liffDecodedIDToken: JwtPayload | null;
+  liffDecodedIDToken: UserInformation| null;
 }
 
 const LiffContext = createContext<LiffContextProps>({
   liff: null,
   liffError: null,
   liffIDToken: null,
-  liffUserID: null,
   liffDecodedIDToken: null,
 });
 

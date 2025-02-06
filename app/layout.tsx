@@ -3,16 +3,15 @@ import "../styles/globals.css";
 import { ReactNode, useState, useEffect } from "react";
 import { type Liff } from "@line/liff";
 import { LiffProvider } from "./context/LiffContext";
-import { JwtPayload } from "jsonwebtoken";
+import { UserInformation } from "@/types/types";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffIDToken, setLiffIDToken] = useState<string | null>(null);
-  const [liffUserID, setLiffUserID] = useState<string | null>(null);
-  const [liffDecodedIDToken, setLiffDecodedIDToken] = useState<JwtPayload | null>(null);
+  const [liffDecodedIDToken, setLiffDecodedIDToken] = useState<UserInformation | null>(null);
 
-  // Execute liff.init() when the app is initialized
+
   useEffect(() => {
     // to avoid `window is not defined` error
     import("@line/liff")
@@ -26,16 +25,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           .then(() => {
             console.log("LIFF init succeeded.");
             const decodedIDToken = liff.getDecodedIDToken();
-            setLiffDecodedIDToken(decodedIDToken);
+            setLiffDecodedIDToken(decodedIDToken as UserInformation);
           })
           .then(() => {
             if (!liff.isLoggedIn()) {
-              liff.login(); // ! Local URI from ngrok
-              async function getProfile() {
-                const profile = await liff.getProfile();
-                setLiffUserID(profile.userId);
-              }
-              getProfile();
+              liff.login();
             } else {
               setLiffObject(liff);
               setLiffIDToken(liff.getIDToken());
@@ -52,15 +46,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     liff: liffObject,
     liffError,
     liffIDToken,
-    liffUserID,
     liffDecodedIDToken,
   };
 
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
       <body>
         <LiffProvider value={liffContextValue}>{children}</LiffProvider>
       </body>
