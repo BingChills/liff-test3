@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { type Liff } from "@line/liff";
 import { LiffProvider } from "./context/LiffContext";
 import { UserInformation } from "@/types/types";
+import liff from "@line/liff";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
@@ -13,10 +14,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 
   useEffect(() => {
-    // to avoid `window is not defined` error
-    import("@line/liff")
-      .then((liff) => liff.default)
-      .then((liff) => {
         console.log("LIFF init...");
         liff
           .init({
@@ -39,7 +36,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             console.log("LIFF init failed.", error);
             setLiffError(error.toString());
           });
-      });
   }, []);
 
   const liffContextValue = {
