@@ -71,6 +71,9 @@ const Main = () => {
         return (
           <>
             {/* Main Content - Egg Display */}
+            { liffDecodedIDToken && dummyUserFromDB && (<div>
+              Decoded: {liffDecodedIDToken.name} Dummy: {dummyUserFromDB.u_id}
+            </div>)}
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 mt-8">
               <div className="w-full max-w-md aspect-square relative">
                 <img 
