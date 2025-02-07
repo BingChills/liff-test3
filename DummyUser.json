@@ -1,0 +1,10 @@
+{
+  "iss": "https://access.line.me",
+  "sub": "U05990af51597f06ef4293cc2784a0c97",
+  "aud": "2006705425",
+  "exp": 1737273398,
+  "iat": 1737269798,
+  "amr": ["linesso"],
+  "name": "T",
+  "picture": "https://profile.line-scdn.net/0hzFRzNIDqJWlvAzXWdJ1aPlNGKwQYLSMhFzJiWk8BcltCNWo6AGE4CB4DclkVNzc2UGY5W04Lf1sR"
+}
