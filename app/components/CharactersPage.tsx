@@ -14,7 +14,7 @@ export function CharactersPage() {
     {
       id: '1',
       name: 'Hamster',
-      image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80',
+      image: 'https://i.ibb.co/bRJ8L6rL/51-EA0-A65-A258-EE93-C8-D328-FF2-B1-D208645-DB7-AE8.jpg',
       rarity: 'common',
       discount: '10% Discount',
       isUsing: true
@@ -22,7 +22,7 @@ export function CharactersPage() {
     {
       id: '2',
       name: 'Elemental Cat',
-      image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=200&q=80',
+      image: 'https://i.ibb.co/gLqrCFc3/EEC2-D44688-BD00-BBE2-B38-F45-BF5-D67-D39-B4657-F7.jpg',
       rarity: 'epic',
       discount: 'Buy 1 Get 1',
       isUsing: true
@@ -30,7 +30,7 @@ export function CharactersPage() {
     {
       id: '3',
       name: 'Evil Dog',
-      image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80',
+      image: 'https://i.ibb.co/Mbvwq6g/149644205-F43-FBF4-E8-C09-EFA7-A19-EC52307-B3945.jpg',
       rarity: 'legendary',
       discount: '25% Discount',
       isUsing: true
@@ -39,7 +39,7 @@ export function CharactersPage() {
     {
       id: '4',
       name: 'Hamster',
-      image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80',
+      image: 'https://i.ibb.co/8DjcHwND/0-C56-A55-CAB9-DC8-B6-C523-F3827-C559-D0229438-E79.jpg',
       rarity: 'common',
       discount: '10% Discount',
       isUsing: false
@@ -47,7 +47,7 @@ export function CharactersPage() {
     {
       id: '5',
       name: 'Hamster',
-      image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80',
+      image: 'https://i.ibb.co/F42HSdJ4/54-C5-D368-AA7-BC0184-F5-CA7-C12-F2973213-A693169.jpg',
       rarity: 'common',
       discount: '10% Discount',
       isUsing: false
@@ -154,3 +154,11 @@ export function CharactersPage() {
     </div>
   );
 }
+
+/*
+https://i.ibb.co/bRJ8L6rL/51-EA0-A65-A258-EE93-C8-D328-FF2-B1-D208645-DB7-AE8.jpg
+https://i.ibb.co/Mbvwq6g/149644205-F43-FBF4-E8-C09-EFA7-A19-EC52307-B3945.jpg
+https://i.ibb.co/gLqrCFc3/EEC2-D44688-BD00-BBE2-B38-F45-BF5-D67-D39-B4657-F7.jpg
+https://i.ibb.co/8DjcHwND/0-C56-A55-CAB9-DC8-B6-C523-F3827-C559-D0229438-E79.jpg
+https://i.ibb.co/F42HSdJ4/54-C5-D368-AA7-BC0184-F5-CA7-C12-F2973213-A693169.jpg
+*/

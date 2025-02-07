@@ -146,16 +146,6 @@ const Main = () => {
       <div className="relative z-10 px-4 pt-safe-top">
         <div className="flex items-center justify-between py-2">
           <div className="w-14 h-14 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center">
-          {dummyUserFromDB && (
-              <div className="mt-8 text-center">
-                <h2 className="text-xl font-bold">User Info</h2>
-                <img src={dummyUserFromDB.profile_picture} alt={dummyUserFromDB.username} className="w-24 h-24 rounded-full mx-auto" />
-                <p className="mt-2">Name: {dummyUserFromDB.username}</p>
-                { liffDecodedIDToken && (
-                  <p className="mt-2">ID: {liffDecodedIDToken.sub}</p>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="flex items-center gap-2">
