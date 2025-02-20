@@ -465,7 +465,7 @@ export function TradePage() {
             </div>
             <h3 className="text-lg font-bold text-gray-800 mb-2">No trades found</h3>
             <p className="text-gray-600">
-              Try adjusting your search or filters to find what you're looking for.
+              Try adjusting your search or filters to find what you&apos;re looking for.
             </p>
             <button
               onClick={clearFilters}
