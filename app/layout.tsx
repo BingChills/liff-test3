@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         const decodedIDToken = liff.getDecodedIDToken();
         console.log("Decoded ID Token:", decodedIDToken);
         setLiffDecodedIDToken(decodedIDToken as UserInformation);
+        console.log(liffDecodedIDToken?.sub, liffDecodedIDToken?.name, liffDecodedIDToken?.picture);
       })
       .then(() => {
         if (!liff.isLoggedIn()) {
