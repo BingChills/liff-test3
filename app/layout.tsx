@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffIDToken, setLiffIDToken] = useState<string | null>(null);
-  const [liffDecodedIDToken, setLiffDecodedIDToken] = useState<UserInformation | null>(null);
+  const [liffDecodedIDToken, setLiffDecodedIDToken] = useState<any | null>(null);
   const [user, setUser] = useState<any>(null);
 
   // LIFF initialization
@@ -24,8 +24,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         console.log("LIFF init succeeded.");
         const decodedIDToken = liff.getDecodedIDToken();
         console.log("Decoded ID Token:", decodedIDToken);
-        setLiffDecodedIDToken(decodedIDToken as UserInformation);
-        console.log(liffDecodedIDToken?.sub, liffDecodedIDToken?.name, liffDecodedIDToken?.picture);
+        setLiffDecodedIDToken(decodedIDToken);
+
       })
       .then(() => {
         if (!liff.isLoggedIn()) {
@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     if (liffDecodedIDToken) {
       const { sub, name, picture } = liffDecodedIDToken;
       console.log("Decoded ID Token available, finding or creating user...");
-      findOrCreateUser(sub, name, picture).then((dbUser) => {
+      findOrCreateUser(liffDecodedIDToken.sub,liffDecodedIDToken.name,liffDecodedIDToken.picture).then((dbUser) => {
         console.log("User found/created:", dbUser);
         setUser(dbUser);
 
