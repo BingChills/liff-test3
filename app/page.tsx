@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Gem, Coins, Timer, User, Ticket, Cat, Store, Trophy, Gamepad2, ChevronDown, Percent } from 'lucide-react';
 import { CharactersPage } from './components/CharactersPage';
 import { LeaderboardPage } from './components/LeaderboardPage';
+import UserProfileModal from './components/UserProfileModal';
 import { CouponPage } from './components/CouponPage';
 import { TradePage } from './components/TradePage';
 import { EggAnimation } from './components/EggAnimation';
@@ -23,7 +24,8 @@ function App() {
   const [coins, setCoins] = useState(2800000);
   const [stamina, setStamina] = useState({ current: 18, max: 20 });
   const [activeTab, setActiveTab] = useState('summon');
-  const { liffDecodedIDToken } = useLiff();
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const { user } = useLiff();
   
   const [stores] = useState<StoreCurrency[]>([
     { name: 'Parabola', gems: 1600, color: 'emerald' },
@@ -188,9 +190,16 @@ function App() {
       {/* Top Bar */}
       <div className="relative z-20 px-4 pt-safe-top">
         <div className="flex items-center justify-between py-2">
-          <div className="w-14 h-14 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center">
+            <div 
+            className="w-14 h-14 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer"
+            onClick={() => setShowUserProfile(true)}
+            >
             <User className="w-8 h-8 text-blue-600" />
-          </div>
+            </div>
+            <UserProfileModal 
+            isVisible={showUserProfile} 
+            onClose={() => setShowUserProfile(false)} 
+            />
 
           <div className="flex items-center gap-2">
             {/* Store Selector */}

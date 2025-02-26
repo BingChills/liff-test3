@@ -96,7 +96,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   // Once the LIFF decoded ID token is available, use its data to find or create the user.
   useEffect(() => {
     if (liffDecodedIDToken) {
-      const { sub, name, picture } = liffDecodedIDToken;
       console.log("Decoded ID Token available, finding or creating user...");
       findOrCreateUser(liffDecodedIDToken.sub,liffDecodedIDToken.name,liffDecodedIDToken.picture).then((dbUser) => {
         console.log("User found/created:", dbUser);

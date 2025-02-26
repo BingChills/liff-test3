@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import QRCode from 'react-qr-code';
 import { Ticket, ChevronRight, User, Coins, Timer, AlertTriangle, Gem, ChevronDown, QrCode, Filter, X, Check, Search } from 'lucide-react';
 
 interface Coupon {
@@ -511,14 +512,16 @@ export function CouponPage() {
 
             <div className="bg-gray-50 rounded-2xl p-4 mb-6">
               <div className="aspect-square bg-white rounded-xl p-4 shadow-inner">
-                <img
-                  src={selectedCoupon.qrCode}
-                  alt="QR Code"
-                  className="w-full h-full object-contain"
-                />
+              <QRCode  
+                  value={selectedCoupon.qrCode || "https://example.com"} 
+                  size={150} 
+                  className='w-full h-full object-contain' />
               </div>
               <div className="flex items-center justify-center gap-2 mt-4 text-gray-500">
-                <QrCode className="w-4 h-4" />
+                <QRCode  
+                  value={selectedCoupon.qrCode || "https://example.com"} 
+                  size={150} 
+                  className='w-full h-full object-contain' />
                 <span className="text-sm">Show this QR code to the cashier</span>
               </div>
             </div>
