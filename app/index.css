@@ -2,29 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area insets for mobile */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Hide scrollbars but keep functionality */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animations */
 @keyframes crack {
   0% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.8) rotate(var(--rotation));
   }
   50% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.2) rotate(var(--rotation));
   }
   100% {
     opacity: 0;
-    transform: scale(1.2);
+    transform: scale(1.4) rotate(var(--rotation));
   }
 }
 
 @keyframes sparkle {
   0%, 100% {
     opacity: 0;
-    transform: scale(0);
+    transform: scale(0) rotate(0deg);
   }
   50% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1.5) rotate(180deg);
   }
 }
 
@@ -33,32 +53,191 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes rays {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--rotation)) translateY(-50%) scaleY(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: rotate(var(--rotation)) translateY(-50%) scaleY(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--rotation)) translateY(-50%) scaleY(0.5);
   }
 }
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.6),
-                0 0 10px rgba(255, 255, 255, 0.4),
-                0 0 15px rgba(255, 255, 255, 0.2);
+    opacity: 0.5;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 20px rgba(255, 255, 255, 0.6),
-                0 0 30px rgba(255, 255, 255, 0.4);
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
-.animate-crack {
-  animation: crack 1s ease-in-out infinite;
+@keyframes legendary-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px 10px rgba(250, 204, 21, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px 20px rgba(250, 204, 21, 0.6);
+  }
 }
 
+@keyframes epic-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px 8px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px 15px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes rare-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px 5px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes legendary-shine {
+  0% {
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
+  }
+}
+
+@keyframes epic-shine {
+  0% {
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(168, 85, 247, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+  }
+}
+
+@keyframes rare-shine {
+  0% {
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes scale-up {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation classes */
+.animate-crack {
+  animation: crack 1s ease-in-out;
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-rays {
+  animation: rays 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 15s linear infinite;
+}
+
+.animate-scale-up {
+  animation: scale-up 0.5s ease-out forwards;
+}
+
+.animate-legendary-pulse {
+  animation: legendary-pulse 2s ease-in-out infinite;
+}
+
+.animate-epic-pulse {
+  animation: epic-pulse 2s ease-in-out infinite;
+}
+
+.animate-rare-pulse {
+  animation: rare-pulse 2s ease-in-out infinite;
+}
+
+.animate-legendary-shine {
+  animation: legendary-shine 2s ease-in-out infinite;
+}
+
+.animate-epic-shine {
+  animation: epic-shine 2s ease-in-out infinite;
+}
+
+.animate-rare-shine {
+  animation: rare-shine 2s ease-in-out infinite;
+}
+
+/* Effects */
 .shadow-glow {
   box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7);
 }
 
-/* Custom styles for cartoon look */
+/* Custom styles */
 .cartoon-shadow {
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
 }
@@ -67,26 +246,55 @@
   border: 3px solid #000;
 }
 
-/* Navigation icon animations */
+/* Navigation */
 .nav-icon {
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nav-icon:hover {
-  transform: translateY(-3px);
+@media (hover: hover) {
+  .nav-icon:hover {
+    transform: translateY(-3px);
+  }
+  
+  .nav-icon:hover svg {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px currentColor);
+  }
 }
 
-.nav-icon:hover svg {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 8px currentColor);
-}
-
-/* Summon button animations */
+/* Buttons */
 .summon-button {
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.summon-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
+@media (hover: hover) {
+  .summon-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+}
+
+.summon-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.summon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .mobile-card {
+    @apply rounded-xl shadow-lg;
+  }
+  
+  .mobile-header {
+    @apply sticky top-0 z-50 backdrop-blur-sm;
+  }
+  
+  .mobile-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200;
+  }
 }

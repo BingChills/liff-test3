@@ -23,26 +23,24 @@ export async function POST(request: Request) {
     const db = client.db("LinkzPlatform");
     const collection = db.collection("user_info");
 
-    let user = await collection.findOne({ u_id: sub });
+    // Insert a new user
+    const newUser = {
+      u_id: sub,
+      username: name,
+      profile_picture: picture,
+      points: {
+        pointA: 100,
+        pointB: 200,
+        pointC: 300,
+      },
+      pets_owned: ["pet_id_1", "pet_id_2", "pet_id_3"],
+      pets_equipped: ["pet_id_1", "pet_id_2", "pet_id_3"],
+    };
 
-    if (!user) {
-      // Insert a new user if not found
-      const newUser = {
-        u_id: sub,
-        username: name,
-        profile_picture: picture,
-        points: {
-          pointA: 100,
-          pointB: 200,
-          pointC: 300,
-        },
-        pets_owned: ["pet_id_1", "pet_id_2", "pet_id_3"],
-        pets_equipped: ["pet_id_1", "pet_id_2", "pet_id_3"],
-      };
+    const result = await collection.insertOne(newUser);
 
-      const result = await collection.insertOne(newUser);
-      user = await collection.findOne({ _id: result.insertedId });
-    }
+    // Query the newly created user
+    const user = await collection.findOne({ u_id: sub });
 
     return NextResponse.json(user);
   } catch (error) {
