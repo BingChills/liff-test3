@@ -1,0 +1,244 @@
+/* Simple layout CSS for Linkz game */
+
+/* Basic reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container styles */
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}
+
+/* Game wrapper with 16:9 aspect ratio */
+.game-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: calc(100vh * (9/16));
+  max-height: calc(100vw * (16/9));
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Game container */
+.game-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 60px);
+  z-index: 1;
+}
+
+/* Hide game when not active */
+.game-container.inactive {
+  display: none;
+}
+
+/* Content pages container */
+.page-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 60px);
+  background-color: #fff;
+  z-index: 2;
+  overflow-y: auto;
+}
+
+/* Tab navigation */
+.tab-navigation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  z-index: 10;
+}
+
+.tab-nav {
+  display: flex;
+  background-color: #1a1a2e;
+  height: 60px;
+  width: 100%;
+}
+
+.tab-container {
+  display: flex;
+  flex-direction: row; /* Ensure horizontal layout */
+  width: 100%;
+  justify-content: space-between;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #a0a0a0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 0;
+}
+
+.tab-item.active {
+  color: #4287f5;
+}
+
+/* Fix for page content to display correctly */
+.page-content {
+  color: #1a1a1a;
+  background-color: inherit;
+}
+
+/* Basic color scheme for pages */
+.coupon-page {
+  background-color: #e8f4fd;
+}
+
+.character-page {
+  background-color: #f5f0ff;
+}
+
+.summon-page {
+  background-color: #fff0f0;
+}
+
+.trade-page {
+  background-color: #f0fff5;
+}
+
+.leaderboard-page {
+  background-color: #fffde7;
+}
+
+/* Additional color fixes for rarity colors */
+.text-yellow-500 {
+  color: #eab308 !important;
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7 !important;
+}
+
+.bg-yellow-500 {
+  background-color: #eab308 !important;
+}
+
+.text-purple-600 {
+  color: #9333ea !important;
+}
+
+.bg-purple-100 {
+  background-color: #f3e8ff !important;
+}
+
+.bg-purple-600 {
+  background-color: #9333ea !important;
+}
+
+.text-blue-500 {
+  color: #3b82f6 !important;
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe !important;
+}
+
+.bg-blue-500 {
+  background-color: #3b82f6 !important;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.bg-gray-500 {
+  background-color: #6b7280 !important;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+/* Tailwind utilities that might be overridden */
+.bg-gradient-to-b {
+  background-image: var(--tw-gradient-stops) !important;
+}
+
+.from-blue-200 {
+  --tw-gradient-from: #bfdbfe !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(191, 219, 254, 0)) !important;
+}
+
+.to-blue-300 {
+  --tw-gradient-to: #93c5fd !important;
+}
+
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.bg-white\/90 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tab-item {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .tab-item span {
+    display: none;
+  }
+  
+  .tab-item {
+    padding: 5px 0;
+  }
+}

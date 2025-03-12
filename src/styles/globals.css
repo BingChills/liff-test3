@@ -1,8 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
 body {
     margin: 0;
     padding: 0;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #000000; 
+    color: #1a1a1a; /* Changed from white to dark text */
+    background-color: #f0f0f0; 
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -29,20 +34,19 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.87);
     cursor: pointer;
     transition: all 0.3s;
+}
 
-    &:hover {
-        border: 1px solid #0ec3c9;
-        color: #0ec3c9;
-    }
+.button:hover {
+    border: 1px solid #0ec3c9;
+    color: #0ec3c9;
+}
 
-    &:active {
-        background-color: #0ec3c9;
-    }
+.button:active {
+    background-color: #0ec3c9;
+}
 
-    /* Disabled styles */
-    &:disabled {
-        cursor: not-allowed;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: rgba(255, 255, 255, 0.3);
-    }
+.button:disabled {
+    cursor: not-allowed;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.3);
 }

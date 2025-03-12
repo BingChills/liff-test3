@@ -4,6 +4,7 @@ import { AUTO, Game, Types, Scale } from "phaser";
 // The main **game** entry point. This contains the game configuration and start the game.
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
+
 const config: Types.Core.GameConfig = {
     type: AUTO,
     scale: {

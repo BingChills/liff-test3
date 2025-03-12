@@ -3,7 +3,9 @@ import { Events } from "phaser";
 import { Player } from "../entities/Player";
 import { ChestManager } from "../managers/ChestManager";
 import { AutoModeController } from "../controllers/AutoModeController";
-import { Coupon, ChestRarity, GameConfig } from "../types/GameTypes";
+import { Coupon as GameCoupon, ChestRarity, GameConfig } from "../types/GameTypes";
+import { EventBus } from "../EventBus";
+import { Coupon as UICoupon } from "../../state/gameState";
 
 export class Game extends Scene {
     // Core components 
@@ -19,13 +21,13 @@ export class Game extends Scene {
     private backgroundMusic!: Phaser.Sound.BaseSound;
     
     // Event system
-    private eventBus: Phaser.Events.EventEmitter;
+    private gameEventBus: Phaser.Events.EventEmitter;
     
     // Current attack state
     private currentAttackTimer?: Phaser.Time.TimerEvent;
 
     // Available coupons
-    private coupons: Coupon[] = [
+    private coupons: GameCoupon[] = [
         {
             id: '1',
             brand: "McDonald's",
@@ -39,7 +41,7 @@ export class Game extends Scene {
 
     constructor() {
         super("Game");
-        this.eventBus = new Events.EventEmitter();
+        this.gameEventBus = new Events.EventEmitter();
     }
 
     preload() {
@@ -112,7 +114,7 @@ export class Game extends Scene {
 
         // Initialize chest manager
         const gameConfig: GameConfig = {
-            eventBus: this.eventBus
+            eventBus: this.gameEventBus
         };
         
         this.chestManager = new ChestManager(
@@ -123,6 +125,9 @@ export class Game extends Scene {
             (newScore: number) => {
                 this.score = newScore;
                 this.scoreText.setText("Score: " + this.score);
+                
+                // Emit score update event to UI
+                EventBus.emit('scoreUpdated', newScore);
             }
         );
         
@@ -153,6 +158,38 @@ export class Game extends Scene {
 
         // Input listener for movement and chest interaction
         this.setupPlayerInput();
+        
+        // Setup event listeners for coupon collection and coin updates
+        this.setupEventListeners();
+        
+        // Notify the React component that this scene is ready
+        EventBus.emit('current-scene-ready', this);
+    }
+
+    // Method to set up event listeners for game events
+    private setupEventListeners(): void {
+        // Listen for chest opened event
+        this.gameEventBus.on('chestOpened', (data: { 
+            coupon: GameCoupon, 
+            coins: number 
+        }) => {
+            // Convert game coupon to UI coupon format
+            const uiCoupon: UICoupon = {
+                id: data.coupon.id,
+                code: data.coupon.id,  // Using ID as code for simplicity
+                discount: data.coupon.discount,
+                expiry: data.coupon.expiresIn ? `${data.coupon.expiresIn} days` : undefined,
+                isUsed: false
+            };
+            
+            // Emit coupon collected event to UI
+            EventBus.emit('couponCollected', uiCoupon);
+            
+            // Emit coins collected event to UI if coins were awarded
+            if (data.coins > 0) {
+                EventBus.emit('coinsCollected', data.coins);
+            }
+        });
     }
 
     private createAnimations(): void {
