@@ -1,4 +1,4 @@
-import { Ticket, User, Gamepad2, Store, ShoppingCart, Trophy } from 'lucide-react';
+import { Ticket, Cat, Gamepad2, Store, ArrowRightLeft, Trophy } from 'lucide-react';
 import { useGameState } from '../state/gameState';
 
 const TabNavigation = () => {
@@ -6,12 +6,12 @@ const TabNavigation = () => {
 
   // Tab definitions with icons and labels
   const tabs = [
-    { id: 'coupon', label: 'Coupon', icon: Ticket },
-    { id: 'character', label: 'Character', icon: User },
-    { id: 'summon', label: 'Summon', icon: Store },
-    { id: 'game', label: 'Game', icon: Gamepad2 },
-    { id: 'trade', label: 'Trade', icon: ShoppingCart },
-    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy }
+    { id: 'coupon', icon: Ticket },
+    { id: 'character', icon: Cat },
+    { id: 'summon', icon: Store },
+    { id: 'game', icon: Gamepad2 },
+    { id: 'trade', icon: ArrowRightLeft },
+    { id: 'leaderboard', icon: Trophy }
   ];
 
   return (
@@ -28,7 +28,6 @@ const TabNavigation = () => {
               onClick={() => setActiveTab(tab.id)}
             >
               <Icon size={20} />
-              <span>{tab.label}</span>
             </button>
           );
         })}

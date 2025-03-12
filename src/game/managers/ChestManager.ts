@@ -1,6 +1,7 @@
 import { GameObjects, Physics, Scene } from "phaser";
 import { ChestRarity, Coupon, GameConfig } from "../types/GameTypes";
 import { Player } from "../entities/Player";
+import { EventBus } from "../EventBus";
 
 export class ChestManager {
     private scene: Scene;
@@ -349,6 +350,9 @@ export class ChestManager {
                         
                         // Update score via callback
                         this.onScoreUpdate(this.score);
+                        
+                        // Directly emit the score update event to ensure React components are updated
+                        EventBus.emit('scoreUpdated', this.score);
                         
                         // Destroy the orb
                         pointOrb.destroy();

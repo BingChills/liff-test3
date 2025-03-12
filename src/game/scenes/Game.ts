@@ -15,7 +15,6 @@ export class Game extends Scene {
     
     // UI elements
     private score: number = 0;
-    private scoreText!: Phaser.GameObjects.Text;
     
     // Audio
     private backgroundMusic!: Phaser.Sound.BaseSound;
@@ -97,7 +96,7 @@ export class Game extends Scene {
 
         // Add and play background music
         this.backgroundMusic = this.sound.add("bgMusic", {
-            volume: 0.2,
+            volume: 0.1,
             loop: true,
         });
         this.backgroundMusic.play();
@@ -124,7 +123,6 @@ export class Game extends Scene {
             this.coupons,
             (newScore: number) => {
                 this.score = newScore;
-                this.scoreText.setText("Score: " + this.score);
                 
                 // Emit score update event to UI
                 EventBus.emit('scoreUpdated', newScore);
@@ -147,16 +145,7 @@ export class Game extends Scene {
         // Create auto mode button
         this.autoModeController.createAutoModeButton();
 
-        // Add score text - positioned for new resolution
-        this.scoreText = this.add.text(20, 40, "Score: 0", {
-            fontSize: "20px",
-            fontStyle: "bold",
-            color: "#000",
-            stroke: "#fff",
-            strokeThickness: 4,
-        });
-
-        // Input listener for movement and chest interaction
+        // Setup input listener for movement and chest interaction
         this.setupPlayerInput();
         
         // Setup event listeners for coupon collection and coin updates

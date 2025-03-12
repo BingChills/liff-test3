@@ -7,6 +7,7 @@ import CharactersPage from "./components/CharactersPage";
 import SummonPage from "./components/SummonPage";
 import TradePage from "./components/TradePage";
 import LeaderboardPage from "./components/LeaderboardPage";
+import PageHeader from "./components/PageHeader";
 
 // Main App wrapper with GameStateProvider
 function AppWrapper() {
@@ -46,6 +47,12 @@ function AppContent() {
             <div className="game-wrapper">
                 {/* The Phaser game is always rendered but only visible on game tab */}
                 <div className={`game-container ${activeTab === 'game' ? 'active' : 'inactive'}`}>
+                    {/* Add PageHeader on top of the game for the game tab */}
+                    {activeTab === 'game' && (
+                        <div className="absolute top-0 left-0 right-0 z-10">
+                            <PageHeader title="Game" />
+                        </div>
+                    )}
                     <PhaserGame ref={phaserRef} />
                 </div>
 

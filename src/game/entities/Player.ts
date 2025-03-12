@@ -7,7 +7,7 @@ export class Player {
     private targetY: number = 0;
     private isMoving: boolean = false;
     private isAttacking: boolean = false;
-    private attackDamage: number = 10;
+    private attackDamage: number = 15;
 
     constructor(scene: Scene, x: number, y: number) {
         this.scene = scene;

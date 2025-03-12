@@ -95,6 +95,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
   const [coins, setCoins] = useState(2800000);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([
+    //NOTE: Examples
     {
       id: 'coupon1',
       code: 'MCDONALDS-50OFF',
@@ -124,12 +125,15 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       isUsed: false
     }
   ]);
+
+  //NOTE: Examples
   const [stores, setStores] = useState<StoreCurrency[]>([
     { name: 'Parabola', gems: 1600, color: 'emerald' },
     { name: 'KFC', gems: 850, color: 'red' },
     { name: 'Pizza Company', gems: 1200, color: 'blue' },
     { name: 'Pizza Hut', gems: 950, color: 'orange' }
   ]);
+  
   const [selectedStore, setSelectedStore] = useState<StoreCurrency>(stores[0]);
   const [stamina, setStamina] = useState({ current: 18, max: 20 });
   const [drawCount, setDrawCount] = useState(0);

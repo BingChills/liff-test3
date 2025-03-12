@@ -36,8 +36,10 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - 60px);
+  height: calc(100% - 60px); /* Minus tab navigation height */
   z-index: 1;
+  /* Adding position relative so the absolute positioned header works correctly */
+  position: relative;
 }
 
 /* Hide game when not active */

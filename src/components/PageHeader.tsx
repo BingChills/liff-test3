@@ -9,7 +9,7 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
-  const { stores, selectedStore, setSelectedStore, stamina } = useGameState();
+  const { stores, selectedStore, setSelectedStore, stamina, score } = useGameState();
   const [showStoreSelector, setShowStoreSelector] = useState(false);
 
   const getStoreColor = (color: string) => {
@@ -77,7 +77,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
             <div className="w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center">
               <Coins className="w-2.5 h-2.5 text-white" />
             </div>
-            <span className="text-sm font-bold text-white">2.8m</span>
+            <span className="text-sm font-bold text-white">{score}</span>
           </div>
           
           {/* Energy/Stamina */}

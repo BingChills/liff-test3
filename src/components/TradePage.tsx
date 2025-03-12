@@ -123,7 +123,7 @@ const TradePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-300 pt-[150px] pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-300 pb-24">
       {/* Header with user profile and resources */}
       <PageHeader 
         title="Trade Characters" 
