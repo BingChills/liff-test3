@@ -24,7 +24,7 @@ export interface Character {
 
 export interface StoreCurrency {
   name: string;
-  gems: number;
+  point: number;
   color: string;
 }
 
@@ -34,8 +34,8 @@ interface GameState {
   setActiveTab: (tab: string) => void;
   
   // Game resources
-  coins: number;
-  setCoins: (coins: number) => void;
+  point: number;
+  setPoint: (point: number) => void;
   
   // Character data
   characters: Character[];
@@ -47,20 +47,24 @@ interface GameState {
   
   // Store data
   stores: StoreCurrency[];
+  setStores: (stores: StoreCurrency[]) => void;
   selectedStore: StoreCurrency;
   setSelectedStore: (store: StoreCurrency) => void;
   
   // Stamina
-  stamina: { current: number; max: number };
+  stamina: {
+    current: number;
+    max: number;
+  };
   setStamina: (stamina: { current: number; max: number }) => void;
   
-  // Summoning state
+  // Summon
   drawCount: number;
   setDrawCount: (count: number) => void;
   remainingDraws: number;
   setRemainingDraws: (count: number) => void;
   
-  // Leaderboard data
+  // Score
   score: number;
   setScore: (score: number) => void;
 }
@@ -69,14 +73,15 @@ interface GameState {
 const GameStateContext = createContext<GameState>({
   activeTab: 'coupon',
   setActiveTab: () => {},
-  coins: 0,
-  setCoins: () => {},
+  point: 0,
+  setPoint: () => {},
   characters: [],
   setCharacters: () => {},
   coupons: [],
   setCoupons: () => {},
   stores: [],
-  selectedStore: { name: '', gems: 0, color: '' },
+  setStores: () => {},
+  selectedStore: { name: '', point: 0, color: '' }, //TODO: Fix this
   setSelectedStore: () => {},
   stamina: { current: 0, max: 0 },
   setStamina: () => {},
@@ -92,7 +97,7 @@ const GameStateContext = createContext<GameState>({
 export const GameStateProvider = (props: { children: ReactNode }) => {
   // Initialize state
   const [activeTab, setActiveTab] = useState('coupon');
-  const [coins, setCoins] = useState(2800000);
+  const [point, setPoint] = useState(0);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([
     //NOTE: Examples
@@ -128,14 +133,14 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
   //NOTE: Examples
   const [stores, setStores] = useState<StoreCurrency[]>([
-    { name: 'Parabola', gems: 1600, color: 'emerald' },
-    { name: 'KFC', gems: 850, color: 'red' },
-    { name: 'Pizza Company', gems: 1200, color: 'blue' },
-    { name: 'Pizza Hut', gems: 950, color: 'orange' }
+    { name: 'Parabola', point: 1600, color: 'emerald' },
+    { name: 'KFC', point: 850, color: 'red' },
+    { name: 'Pizza Company', point: 1200, color: 'blue' },
+    { name: 'Pizza Hut', point: 950, color: 'orange' }
   ]);
   
   const [selectedStore, setSelectedStore] = useState<StoreCurrency>(stores[0]);
-  const [stamina, setStamina] = useState({ current: 18, max: 20 });
+  const [stamina, setStamina] = useState({ current: 20, max: 20 });
   const [drawCount, setDrawCount] = useState(0);
   const [remainingDraws, setRemainingDraws] = useState(0);
   const [score, setScore] = useState(0);
@@ -152,20 +157,20 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setScore(newScore);
     };
 
-    // Handle coin collection event from the game
-    const handleCoinsCollected = (amount: number) => {
-      setCoins(prev => prev + amount);
+    // Handle point collection event from the game
+    const handlePointCollected = (amount: number) => {
+      setPoint(prev => prev + amount);
     };
 
     EventBus.on('couponCollected', handleCouponCollected);
     EventBus.on('scoreUpdated', handleScoreUpdated);
-    EventBus.on('coinsCollected', handleCoinsCollected);
+    EventBus.on('pointCollected', handlePointCollected);
 
     return () => {
       // Clean up event listeners
       EventBus.removeListener('couponCollected', handleCouponCollected);
       EventBus.removeListener('scoreUpdated', handleScoreUpdated);
-      EventBus.removeListener('coinsCollected', handleCoinsCollected);
+      EventBus.removeListener('pointCollected', handlePointCollected);
     };
   }, []);
 
@@ -173,13 +178,14 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
   const value: GameState = {
     activeTab,
     setActiveTab,
-    coins,
-    setCoins,
+    point,
+    setPoint,
     characters,
     setCharacters,
     coupons,
     setCoupons,
     stores,
+    setStores,
     selectedStore,
     setSelectedStore,
     stamina,

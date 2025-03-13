@@ -148,7 +148,7 @@ export class Game extends Scene {
         // Setup input listener for movement and chest interaction
         this.setupPlayerInput();
         
-        // Setup event listeners for coupon collection and coin updates
+        // Setup event listeners for coupon collection and point updates
         this.setupEventListeners();
         
         // Notify the React component that this scene is ready

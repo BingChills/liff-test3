@@ -38,16 +38,16 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
         
         {/* Right side: Resources */}
         <div className="flex items-center gap-2">
-          {/* Gems/Points */}
+          {/* point/Points */}
           <div className="relative">
             <button
               onClick={() => setShowStoreSelector(!showStoreSelector)}
               className="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-full"
             >
-              <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+              <div className={`w-4 h-4 rounded-full ${getStoreColor(selectedStore.color)} flex items-center justify-center`}>
                 <Gem className="w-2.5 h-2.5 text-white" />
               </div>
-              <span className="text-sm font-bold text-white">{selectedStore.gems}</span>
+              <span className="text-sm font-bold text-white">{selectedStore.point}</span>
               <ChevronDown className="w-3 h-3 text-white/80" />
             </button>
 
@@ -65,7 +65,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                       </div>
                       <span className="text-sm font-medium text-gray-700">{store.name}</span>
                     </div>
-                    <span className="text-sm font-bold text-gray-900">{store.gems}</span>
+                    <span className="text-sm font-bold text-gray-900">{store.point}</span>
                   </button>
                 ))}
               </div>

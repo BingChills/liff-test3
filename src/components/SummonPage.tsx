@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Store, Gem, ChevronDown, Percent } from 'lucide-react';
-import { useGameState, Character } from '../state/gameState';
+import { useGameState, Character, StoreCurrency } from '../state/gameState';
 import PageHeader from './PageHeader';
 
 const SummonPage = () => {
-  const { stores, selectedStore, setSelectedStore, coins, setCoins, characters, setCharacters } = useGameState();
+  const { 
+    stores, 
+    setStores, 
+    selectedStore, 
+    setSelectedStore, 
+    point, 
+    setPoint, 
+    characters, 
+    setCharacters 
+  } = useGameState();
   const [showDropRates, setShowDropRates] = useState(false);
   const [showStoreSelector, setShowStoreSelector] = useState(false);
   const [showEggAnimation, setShowEggAnimation] = useState(false);
@@ -17,14 +26,29 @@ const SummonPage = () => {
   };
 
   const handleSummon = (isTenDraw: boolean) => {
-    // Check if user has enough coins
-    const drawCost = selectedStore.gems * (isTenDraw ? 10 : 1);
-    if (coins < drawCost) {
+    // Each character costs 100 points regardless of store
+    const characterCost = 100;
+    const drawCost = characterCost * (isTenDraw ? 10 : 1);
+    
+    // Check if user has enough points in the selected store
+    if (selectedStore.point < drawCost) {
+      console.log(`You only have ${selectedStore.point} ${selectedStore.name} points. Need ${drawCost} points.`);
       return;
     }
 
-    // Deduct coins
-    setCoins(coins - drawCost);
+    // Update the points for the selected store
+    const updatedStores = stores.map(store => 
+      store.name === selectedStore.name 
+        ? { ...store, point: store.point - drawCost } 
+        : store
+    );
+    
+    // Update the selected store with reduced points
+    const updatedSelectedStore = { ...selectedStore, point: selectedStore.point - drawCost };
+    
+    // Update global state
+    setStores(updatedStores);
+    setSelectedStore(updatedSelectedStore);
 
     // Set up animation
     setShowEggAnimation(true);
@@ -83,7 +107,7 @@ const SummonPage = () => {
               {selectedStore.name} Summon
             </h2>
             <p className="text-gray-600">
-              Spend gems to get characters from {selectedStore.name}
+              Spend point to get characters from {selectedStore.name}
             </p>
           </div>
           
@@ -96,21 +120,21 @@ const SummonPage = () => {
           <div className="flex flex-col gap-4 mb-6">
             <button 
               onClick={() => handleSummon(false)}
-              disabled={coins < selectedStore.gems}
+              disabled={selectedStore.point < 100}
               className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
-                coins < selectedStore.gems ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+                selectedStore.point < 100 ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
               }`}
             >
-              Single Draw ({selectedStore.gems.toLocaleString()} gems)
+              Single Draw (100 points)
             </button>
             <button 
               onClick={() => handleSummon(true)}
-              disabled={coins < selectedStore.gems * 10}
+              disabled={selectedStore.point < 1000}
               className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
-                coins < selectedStore.gems * 10 ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
+                selectedStore.point < 1000 ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
               }`}
             >
-              10x Draw ({(selectedStore.gems * 10).toLocaleString()} gems)
+              10x Draw (1,000 points)
             </button>
           </div>
           
