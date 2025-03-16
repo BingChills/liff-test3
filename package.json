@@ -25,9 +25,14 @@
         "dev": "node log.js dev & next dev -p 8080",
         "build": "node log.js build & next build",
         "dev-nolog": "next dev -p 8080",
-        "build-nolog": "next build"
+        "build-nolog": "next build",
+        "server": "nodemon server/server.js",
+        "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+        "start": "node server/server.js"
     },
     "dependencies": {
+        "axios": "^1.8.3",
+        "concurrently": "^8.2.2",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",

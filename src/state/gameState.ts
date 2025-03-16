@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import React from 'react';
 import { EventBus } from '../game/EventBus';
+import axios from 'axios';
 
 // Define types for our game state
 export interface Coupon {
@@ -67,7 +68,49 @@ interface GameState {
   // Score
   score: number;
   setScore: (score: number) => void;
+  
+  // User information
+  userId: string | null;
+  setUserId: (id: string | null) => void;
+  
+  // Data management
+  saveGameState: () => Promise<void>;
+  loadGameState: () => Promise<void>;
 }
+
+// Functions to interact with API
+const fetchPlayerData = async (userId: string) => {
+  try {
+    const response = await axios.get(`/api/players/${userId}`);
+    return response.data;
+  } catch (error) {
+    if ((error as any)?.response?.status === 404) {
+      // Player not found, create a new player
+      const createResponse = await axios.post('/api/players', { userId });
+      return createResponse.data;
+    }
+    console.error('Error fetching player data:', error);
+    return null;
+  }
+};
+
+const savePlayerData = async (userId: string, data: any) => {
+  try {
+    const response = await axios.put(`/api/players/${userId}`, data);
+    return response.data;
+  } catch (error) {
+    if ((error as any)?.response?.status === 404) {
+      // Player not found, create a new player with the data
+      const createResponse = await axios.post('/api/players', { 
+        userId,
+        ...data
+      });
+      return createResponse.data;
+    }
+    console.error('Error saving player data:', error);
+    return null;
+  }
+};
 
 // Create context with default values
 const GameStateContext = createContext<GameState>({
@@ -90,7 +133,11 @@ const GameStateContext = createContext<GameState>({
   remainingDraws: 0,
   setRemainingDraws: () => {},
   score: 0,
-  setScore: () => {}
+  setScore: () => {},
+  userId: null,
+  setUserId: () => {},
+  saveGameState: async () => {},
+  loadGameState: async () => {}
 });
 
 // Provider component to wrap our app
@@ -131,7 +178,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     }
   ]);
 
-  //NOTE: Examples
+  //NOTE: Mock stores
   const [stores, setStores] = useState<StoreCurrency[]>([
     { name: 'Parabola', point: 1600, color: 'emerald' },
     { name: 'KFC', point: 850, color: 'red' },
@@ -144,7 +191,92 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
   const [drawCount, setDrawCount] = useState(0);
   const [remainingDraws, setRemainingDraws] = useState(0);
   const [score, setScore] = useState(0);
-
+  
+  // Add userId state
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Function to save game state to MongoDB
+  const saveGameState = async () => {
+    if (!userId) return;
+    
+    setIsLoading(true);
+    try {
+      const gameData = {
+        point,
+        characters,
+        coupons,
+        stores,
+        selectedStore,
+        stamina,
+        drawCount,
+        remainingDraws,
+        score
+      };
+      
+      await savePlayerData(userId, gameData);
+    } catch (error) {
+      console.error('Failed to save game state:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Function to load game state from MongoDB
+  const loadGameState = async () => {
+    if (!userId) return;
+    
+    setIsLoading(true);
+    try {
+      const playerData = await fetchPlayerData(userId);
+      
+      if (playerData) {
+        // Set all state from retrieved data
+        setPoint(playerData.point || 0);
+        setCharacters(playerData.characters || []);
+        setCoupons(playerData.coupons || []);
+        setStores(playerData.stores || stores);
+        setSelectedStore(playerData.selectedStore || stores[0]);
+        setStamina(playerData.stamina || { current: 20, max: 20 });
+        setDrawCount(playerData.drawCount || 0);
+        setRemainingDraws(playerData.remainingDraws || 0);
+        setScore(playerData.score || 0);
+      }
+    } catch (error) {
+      console.error('Failed to load game state:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Load player data when userId changes
+  useEffect(() => {
+    if (userId) {
+      loadGameState();
+    }
+  }, [userId]);
+  
+  // Auto-save game state when critical data changes (with debounce)
+  useEffect(() => {
+    if (!userId) return;
+    
+    const timeoutId = setTimeout(() => {
+      saveGameState();
+    }, 2000); // Debounce for 2 seconds
+    
+    return () => clearTimeout(timeoutId);
+  }, [
+    point, 
+    characters, 
+    coupons, 
+    stores, 
+    selectedStore, 
+    stamina, 
+    score
+  ]);
+  
   // Listen for events from the Phaser game
   useEffect(() => {
     // Handle coupon collection event from the game
@@ -195,7 +327,11 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     remainingDraws,
     setRemainingDraws,
     score,
-    setScore
+    setScore,
+    userId,
+    setUserId,
+    saveGameState,
+    loadGameState
   };
 
   // Use React.createElement instead of JSX

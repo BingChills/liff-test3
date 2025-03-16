@@ -64,4 +64,4 @@ const PlayerSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Player', PlayerSchema);
+module.exports = mongoose.model('Player', PlayerSchema, 'user_info');

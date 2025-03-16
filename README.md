@@ -1,6 +1,6 @@
 # Linkz Gameplay
 
-A gamified loyalty platform. The main features in include coupon collection and character summoning application built with Next.js, React, and Phaser. Users can collect points from different stores, summon characters, and redeem coupons.
+A gamified loyalty platform. The main features include coupon collection and character summoning application built with Next.js, React, and Phaser. Users can collect points from different stores, summon characters, and redeem coupons.
 
 ## Tech Stack
 
@@ -8,6 +8,8 @@ A gamified loyalty platform. The main features in include coupon collection and 
 - **UI Library**: [React](https://reactjs.org/) with TypeScript 5
 - **Game Engine**: [Phaser 3.87.0](https://github.com/phaserjs/phaser)
 - **Styling**: Tailwind CSS
+- **Backend**: Express.js
+- **Database**: MongoDB
 - **Node.js**: v18+ recommended
 
 ## Setup Instructions
@@ -25,13 +27,35 @@ A gamified loyalty platform. The main features in include coupon collection and 
    npm install
    ```
 
-3. **Run the Development Server**
+3. **Environment Setup**
 
-   ```bash
-   npm run dev
+   Create a `.env` file in the root directory with the following variables:
+   
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   PORT=5000
+   NODE_ENV=development
    ```
 
-   This will start the development server at `http://localhost:8080`.
+4. **Run the Application**
+
+   **Development Mode (Frontend & Backend Together)**
+   ```bash
+   npm run dev:full
+   ```
+
+   **Run Frontend and Backend Separately**
+   ```bash
+   # Start Backend (Express Server)
+   npm run server
+   
+   # Start Frontend (Next.js)
+   npm run dev
+   ```
+   
+   The servers will be available at:
+   - Frontend: `http://localhost:8080`
+   - Backend API: `http://localhost:5000/api`
 
 ## Project Structure
 
@@ -46,6 +70,13 @@ A gamified loyalty platform. The main features in include coupon collection and 
   - `/styles` - CSS styles, including globals.css
 - `/public` - Static assets
   - `/assets` - Game assets (images, audio, etc.)
+- `/server` - Backend Express.js server
+  - `/config` - Server configuration (database connection)
+  - `/controllers` - API controllers
+  - `/middleware` - Custom middleware
+  - `/models` - MongoDB models
+  - `/routes` - API routes
+  - `server.js` - Main server file
 
 ## Features
 
@@ -54,15 +85,28 @@ A gamified loyalty platform. The main features in include coupon collection and 
 - **Coupon Collection**: Collect and redeem coupons from different stores
 - **Rarity System**: Characters have different rarities (common, rare, epic, legendary)
 - **React-Phaser Integration**: Seamless communication between React UI and Phaser game using EventBus
+- **RESTful API**: Backend API for player data management
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players/:userId` | Get player data by user ID |
+| POST | `/api/players` | Create a new player |
+| PUT | `/api/players/:userId` | Update entire player data |
+| PATCH | `/api/players/:userId/:field` | Update specific player field |
 
 ## Available Commands
 
 | Command | Description |
 |---------|-------------|
 | `npm install` | Install project dependencies |
-| `npm run dev` | Launch development server at http://localhost:8080 |
-| `npm run build` | Create production build in the `dist` folder |
-| `npm run dev-nolog` | Run development server without analytics |
+| `npm run dev` | Launch frontend development server at http://localhost:8080 |
+| `npm run server` | Start backend server at http://localhost:5000 |
+| `npm run dev:full` | Run both frontend and backend concurrently |
+| `npm run build` | Create production build |
+| `npm run dev-nolog` | Run frontend development server without analytics |
+| `npm start` | Start the production server |
 
 ## Communication Between React and Phaser
 
@@ -96,8 +140,13 @@ The application is optimized for modern browsers including Chrome, Firefox, Safa
 
 **Common Issues:**
 
-1. **Port already in use**: If port 8080 is already in use, you can modify the port in `next.config.mjs`
-2. **Node version**: Make sure you're using Node.js v16+ for optimal compatibility
+1. **Port already in use**: 
+   - If port 8080 is already in use, you can modify the port in the dev script in `package.json`
+   - If port 5000 is already in use, you can modify the PORT value in `.env` file
+
+2. **Node version**: Make sure you're using Node.js v18+ for optimal compatibility
+
+3. **MongoDB Connection**: Ensure your MongoDB connection string in `.env` is correct and the database is accessible
 
 ## Contributing
 
