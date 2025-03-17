@@ -46,7 +46,7 @@ const createPlayer = async (req, res) => {
     const newPlayer = {
       userId,
       score: 0,
-      coins: 0, 
+      point: 0,
       stores: [
         { name: 'Parabola', point: 1600, color: 'emerald' },
         { name: 'KFC', point: 850, color: 'red' },

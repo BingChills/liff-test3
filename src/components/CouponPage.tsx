@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
-import { Ticket, ChevronRight, Filter, Search, X, Clock } from 'lucide-react';
-import { useGameState, Coupon } from '../state/gameState';
+import React, { useState, useMemo } from 'react';
+import { Ticket, ChevronRight, Filter, Search, X, Clock, User, Gem, Coins, Timer, ChevronDown, Check, AlertTriangle, QrCode } from 'lucide-react';
+import { useGameState, Coupon, StoreCurrency } from '../state/gameState';
 import PageHeader from './PageHeader';
 
 type FilterStatus = 'active' | 'used' | 'expired' | 'all';
+type DaysFilter = 'all' | '3days' | '7days' | '30days';
+
+// Define enhanced coupon type with additional UI properties
+interface EnhancedCoupon extends Coupon {
+  expiresIn: number;
+  brand: string;
+  logo: string; 
+  qrCode: string;
+}
 
 type BrandInfo = {
   name: string;
@@ -42,13 +51,6 @@ const getDaysLeft = (coupon: Coupon) => {
   return Math.max(1, id % 10);
 };
 
-// Helper to get status color based on days left
-const getStatusColor = (daysLeft: number) => {
-  if (daysLeft > 5) return 'text-green-600';
-  if (daysLeft > 2) return 'text-orange-500';
-  return 'text-red-500';
-};
-
 // Helper to get brand info
 const getBrand = (code: string) => {
   const brandCode = code.split('-')[0];
@@ -59,57 +61,123 @@ const getBrand = (code: string) => {
 };
 
 const CouponPage = () => {
-  const { coupons } = useGameState();
-  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
+  const { coupons, stores } = useGameState();
+  const [selectedCoupon, setSelectedCoupon] = useState<EnhancedCoupon | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('active');
+  const [daysFilter, setDaysFilter] = useState<DaysFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showStoreSelector, setShowStoreSelector] = useState(false);
+  const [selectedStore, setSelectedStore] = useState(stores[0]);
 
-  // Filter coupons based on current filters
-  const filteredCoupons = coupons.filter(coupon => {
-    // Status filter
-    if (statusFilter === 'active' && coupon.isUsed) return false;
-    if (statusFilter === 'used' && !coupon.isUsed) return false;
-    
-    // Search filter
-    const brand = getBrand(coupon.code);
-    if (searchQuery && 
-        !coupon.discount.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !brand.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
+  const filteredCoupons = useMemo(() => {
+    return coupons.map(coupon => {
+      // Add expiresIn property to each coupon
+      const expiresIn = getDaysLeft(coupon);
+      return {
+        ...coupon,
+        expiresIn,
+        brand: getBrand(coupon.code).name,
+        logo: getBrand(coupon.code).image,
+        qrCode: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + coupon.code
+      } as EnhancedCoupon;
+    }).filter(coupon => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesBrand = coupon.brand.toLowerCase().includes(query);
+        const matchesDiscount = coupon.discount.toLowerCase().includes(query);
+        if (!matchesBrand && !matchesDiscount) return false;
+      }
+
+      // Filter by status
+      if (statusFilter === 'used' && !coupon.isUsed) return false;
+      if (statusFilter === 'expired' && coupon.expiresIn !== 0) return false;
+      if (statusFilter === 'active' && (coupon.isUsed || coupon.expiresIn === 0)) return false;
+
+      // Filter by days
+      if (daysFilter === '3days' && coupon.expiresIn > 3) return false;
+      if (daysFilter === '7days' && coupon.expiresIn > 7) return false;
+      if (daysFilter === '30days' && coupon.expiresIn > 30) return false;
+
+      return true;
+    });
+  }, [coupons, statusFilter, daysFilter, searchQuery]);
+
+  const getStoreColor = (color: string) => {
+    switch (color) {
+      case 'emerald': return 'bg-emerald-400';
+      case 'red': return 'bg-red-500';
+      case 'blue': return 'bg-blue-500';
+      case 'orange': return 'bg-orange-500';
+      default: return 'bg-emerald-400';
     }
-    
-    return true;
-  });
+  };
 
-  // Handle coupon selection
-  const handleCouponClick = (coupon: Coupon) => {
+  const handleStoreSelect = (store: StoreCurrency) => {
+    setSelectedStore(store);
+    setShowStoreSelector(false);
+  };
+
+  const getExpiryColor = (days: number) => {
+    if (days <= 2) return 'bg-red-100 text-red-700 border border-red-200';
+    if (days <= 4) return 'bg-orange-100 text-orange-700 border border-orange-200';
+    return 'bg-green-100 text-green-700 border border-green-200';
+  };
+
+  const getExpiryIcon = (days: number) => {
+    if (days <= 2) {
+      return <AlertTriangle className="w-3.5 h-3.5 text-red-500" />;
+    }
+    return <Timer className="w-3.5 h-3.5" />;
+  };
+
+  const getExpiryText = (days: number) => {
+    if (days === 0) return 'Expired';
+    return `${days} day${days === 1 ? '' : 's'} left`;
+  };
+
+  const handleUseCoupon = (coupon: EnhancedCoupon) => {
+    if (coupon.isUsed || coupon.expiresIn === 0) return;
     setSelectedCoupon(coupon);
   };
 
-  // Close coupon detail view
-  const handleCloseDetail = () => {
-    setSelectedCoupon(null);
+  const clearFilters = () => {
+    setStatusFilter('active');
+    setDaysFilter('all');
+    setSearchQuery('');
   };
 
+  const hasActiveFilters = statusFilter !== 'active' || daysFilter !== 'all';
+
+  // Get counts for filter badges
+  const getCounts = () => {
+    const active = coupons.filter(c => !c.isUsed && getDaysLeft(c) > 0).length;
+    const used = coupons.filter(c => c.isUsed).length;
+    const expired = coupons.filter(c => getDaysLeft(c) === 0).length;
+    return { active, used, expired };
+  };
+
+  const counts = getCounts();
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-300">
-      {/* Resource bar at the top */}
+    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-300 pb-24">
+      {/* Use the shared PageHeader component */}
       <PageHeader />
       
-      {/* Title and Icon Row */}
-      <div className="px-4 pb-2 flex items-center gap-3">
-        <div className="w-12 h-12 bg-blue-100 rounded-2xl shadow-md flex items-center justify-center">
-          <Ticket className="w-6 h-6 text-blue-600" />
+      {/* Page Title with Icon */}
+      <div className="mt-2 px-4 flex items-center gap-3">
+        <div className="w-14 h-14 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center">
+          <Ticket className="w-8 h-8 text-blue-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white drop-shadow-sm">My Coupons</h1>
-          <p className="text-white/80 text-sm">Use them before they expire!</p>
+          <h1 className="text-3xl font-black text-gray-800 drop-shadow-sm">My Coupons</h1>
+          <p className="text-gray-700 text-sm mt-1">Use them before they expire!</p>
         </div>
       </div>
       
-      {/* Search and filters */}
-      <div className="px-4 pb-4 flex gap-2">
+      {/* Search and Filter Row */}
+      <div className="mt-4 px-4 flex gap-2">
         <div className="flex-1 relative">
           <input
             type="text"
@@ -128,141 +196,253 @@ const CouponPage = () => {
             </button>
           )}
         </div>
-        
         <button 
-          className="h-12 w-16 rounded-xl flex items-center justify-center shadow-lg transition-colors bg-white/90 text-gray-700"
           onClick={() => setShowFilters(!showFilters)}
+          className={`h-12 px-4 rounded-xl flex items-center gap-2 shadow-lg transition-colors ${
+            showFilters || hasActiveFilters
+              ? 'bg-blue-500 text-white'
+              : 'bg-white/90 text-gray-600 hover:bg-white'
+          }`}
         >
           <Filter className="w-5 h-5" />
-          <span className="ml-1 font-medium">Filter</span>
+          <span className="text-sm font-medium">Filter</span>
+          {hasActiveFilters && (
+            <div className="w-5 h-5 rounded-full bg-white text-blue-500 text-xs font-bold flex items-center justify-center">
+              {[
+                statusFilter !== 'active',
+                daysFilter !== 'all'
+              ].filter(Boolean).length}
+            </div>
+          )}
         </button>
       </div>
-      
+
+      {/* Filter Panel */}
       {showFilters && (
-        <div className="mt-0 px-4 mb-4">
-          <div className="bg-white/90 rounded-xl p-4 shadow-lg">
-            <h3 className="font-bold text-gray-800 mb-3">Filter by Status</h3>
-            <div className="flex flex-wrap gap-2">
-              <button 
-                className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${
-                  statusFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
-                onClick={() => setStatusFilter('all')}
-              >
-                All Coupons
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${
-                  statusFilter === 'active' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
-                onClick={() => setStatusFilter('active')}
-              >
-                Active
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${
-                  statusFilter === 'used' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
-                onClick={() => setStatusFilter('used')}
-              >
-                Used
-              </button>
+        <div className="mt-4 px-4">
+          <div className="bg-white/95 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-800">Filters</h3>
+              {(hasActiveFilters || searchQuery) && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-blue-600 font-medium hover:text-blue-700"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            {/* Status Filter */}
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Status</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'active', label: 'Active', count: counts.active },
+                  { value: 'used', label: 'Used', count: counts.used },
+                  { value: 'expired', label: 'Expired', count: counts.expired },
+                  { value: 'all', label: 'All Coupons', count: coupons.length }
+                ].map((status) => (
+                  <button
+                    key={status.value}
+                    onClick={() => setStatusFilter(status.value as FilterStatus)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-between ${
+                      statusFilter === status.value
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {statusFilter === status.value && <Check className="w-4 h-4" />}
+                      {status.label}
+                    </div>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/50">
+                      {status.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Days Filter */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Expires Within</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'all', label: 'Any Time' },
+                  { value: '3days', label: '3 Days' },
+                  { value: '7days', label: '7 Days' },
+                  { value: '30days', label: '30 Days' }
+                ].map((days) => (
+                  <button
+                    key={days.value}
+                    onClick={() => setDaysFilter(days.value as DaysFilter)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${
+                      daysFilter === days.value
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {daysFilter === days.value && <Check className="w-4 h-4" />}
+                    {days.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
-      
-      {/* Coupon list */}
-      {selectedCoupon ? (
-        // Coupon detail view
-        <div className="mt-2 px-4 pb-24">
-          <button 
-            className="mb-5 text-blue-700 font-semibold flex items-center text-lg"
-            onClick={handleCloseDetail}
-          >
-            ← Back to coupons
-          </button>
-          
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-            <div className="bg-blue-600 p-7 text-white text-center">
-              <h2 className="text-2xl font-bold mb-2 drop-shadow-sm">{selectedCoupon.discount}</h2>
-              <p className="text-base font-medium text-blue-100">
-                {selectedCoupon.isUsed ? 'Used' : 'Active'}
-              </p>
+
+      {/* Coupon List */}
+      <div className="px-4 space-y-4 mt-4">
+        {filteredCoupons.length === 0 ? (
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <Ticket className="w-8 h-8 text-gray-400" />
             </div>
-            
-            <div className="p-7">
-              <div className="text-center mb-7">
-                <div className="bg-gray-100 p-5 rounded-lg mx-auto w-56 h-56 flex items-center justify-center mb-4 border-2 border-gray-200 shadow-inner">
-                  <span className="text-xl font-bold text-gray-800">{selectedCoupon.code}</span>
-                </div>
-                <p className="text-gray-700 text-base font-medium">Show this code to the cashier</p>
-              </div>
-              
-              <div className="border-t-2 border-gray-200 pt-5">
-                <p className="text-base text-gray-800 font-medium mb-2">
-                  {selectedCoupon.expiry ? `Expires: ${selectedCoupon.expiry}` : 'No expiration date'}
-                </p>
-                <p className="text-base text-gray-800 font-medium">
-                  Code: <span className="font-bold">{selectedCoupon.code}</span>
-                </p>
-              </div>
-            </div>
+            <h3 className="text-lg font-bold text-gray-800 mb-2">No coupons found</h3>
+            <p className="text-gray-600">
+              Try adjusting your filters to see more coupons.
+            </p>
+            {(hasActiveFilters || searchQuery) && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
-        </div>
-      ) : (
-        // Coupon list view - matching the image design
-        <div className="px-4 pb-24">
-          {filteredCoupons.length === 0 ? (
-            <div className="text-center py-12 text-gray-700 bg-white rounded-xl shadow-md p-8">
-              <Ticket size={56} className="mx-auto mb-5 text-gray-400" />
-              <p className="text-xl font-semibold">No coupons found</p>
-              <p className="mt-2 text-gray-600">Try adjusting your filters to see more coupons</p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {filteredCoupons.map(coupon => {
-                const daysLeft = getDaysLeft(coupon);
-                const statusColor = getStatusColor(daysLeft);
-                const brand = getBrand(coupon.code);
+        ) : (
+          filteredCoupons.map((coupon) => (
+            <div
+              key={coupon.id}
+              className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 ${
+                coupon.isUsed || coupon.expiresIn === 0
+                  ? 'opacity-60'
+                  : 'hover:scale-[1.02]'
+              }`}
+            >
+              <div className="relative p-4 flex items-center gap-4">
+                {/* Left Border Decoration */}
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${
+                  coupon.isUsed
+                    ? 'bg-gradient-to-b from-gray-400 to-gray-500'
+                    : coupon.expiresIn === 0
+                    ? 'bg-gradient-to-b from-red-500 to-red-600'
+                    : 'bg-gradient-to-b from-blue-500 to-blue-600'
+                }`} />
                 
-                return (
-                  <div 
-                    key={coupon.id}
-                    className="bg-white rounded-xl shadow-md overflow-hidden"
-                  >
-                    <div className="p-4 flex justify-between items-center">
-                      <div className="flex">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
-                          <img 
-                            src={brand.image} 
-                            alt={brand.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-gray-900">{brand.name}</h3>
-                          <p className="font-medium text-blue-600">
-                            {coupon.discount}
-                          </p>
-                          <div className={`flex items-center mt-1 ${statusColor}`}>
-                            <Clock className="w-4 h-4 mr-1" />
-                            <span className="text-sm font-medium">{daysLeft} days left</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button 
-                        className="bg-blue-500 text-white font-medium py-2 px-4 rounded-lg flex items-center"
-                        onClick={() => handleCouponClick(coupon)}
-                      >
-                        Use <ChevronRight size={18} className="ml-1" />
-                      </button>
-                    </div>
+                {/* Logo */}
+                <div className="w-16 h-16 rounded-xl overflow-hidden shadow-md">
+                  <img
+                    src={coupon.logo}
+                    alt={coupon.brand}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-gray-800">{coupon.brand}</h3>
+                    {coupon.isUsed && (
+                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">
+                        Used
+                      </span>
+                    )}
                   </div>
-                );
-              })}
+                  <p className="text-blue-600 font-semibold">{coupon.discount}</p>
+                  <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mt-2 ${
+                    coupon.isUsed
+                      ? 'bg-gray-100 text-gray-600'
+                      : getExpiryColor(coupon.expiresIn)
+                  }`}>
+                    {getExpiryIcon(coupon.expiresIn)}
+                    <span className="text-sm font-medium">
+                      {getExpiryText(coupon.expiresIn)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Use Button */}
+                <button 
+                  onClick={() => handleUseCoupon(coupon)}
+                  disabled={coupon.isUsed || coupon.expiresIn === 0}
+                  className={`px-6 py-2 rounded-xl font-semibold flex items-center gap-2 transition-colors ${
+                    coupon.isUsed || coupon.expiresIn === 0
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {coupon.isUsed ? 'Used' : coupon.expiresIn === 0 ? 'Expired' : 'Use'}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Bottom Border Decoration */}
+              <div className={`h-1 ${
+                coupon.isUsed
+                  ? 'bg-gradient-to-r from-gray-400 to-gray-500'
+                  : coupon.expiresIn === 0
+                  ? 'bg-gradient-to-r from-red-500 to-red-600'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-600'
+              }`} />
             </div>
-          )}
+          ))
+        )}
+      </div>
+
+      {/* QR Code Modal */}
+      {selectedCoupon && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setSelectedCoupon(null)}
+        >
+          <div 
+            className="bg-white w-[85%] max-w-sm rounded-3xl p-6 transform transition-all"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4">
+                <img
+                  src={selectedCoupon.logo}
+                  alt={selectedCoupon.brand}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800">{selectedCoupon.brand}</h3>
+              <p className="text-blue-600 font-semibold mt-1">{selectedCoupon.discount}</p>
+            </div>
+
+            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+              <div className="aspect-square bg-white rounded-xl p-4 shadow-inner">
+                <img
+                  src={selectedCoupon.qrCode}
+                  alt="QR Code"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex items-center justify-center gap-2 mt-4 text-gray-500">
+                <QrCode className="w-4 h-4" />
+                <span className="text-sm">Show this QR code to the cashier</span>
+              </div>
+            </div>
+
+            <div className={`flex items-center gap-1.5 justify-center ${getExpiryColor(selectedCoupon.expiresIn)} rounded-full py-2 mb-6`}>
+              {getExpiryIcon(selectedCoupon.expiresIn)}
+              <span className="text-sm font-medium">
+                {getExpiryText(selectedCoupon.expiresIn)}
+              </span>
+            </div>
+
+            <button 
+              onClick={() => setSelectedCoupon(null)}
+              className="w-full bg-gray-100 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>
