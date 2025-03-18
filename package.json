@@ -49,6 +49,8 @@
         "@types/react": "^18.3.18",
         "@types/react-dom": "^18.3.5",
         "autoprefixer": "^10.4.21",
+        "eslint": "^8.56.0",
+        "eslint-config-next": "^14.2.3",
         "nodemon": "^3.1.9",
         "postcss": "^8.5.3",
         "postcss-flexbugs-fixes": "^5.0.2",
