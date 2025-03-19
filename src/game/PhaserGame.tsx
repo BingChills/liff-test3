@@ -41,6 +41,16 @@ export const PhaserGame = forwardRef<IRefPhaserGame, PhaserGameProps>((props, re
       console.log('Skipping Phaser initialization - not in browser environment');
       return;
     }
+    
+    // Add global error handler for Phaser asset loading issues
+    window.addEventListener('error', (e) => {
+      // Only handle asset loading errors
+      if (e.message.includes('Failed to load resource') || 
+          e.message.includes('404') || 
+          e.message.includes('texture')) {
+        console.error('Asset loading error detected:', e.message);
+      }
+    }, { once: false });
 
     if (containerRef.current && !gameRef.current) {
       try {

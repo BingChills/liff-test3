@@ -9,8 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true, // Don't optimize game assets
   },
-  // Explicitly set asset prefix to be empty (default) to ensure asset paths work in all environments
-  assetPrefix: '',
+  // Don't set assetPrefix as it can cause issues with relative paths
+  // Handle trailing slashes to ensure consistent URL paths
+  trailingSlash: false,
+  // Ensure output is static-optimized
+  output: 'standalone',
 };
 
 module.exports = nextConfig;

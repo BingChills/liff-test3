@@ -45,11 +45,21 @@ export class Game extends Scene {
 
     preload() {
         try {
-            // Set base path for all assets with a leading slash to ensure it works in all environments
-            this.load.setPath("/assets");
+            // Use relative path without leading slash for better compatibility
+            this.load.setPath("assets");
 
             // Log asset loading for debugging
-            console.log('Preloading game assets from:', this.load.baseURL);
+            console.log('Preloading game assets from path:', this.load.baseURL);
+
+            // Add error handler for load errors
+            this.load.on('loaderror', (fileObj: any) => {
+                console.error('Error loading asset:', fileObj.src);
+            });
+
+            // Add complete handler to verify loading
+            this.load.on('complete', () => {
+                console.log('All assets loaded successfully');
+            });
 
             this.load.spritesheet(
                 "ninjaTurtle_walk",
