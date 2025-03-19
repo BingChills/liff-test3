@@ -3,37 +3,41 @@ import { Events } from "phaser";
 import { Player } from "../entities/Player";
 import { ChestManager } from "../managers/ChestManager";
 import { AutoModeController } from "../controllers/AutoModeController";
-import { Coupon as GameCoupon, ChestRarity, GameConfig } from "../types/GameTypes";
+import {
+    Coupon as GameCoupon,
+    ChestRarity,
+    GameConfig,
+} from "../types/GameTypes";
 import { EventBus } from "../EventBus";
 import { Coupon as UICoupon } from "../../state/gameState";
 
 export class Game extends Scene {
-    // Core components 
+    // Core components
     private player!: Player;
     private chestManager!: ChestManager;
     private autoModeController!: AutoModeController;
-    
+
     // UI elements
     private score: number = 0;
-    
+
     // Audio
     private backgroundMusic!: Phaser.Sound.BaseSound;
-    
+
     // Event system
     private gameEventBus: Phaser.Events.EventEmitter;
-    
+
     // Current attack state
     private currentAttackTimer?: Phaser.Time.TimerEvent;
 
     // Available coupons
     private coupons: GameCoupon[] = [
         {
-            id: '1',
+            id: "1",
             brand: "McDonald's",
             logo: "https://images.unsplash.com/photo-1586816001966-79b736744398?auto=format&fit=crop&w=200&q=80",
             discount: "50% Discount",
             expiresIn: 7,
-            qrCode: "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=300&q=80"
+            qrCode: "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=300&q=80",
         },
         // ... (rest of your coupons array)
     ];
@@ -46,39 +50,46 @@ export class Game extends Scene {
     preload() {
         try {
             // Don't set baseURL - let it use the default which is the root of the site
-            
+
             // Set the path manually to make sure we use the correct path in all environments
-            this.load.setPath('assets'); // No leading slash - use a relative path
-            
+            this.load.setPath("assets"); // No leading slash - use a relative path
+
             // Log the loading path for debugging
-            console.log('Loading assets from:', window.location.origin + '/' + this.load.path);
-            
+            console.log(
+                "Loading assets from:",
+                window.location.origin + "/" + this.load.path
+            );
+
             // Add error handlers with detailed logging
-            this.load.on('loaderror', (fileObj: any) => {
-                console.error('Asset loading error:', {
+            this.load.on("loaderror", (fileObj: any) => {
+                console.error("Asset loading error:", {
                     src: fileObj.src,
                     key: fileObj.key,
-                    url: window.location.href
+                    url: window.location.href,
                 });
             });
 
             // Add complete handler to verify loading
-            this.load.on('complete', () => {
-                console.log('All assets loaded successfully');
+            this.load.on("complete", () => {
+                console.log("All assets loaded successfully");
             });
 
             this.load.spritesheet(
                 "ninjaTurtle_walk",
-                "NinjaTurtle/ninjaTurtle-Walk.png",
+                "NinjaTurtle/ninjaTurtle-walk.png",
                 {
                     frameWidth: 64,
                     frameHeight: 64,
                 }
             );
-            this.load.spritesheet("ninjaTurtle_idle", "NinjaTurtle/ninjaTurtle-Idle.png", {
-                frameWidth: 64,
-                frameHeight: 64,
-            });
+            this.load.spritesheet(
+                "ninjaTurtle_idle",
+                "NinjaTurtle/ninjaTurtle-idle.png",
+                {
+                    frameWidth: 64,
+                    frameHeight: 64,
+                }
+            );
 
             this.load.image("hedgehog", "hedgehog.png");
             this.load.spritesheet(
@@ -89,10 +100,14 @@ export class Game extends Scene {
                     frameHeight: 64,
                 }
             );
-            this.load.spritesheet("hedgehog_idle", "Hedgehog/hedgehog-Idle.png", {
-                frameWidth: 64,
-                frameHeight: 64,
-            });
+            this.load.spritesheet(
+                "hedgehog_idle",
+                "Hedgehog/hedgehog-Idle.png",
+                {
+                    frameWidth: 64,
+                    frameHeight: 64,
+                }
+            );
             this.load.image("chest", "chest.png");
             this.load.image("background", "grass_bg.png");
             this.load.image("background2", "grass_bg2.png");
@@ -104,11 +119,11 @@ export class Game extends Scene {
             this.load.image("chest_rare", "chests/chest_rare.png");
             this.load.image("chest_epic", "chests/chest_epic.png");
             this.load.image("chest_legendary", "chests/chest_legendary.png");
-            
+
             // Load point sprite
             this.load.image("point_orb", "items/point_orb.png");
         } catch (error) {
-            console.error('Error during asset preloading:', error);
+            console.error("Error during asset preloading:", error);
         }
     }
 
@@ -137,25 +152,25 @@ export class Game extends Scene {
 
         // Initialize chest manager
         const gameConfig: GameConfig = {
-            eventBus: this.gameEventBus
+            eventBus: this.gameEventBus,
         };
-        
+
         this.chestManager = new ChestManager(
-            this, 
-            this.player, 
-            gameConfig, 
+            this,
+            this.player,
+            gameConfig,
             this.coupons,
             (newScore: number) => {
                 this.score = newScore;
-                
+
                 // Emit score update event to UI
-                EventBus.emit('scoreUpdated', newScore);
+                EventBus.emit("scoreUpdated", newScore);
             }
         );
-        
+
         // Setup colliders
         this.chestManager.setupColliders();
-        
+
         // Spawn initial chests
         this.chestManager.spawnInitialChests(4);
 
@@ -165,44 +180,46 @@ export class Game extends Scene {
             this.player,
             this.chestManager
         );
-        
+
         // Create auto mode button
         this.autoModeController.createAutoModeButton();
 
         // Setup input listener for movement and chest interaction
         this.setupPlayerInput();
-        
+
         // Setup event listeners for coupon collection and point updates
         this.setupEventListeners();
-        
+
         // Notify the React component that this scene is ready
-        EventBus.emit('current-scene-ready', this);
+        EventBus.emit("current-scene-ready", this);
     }
 
     // Method to set up event listeners for game events
     private setupEventListeners(): void {
         // Listen for chest opened event
-        this.gameEventBus.on('chestOpened', (data: { 
-            coupon: GameCoupon, 
-            coins: number 
-        }) => {
-            // Convert game coupon to UI coupon format
-            const uiCoupon: UICoupon = {
-                id: data.coupon.id,
-                code: data.coupon.id,  // Using ID as code for simplicity
-                discount: data.coupon.discount,
-                expiry: data.coupon.expiresIn ? `${data.coupon.expiresIn} days` : undefined,
-                isUsed: false
-            };
-            
-            // Emit coupon collected event to UI
-            EventBus.emit('couponCollected', uiCoupon);
-            
-            // Emit coins collected event to UI if coins were awarded
-            if (data.coins > 0) {
-                EventBus.emit('coinsCollected', data.coins);
+        this.gameEventBus.on(
+            "chestOpened",
+            (data: { coupon: GameCoupon; coins: number }) => {
+                // Convert game coupon to UI coupon format
+                const uiCoupon: UICoupon = {
+                    id: data.coupon.id,
+                    code: data.coupon.id, // Using ID as code for simplicity
+                    discount: data.coupon.discount,
+                    expiry: data.coupon.expiresIn
+                        ? `${data.coupon.expiresIn} days`
+                        : undefined,
+                    isUsed: false,
+                };
+
+                // Emit coupon collected event to UI
+                EventBus.emit("couponCollected", uiCoupon);
+
+                // Emit coins collected event to UI if coins were awarded
+                if (data.coins > 0) {
+                    EventBus.emit("coinsCollected", data.coins);
+                }
             }
-        });
+        );
     }
 
     private createAnimations(): void {
@@ -267,10 +284,10 @@ export class Game extends Scene {
 
             if (clickedChest) {
                 const chest = clickedChest as Phaser.Physics.Arcade.Sprite;
-                
+
                 // Move player to position near the chest
                 this.player.moveTowardObject(chest, 35);
-                
+
                 // Attack when close enough
                 this.currentAttackTimer = this.time.addEvent({
                     delay: 1000,
@@ -281,7 +298,8 @@ export class Game extends Scene {
                             chest.x,
                             chest.y
                         );
-                        if (distance < 50 && chest.active) { // Increased attack range
+                        if (distance < 50 && chest.active) {
+                            // Increased attack range
                             this.player.setIsAttacking(true);
                             this.player.setIsMoving(false);
                             this.player.getSprite().setVelocity(0, 0);
@@ -290,12 +308,14 @@ export class Game extends Scene {
                             this.currentAttackTimer?.destroy();
                             this.player.setIsAttacking(false);
                             if (!this.player.isPlayerMoving()) {
-                                this.player.getSprite().play("ninjaTurtle_idle", true);
+                                this.player
+                                    .getSprite()
+                                    .play("ninjaTurtle_idle", true);
                             }
                         }
                     },
                     loop: true,
-                    paused: false
+                    paused: false,
                 });
             } else {
                 // Normal movement - click to move
@@ -307,8 +327,9 @@ export class Game extends Scene {
     update() {
         // Update player
         this.player.update();
-        
+
         // Update auto mode controller
         this.autoModeController.update();
     }
 }
+
