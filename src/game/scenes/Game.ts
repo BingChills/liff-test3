@@ -74,9 +74,10 @@ export class Game extends Scene {
                 console.log("All assets loaded successfully");
             });
 
+            // Character assets - ninja turtle
             this.load.spritesheet(
                 "ninjaTurtle_walk",
-                "NinjaTurtle/ninjaTurtle-walk.png",
+                "characters/ninja-turtle/walk.png",
                 {
                     frameWidth: 64,
                     frameHeight: 64,
@@ -84,17 +85,18 @@ export class Game extends Scene {
             );
             this.load.spritesheet(
                 "ninjaTurtle_idle",
-                "NinjaTurtle/ninjaTurtle-idle.png",
+                "characters/ninja-turtle/idle.png",
                 {
                     frameWidth: 64,
                     frameHeight: 64,
                 }
             );
 
-            this.load.image("hedgehog", "hedgehog.png");
+            // Character assets - hedgehog
+            this.load.image("hedgehog", "characters/hedgehog/idle.png");
             this.load.spritesheet(
                 "hedgehog_walk",
-                "Hedgehog/hedgehog-Walk_South.png",
+                "characters/hedgehog/walk-south.png",
                 {
                     frameWidth: 64,
                     frameHeight: 64,
@@ -102,26 +104,32 @@ export class Game extends Scene {
             );
             this.load.spritesheet(
                 "hedgehog_idle",
-                "Hedgehog/hedgehog-Idle.png",
+                "characters/hedgehog/idle.png",
                 {
                     frameWidth: 64,
                     frameHeight: 64,
                 }
             );
-            this.load.image("chest", "chest.png");
-            this.load.image("background", "grass_bg.png");
-            this.load.image("background2", "grass_bg2.png");
-            this.load.audio("bgMusic", ["8-bit-arcade.mp3"]);
-            this.load.audio("collectPointSound", ["collect.mp3"]);
+            
+            // Item assets
+            this.load.image("chest", "items/chest.png");
+            
+            // Background assets
+            this.load.image("background", "backgrounds/grass-bg.png");
+            this.load.image("background2", "backgrounds/grass-bg2.png");
+            
+            // Audio assets
+            this.load.audio("bgMusic", ["audio/background-music.mp3"]);
+            this.load.audio("collectPointSound", ["audio/collect.mp3"]);
 
-            // Load chest variants
-            this.load.image("chest_common", "chests/chest_common.png");
-            this.load.image("chest_rare", "chests/chest_rare.png");
-            this.load.image("chest_epic", "chests/chest_epic.png");
-            this.load.image("chest_legendary", "chests/chest_legendary.png");
+            // Chest variants
+            this.load.image("chest_common", "items/chests/common.png");
+            this.load.image("chest_rare", "items/chests/rare.png");
+            this.load.image("chest_epic", "items/chests/epic.png");
+            this.load.image("chest_legendary", "items/chests/legendary.png");
 
-            // Load point sprite
-            this.load.image("point_orb", "items/point_orb.png");
+            // Points and collectibles
+            this.load.image("point_orb", "items/point-orb.png");
         } catch (error) {
             console.error("Error during asset preloading:", error);
         }

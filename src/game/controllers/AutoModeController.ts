@@ -17,27 +17,71 @@ export class AutoModeController {
     }
     
     public createAutoModeButton(): void {
-        // Create a container for the button
-        this.autoModeButton = this.scene.add.container(320, 600);
+        // Create a container for the button - position it in the bottom right corner
+        this.autoModeButton = this.scene.add.container(this.scene.cameras.main.width - 70, this.scene.cameras.main.height - 50);
         
-        // Create background for the button
-        const bg = this.scene.add.circle(0, 0, 25, 0x333333, 0.7);
+        // Create a rounded rectangle background (pill shape) for the button
+        const bgWidth = 80;
+        const bgHeight = 36;
+        const radius = bgHeight / 2;
+        const bgColor = this.isAutoMode ? 0x4ade80 : 0x374151; // Green when active, gray when inactive (matching PageHeader)
+        
+        // Create a rounded rectangle with shadow
+        const bg = this.scene.add.graphics();
+        bg.fillStyle(0x000000, 0.2); // Shadow
+        bg.fillRoundedRect(-bgWidth/2 + 2, -bgHeight/2 + 2, bgWidth, bgHeight, radius);
+        bg.fillStyle(bgColor, 1);
+        bg.fillRoundedRect(-bgWidth/2, -bgHeight/2, bgWidth, bgHeight, radius);
+        
+        // Create an icon circle for the button (similar to the resource icons in PageHeader)
+        const iconCircle = this.scene.add.graphics();
+        iconCircle.fillStyle(0xFFFFFF, 0.9);
+        iconCircle.fillCircle(-bgWidth/2 + radius, 0, 12); // Position circle on the left side
+        
+        // Create an icon for the auto mode (using a play symbol)
+        const icon = this.scene.add.graphics();
+        icon.fillStyle(this.isAutoMode ? 0x374151 : 0x4ade80, 1); // Dark when inactive, green when active
+        // Draw a play triangle icon
+        icon.fillTriangle(
+            -bgWidth/2 + radius - 3, -5,  // Top point
+            -bgWidth/2 + radius - 3, 5,   // Bottom point
+            -bgWidth/2 + radius + 5, 0    // Right point
+        );
         
         // Create text for the button
-        const text = this.scene.add.text(0, 0, "AUTO", {
-            fontSize: "12px",
+        const text = this.scene.add.text(2, 0, "AUTO", {
+            fontSize: "13px",
+            fontFamily: "Arial, sans-serif",
             fontStyle: "bold",
             color: "#FFFFFF",
-        }).setOrigin(0.5);
+        }).setOrigin(0, 0.5); // Left-aligned text
         
         // Add components to the container
-        this.autoModeButton.add([bg, text]);
+        this.autoModeButton.add([bg, iconCircle, icon, text]);
         
-        // Make the button interactive
-        bg.setInteractive({ useHandCursor: true });
+        // Create interactive area for the entire button
+        const hitArea = new Phaser.Geom.Rectangle(-bgWidth/2, -bgHeight/2, bgWidth, bgHeight);
+        this.autoModeButton.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+        
+        // Add hover effects
+        this.autoModeButton.on('pointerover', () => {
+            bg.clear();
+            bg.fillStyle(0x000000, 0.25); // Darker shadow on hover
+            bg.fillRoundedRect(-bgWidth/2 + 2, -bgHeight/2 + 2, bgWidth, bgHeight, radius);
+            bg.fillStyle(this.isAutoMode ? 0x3ecd6d : 0x2c3440, 1); // Slightly darker on hover
+            bg.fillRoundedRect(-bgWidth/2, -bgHeight/2, bgWidth, bgHeight, radius);
+        });
+        
+        this.autoModeButton.on('pointerout', () => {
+            bg.clear();
+            bg.fillStyle(0x000000, 0.2); // Normal shadow
+            bg.fillRoundedRect(-bgWidth/2 + 2, -bgHeight/2 + 2, bgWidth, bgHeight, radius);
+            bg.fillStyle(this.isAutoMode ? 0x4ade80 : 0x374151, 1); // Normal colors
+            bg.fillRoundedRect(-bgWidth/2, -bgHeight/2, bgWidth, bgHeight, radius);
+        });
         
         // Add click event
-        bg.on('pointerdown', () => {
+        this.autoModeButton.on('pointerdown', () => {
             this.toggleAutoMode();
         });
         
@@ -49,17 +93,17 @@ export class AutoModeController {
         this.isAutoMode = !this.isAutoMode;
         
         // Update button appearance based on state
-        const bg = this.autoModeButton.getAt(0) as GameObjects.Shape;
+        this.updateButtonAppearance();
         
         if (this.isAutoMode) {
-            bg.setFillStyle(0x00ff00, 0.7); // Green when active
+            console.log("Auto mode activated");
             
             // If not already attacking a chest, find and attack the nearest one
             if (!this.player.isPlayerAttacking() && !this.player.isPlayerMoving()) {
                 this.findAndAttackNearestChest();
             }
         } else {
-            bg.setFillStyle(0x333333, 0.7); // Gray when inactive
+            console.log("Auto mode deactivated");
             
             // Stop current attack if any
             if (this.currentAttackTimer) {
@@ -72,6 +116,37 @@ export class AutoModeController {
                 this.player.stopMovement();
             }
         }
+    }
+    
+    private updateButtonAppearance(): void {
+        if (!this.autoModeButton) return;
+        
+        // Get the background and icon components
+        const bg = this.autoModeButton.getAt(0) as Phaser.GameObjects.Graphics;
+        const iconCircle = this.autoModeButton.getAt(1) as Phaser.GameObjects.Graphics;
+        const icon = this.autoModeButton.getAt(2) as Phaser.GameObjects.Graphics;
+        
+        // Get dimensions for consistent drawing
+        const bgWidth = 80;
+        const bgHeight = 36;
+        const radius = bgHeight / 2;
+        
+        // Update background color based on state
+        bg.clear();
+        bg.fillStyle(0x000000, 0.2); // Shadow
+        bg.fillRoundedRect(-bgWidth/2 + 2, -bgHeight/2 + 2, bgWidth, bgHeight, radius);
+        bg.fillStyle(this.isAutoMode ? 0x4ade80 : 0x374151, 1); // Green when active, gray when inactive
+        bg.fillRoundedRect(-bgWidth/2, -bgHeight/2, bgWidth, bgHeight, radius);
+        
+        // Update icon color based on state
+        icon.clear();
+        icon.fillStyle(this.isAutoMode ? 0x374151 : 0x4ade80, 1); // Dark when active, green when inactive
+        // Redraw the triangle icon
+        icon.fillTriangle(
+            -bgWidth/2 + radius - 3, -5,  // Top point
+            -bgWidth/2 + radius - 3, 5,   // Bottom point
+            -bgWidth/2 + radius + 5, 0    // Right point
+        );
     }
     
     public isInAutoMode(): boolean {
