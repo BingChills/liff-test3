@@ -45,15 +45,21 @@ export class Game extends Scene {
 
     preload() {
         try {
-            // Use relative path without leading slash for better compatibility
-            this.load.setPath("assets");
-
-            // Log asset loading for debugging
-            console.log('Preloading game assets from path:', this.load.baseURL);
-
-            // Add error handler for load errors
+            // Don't set baseURL - let it use the default which is the root of the site
+            
+            // Set the path manually to make sure we use the correct path in all environments
+            this.load.setPath('assets'); // No leading slash - use a relative path
+            
+            // Log the loading path for debugging
+            console.log('Loading assets from:', window.location.origin + '/' + this.load.path);
+            
+            // Add error handlers with detailed logging
             this.load.on('loaderror', (fileObj: any) => {
-                console.error('Error loading asset:', fileObj.src);
+                console.error('Asset loading error:', {
+                    src: fileObj.src,
+                    key: fileObj.key,
+                    url: window.location.href
+                });
             });
 
             // Add complete handler to verify loading

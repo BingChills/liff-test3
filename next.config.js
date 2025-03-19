@@ -9,11 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true, // Don't optimize game assets
   },
-  // Don't set assetPrefix as it can cause issues with relative paths
-  // Handle trailing slashes to ensure consistent URL paths
-  trailingSlash: false,
-  // Ensure output is static-optimized
-  output: 'standalone',
+  // Keep configuration simple for Vercel compatibility
+  // We're not using assetPrefix, output, or distDir as they can cause issues with Vercel
 };
+
 
 module.exports = nextConfig;
