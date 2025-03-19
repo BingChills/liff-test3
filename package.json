@@ -30,7 +30,8 @@
         "build-nolog": "next build",
         "server": "nodemon server/server.js",
         "dev:full": "concurrently \"yarn server\" \"yarn dev\"",
-        "start": "node server/server.js"
+        "start": "node server/server.js",
+        "vercel-build": "next build"
     },
     "dependencies": {
         "@line/liff": "^2.25.1",
@@ -61,3 +62,4 @@
         "typescript": "^5"
     }
 }
+
