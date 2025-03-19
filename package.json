@@ -1,25 +1,27 @@
 {
-    "name": "template-nextjs",
+    "name": "linkz-gameplay",
     "version": "1.1.1",
-    "description": "A Phaser 3 Next.js project template that demonstrates Next.js with React communication and uses Vite for bundling.",
+    "description": "A gamified loyalty platform with coupon collection and character summoning features built with Next.js, React, and Phaser.",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/phaserjs/template-nextjs.git"
+        "url": "git+https://github.com/BingChills/liff-test3.git"
     },
-    "author": "Phaser Studio <support@phaser.io> (https://phaser.io/)",
+    "author": "BingChills Team",
     "license": "MIT",
     "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
     "bugs": {
-        "url": "https://github.com/phaserjs/template-nextjs/issues"
+        "url": "https://github.com/BingChills/liff-test3/issues"
     },
-    "homepage": "https://github.com/phaserjs/template-nextjs#readme",
+    "homepage": "https://github.com/BingChills/liff-test3#readme",
     "keywords": [
         "phaser",
         "phaser3",
         "next",
         "nextjs",
         "vite",
-        "typescript"
+        "typescript",
+        "loyalty",
+        "gamification"
     ],
     "scripts": {
         "dev": "node log.js dev & next dev -p 8080",
@@ -27,7 +29,7 @@
         "dev-nolog": "next dev -p 8080",
         "build-nolog": "next build",
         "server": "nodemon server/server.js",
-        "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+        "dev:full": "concurrently \"yarn server\" \"yarn dev\"",
         "start": "node server/server.js"
     },
     "dependencies": {
