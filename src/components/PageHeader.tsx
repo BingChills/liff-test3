@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, Coins, Timer, Gem, ChevronDown } from 'lucide-react';
 import { useGameState, StoreCurrency } from '../state/gameState';
+import { useLiff } from '../context/LiffContext';
+import Image from 'next/image';
 
 interface PageHeaderProps {
   title?: string;
@@ -10,6 +12,7 @@ interface PageHeaderProps {
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
   const { stores, selectedStore, setSelectedStore, stamina, score } = useGameState();
+  const { liffDecodedIDToken } = useLiff();
   const [showStoreSelector, setShowStoreSelector] = useState(false);
 
   const getStoreColor = (color: string) => {
@@ -32,8 +35,20 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
       {/* Resources bar - only the profile and resources */}
       <div className="flex items-center justify-between">
         {/* User profile icon */}
-        <div className="w-12 h-12 bg-blue-100 rounded-2xl shadow-md flex items-center justify-center">
-          <User className="w-6 h-6 text-blue-600" />
+        <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
+          {liffDecodedIDToken?.picture ? (
+            <Image 
+              src={liffDecodedIDToken.picture} 
+              alt="Profile" 
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+          )}
         </div>
         
         {/* Right side: Resources */}
