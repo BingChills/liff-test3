@@ -110,14 +110,14 @@ export class Game extends Scene {
                     frameHeight: 64,
                 }
             );
-            
+
             // Item assets
             this.load.image("chest", "items/chest.png");
-            
+
             // Background assets
             this.load.image("background", "backgrounds/grass-bg.png");
             this.load.image("background2", "backgrounds/grass-bg2.png");
-            
+
             // Audio assets
             this.load.audio("bgMusic", ["audio/background-music.mp3"]);
             this.load.audio("collectPointSound", ["audio/collect.mp3"]);
@@ -276,6 +276,22 @@ export class Game extends Scene {
 
     private setupPlayerInput(): void {
         this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+            // Ignore clicks in the auto button area
+            // Auto button is positioned at bottom right corner
+            const autoButtonX = this.cameras.main.width - 70;
+            const autoButtonY = this.cameras.main.height - 50;
+            const buttonRadius = 40; // Slightly larger than the actual button for better UX
+            
+            // Calculate distance from click to button center
+            const distanceToButton = Phaser.Math.Distance.Between(
+                pointer.x, pointer.y, autoButtonX, autoButtonY
+            );
+            
+            // If clicked on or near the button, ignore the click for player movement
+            if (distanceToButton < buttonRadius) {
+                return;
+            }
+            
             // Stop any existing attack timer
             if (this.currentAttackTimer) {
                 this.currentAttackTimer.destroy();
@@ -340,4 +356,3 @@ export class Game extends Scene {
         this.autoModeController.update();
     }
 }
-
