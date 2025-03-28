@@ -5,9 +5,17 @@ const nextConfig = {
     // Add specific handling for Phaser dependencies if needed
     return config;
   },
-  // Optimize asset serving
+  // Configure image optimization
   images: {
-    unoptimized: true, // Don't optimize game assets
+    domains: [
+      'placehold.co',
+      'api.qrserver.com',
+      'www.mcdonalds.com.sg',
+      's7d1.scene7.com',
+      'www.kfc.com.my'
+    ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60
   },
   // Keep configuration simple for Vercel compatibility
   // We're not using assetPrefix, output, or distDir as they can cause issues with Vercel

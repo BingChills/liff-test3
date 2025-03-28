@@ -23,15 +23,12 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        // Initialize LIFF
-        console.log("Initializing LIFF...");
-
         const initializeLiff = async () => {
             try {
                 const liffId =
                     process.env.NEXT_PUBLIC_LIFF_ID || "2006705425-2we7d4d6";
 
-                if (!process.env.NEXT_PUBLIC_LIFF_ID) {
+                if (!liffId) {
                     console.warn(
                         "⚠️ Please set your LIFF ID in .env.local file (NEXT_PUBLIC_LIFF_ID)"
                     );
@@ -42,13 +39,10 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
 
                 const liff = (await import("@line/liff")).default;
                 await liff.init({ liffId });
-                console.log("LIFF initialized successfully");
-
                 setLiffObject(liff);
 
                 // Get ID token if user is logged in
                 if (liff.isLoggedIn()) {
-                    console.log("User is logged in");
                     const token = liff.getIDToken();
                     setIdToken(token);
 
@@ -66,7 +60,6 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                             const data = await response.json();
                             if (data.decoded) {
                                 setDecodedToken(data.decoded);
-                                console.log("Decoded token:", data.decoded);
                             }
                         } catch (error) {
                             console.error("Error verifying token:", error);

@@ -20,41 +20,24 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     // Fetch the user profile directly from LIFF when available
     useEffect(() => {
         const fetchProfile = async () => {
-            console.log("LIFF debug - Starting profile fetch");
-            console.log("LIFF debug - liff object status:", liff ? "exists" : "undefined");
-            if (liff) {
-                console.log("LIFF debug - Is user logged in?", liff.isLoggedIn() ? "Yes" : "No");
-            }
-            console.log("LIFF debug - liffDecodedIDToken:", liffDecodedIDToken);
-            
             // Approach 1: Try direct LIFF profile fetch (preferred method)
             if (liff && liff.isLoggedIn()) {
-                console.log("LIFF debug - User is logged in, fetching profile...");
                 try {
                     const profile = await liff.getProfile();
-                    console.log("LIFF debug - Raw profile data:", profile);
                     if (profile.pictureUrl) {
-                        console.log("LIFF debug - Setting profile picture from LIFF.getProfile()");
                         setProfilePicture(profile.pictureUrl);
-                    } else {
-                        console.log("LIFF debug - No pictureUrl in profile data");
                     }
                 } catch (error) {
                     console.error("Error fetching LIFF profile:", error);
-                    console.log("LIFF debug - Falling back to decoded token");
                     // Fallback to decoded ID token if available
                     if (liffDecodedIDToken?.picture) {
-                        console.log("LIFF debug - Using picture from decoded token");
                         setProfilePicture(liffDecodedIDToken.picture);
                     }
                 }
             } 
             // Approach 2: Use decoded token if LIFF is unavailable or user not logged in
             else if (liffDecodedIDToken?.picture) {
-                console.log("LIFF debug - Using fallback picture from decoded token");
                 setProfilePicture(liffDecodedIDToken.picture);
-            } else {
-                console.log("LIFF debug - No profile picture available from any source");
             }
         };
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import React from 'react';
 import { EventBus } from '../game/EventBus';
 import axios from 'axios';
@@ -146,44 +146,10 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
   const [activeTab, setActiveTab] = useState('coupon');
   const [point, setPoint] = useState(0);
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [coupons, setCoupons] = useState<Coupon[]>([
-    //NOTE: Examples
-    {
-      id: 'coupon1',
-      code: 'MCDONALDS-50OFF',
-      discount: '50% Discount',
-      expiry: '2025-04-15',
-      isUsed: false
-    },
-    {
-      id: 'coupon2',
-      code: 'PIZZAHUT-30OFF',
-      discount: '30% Off on Large Pizzas',
-      expiry: '2025-04-10',
-      isUsed: false
-    },
-    {
-      id: 'coupon3',
-      code: 'BURGERKING-40OFF',
-      discount: '40% Off on Combo Meals',
-      expiry: '2025-04-08',
-      isUsed: false
-    },
-    {
-      id: 'coupon4',
-      code: 'KFC-FREEWING',
-      discount: 'Free Chicken Wings',
-      expiry: '2025-04-05',
-      isUsed: false
-    }
-  ]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
 
-  //NOTE: Mock stores
   const [stores, setStores] = useState<StoreCurrency[]>([
-    { name: 'Parabola', point: 1600, color: 'emerald' },
-    { name: 'KFC', point: 850, color: 'red' },
-    { name: 'Pizza Company', point: 1200, color: 'blue' },
-    { name: 'Pizza Hut', point: 950, color: 'orange' }
+    { name: 'Default Store', point: 0, color: 'blue' }
   ]);
   
   const [selectedStore, setSelectedStore] = useState<StoreCurrency>(stores[0]);
@@ -199,7 +165,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Function to save game state to MongoDB
-  const saveGameState = async () => {
+  const saveGameState = useCallback(async () => {
     if (!userId) return;
     
     setIsLoading(true);
@@ -222,10 +188,21 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [
+    userId,
+    point,
+    characters,
+    coupons,
+    stores,
+    selectedStore,
+    stamina,
+    drawCount,
+    remainingDraws,
+    score
+  ]);
   
   // Function to load game state from MongoDB
-  const loadGameState = async () => {
+  const loadGameState = useCallback(async () => {
     if (!userId) return;
     
     setIsLoading(true);
@@ -237,7 +214,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         setPoint(playerData.point || 0);
         setCharacters(playerData.characters || []);
         setCoupons(playerData.coupons || []);
-        setStores(playerData.stores || stores);
+        setStores(playerData.stores || [{ name: 'Default Store', point: 0, color: 'blue' }]);
         setSelectedStore(playerData.selectedStore || stores[0]);
         setStamina(playerData.stamina || { current: 20, max: 20 });
         setDrawCount(playerData.drawCount || 0);
@@ -249,14 +226,26 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [
+    userId,
+    setPoint,
+    setCharacters,
+    setCoupons,
+    setStores,
+    setSelectedStore,
+    setStamina,
+    setDrawCount,
+    setRemainingDraws,
+    setScore,
+    stores
+  ]);
   
   // Load player data when userId changes
   useEffect(() => {
     if (userId) {
       loadGameState();
     }
-  }, [userId]);
+  }, [userId, loadGameState]);
   
   // Auto-save game state when critical data changes (with debounce)
   useEffect(() => {
@@ -274,7 +263,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     stores, 
     selectedStore, 
     stamina, 
-    score
+    score,
+    userId,
+    saveGameState
   ]);
   
   // Listen for events from the Phaser game
