@@ -3,11 +3,7 @@ import { Events } from "phaser";
 import { Player } from "../entities/Player";
 import { ChestManager } from "../managers/ChestManager";
 import { AutoModeController } from "../controllers/AutoModeController";
-import {
-    Coupon as GameCoupon,
-    ChestRarity,
-    GameConfig,
-} from "../types/GameTypes";
+import { Coupon as GameCoupon, GameConfig } from "../types/GameTypes";
 import { EventBus } from "../EventBus";
 import { Coupon as UICoupon } from "../../state/gameState";
 
@@ -38,6 +34,7 @@ export class Game extends Scene {
             discount: "50% Discount",
             expiresIn: 7,
             qrCode: "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=300&q=80",
+            storeName: "McDonald's"
         },
         // ... (rest of your coupons array)
     ];
@@ -210,6 +207,7 @@ export class Game extends Scene {
             (data: { coupon: GameCoupon; coins: number }) => {
                 // Convert game coupon to UI coupon format
                 const uiCoupon: UICoupon = {
+                    storeName: data.coupon.storeName,
                     id: data.coupon.id,
                     code: data.coupon.id, // Using ID as code for simplicity
                     discount: data.coupon.discount,
@@ -281,17 +279,20 @@ export class Game extends Scene {
             const autoButtonX = this.cameras.main.width - 70;
             const autoButtonY = this.cameras.main.height - 50;
             const buttonRadius = 40; // Slightly larger than the actual button for better UX
-            
+
             // Calculate distance from click to button center
             const distanceToButton = Phaser.Math.Distance.Between(
-                pointer.x, pointer.y, autoButtonX, autoButtonY
+                pointer.x,
+                pointer.y,
+                autoButtonX,
+                autoButtonY
             );
-            
+
             // If clicked on or near the button, ignore the click for player movement
             if (distanceToButton < buttonRadius) {
                 return;
             }
-            
+
             // Stop any existing attack timer
             if (this.currentAttackTimer) {
                 this.currentAttackTimer.destroy();

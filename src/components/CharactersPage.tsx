@@ -1,15 +1,6 @@
 import React, { useState } from "react";
-import {
-    User,
-    Filter,
-    Search,
-    Cat,
-    Gem,
-    ChevronDown,
-    Timer,
-    Coins,
-} from "lucide-react";
-import { useGameState, Character } from "../state/gameState";
+import { Cat, Gem } from "lucide-react";
+import { useGameState } from "../state/gameState";
 import PageHeader from "./PageHeader";
 
 const CharactersPage = () => {
@@ -19,11 +10,8 @@ const CharactersPage = () => {
         selectedStore,
         setSelectedStore,
         setCharacters,
-        stamina,
-        score,
     } = useGameState();
     const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-    const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
     // Filter characters based on store
@@ -67,12 +55,6 @@ const CharactersPage = () => {
             default:
                 return "bg-blue-400";
         }
-    };
-
-    const handleStoreSelect = (store: any) => {
-        setSelectedStore(store);
-        setSelectedCompany(store.name);
-        setShowStoreSelector(false);
     };
 
     const getRarityColor = (rarity: string) => {
