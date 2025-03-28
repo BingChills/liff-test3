@@ -11,6 +11,7 @@ export interface Coupon {
   expiry?: string;
   image?: string;
   isUsed: boolean;
+  storeName: string; // Store this coupon belongs to
 }
 
 export interface Character {
@@ -20,7 +21,7 @@ export interface Character {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   discount: string;
   isUsing: boolean;
-  company: string;
+  storeName: string; // Store this character belongs to
 }
 
 export interface StoreCurrency {

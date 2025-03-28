@@ -21,11 +21,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     useEffect(() => {
         if (liff && liff.isLoggedIn()) {
             liff.getProfile()
-                .then(profile => {
+                .then((profile) => {
                     console.log("Got profile:", profile);
                     setProfilePicture(profile.pictureUrl || null);
                 })
-                .catch(err => console.error("Error getting profile:", err));
+                .catch((err) => console.error("Error getting profile:", err));
         }
     }, [liff]); // Only run when liff object changes
 
@@ -56,6 +56,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                 {/* User profile icon */}
                 <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
                     {profilePicture ? (
+                        // NOTE: 'Image' is not working so use this for now
                         <img
                             src={profilePicture}
                             alt="Profile"
@@ -120,7 +121,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                         )}
                     </div>
 
-                    {/* Coins/Score */}
+                    {/* Score */}
                     <div className="flex items-center gap-1 bg-gray-800 px-3 py-1.5 rounded-full">
                         <div className="w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center">
                             <Coins className="w-2.5 h-2.5 text-white" />

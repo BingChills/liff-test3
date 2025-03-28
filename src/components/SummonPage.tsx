@@ -21,6 +21,7 @@ interface EggAnimationProps {
     isVisible: boolean;
     onAnimationEnd: (characters: Character[]) => void;
     drawCount?: number;
+    // No need to add selectedStore here since we're using intersection type in the component
 }
 
 const getRarityColor = (rarity: CharacterRarity) => {
@@ -345,7 +346,7 @@ export function EggAnimation({
     onAnimationEnd,
     drawCount = 1,
 }: EggAnimationProps) {
-    const { characters: gameCharacters } = useGameState();
+    const { characters: gameCharacters, selectedStore } = useGameState();
     const [showCharacters, setShowCharacters] = useState(false);
     const [characters, setCharacters] = useState<Character[]>([]);
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
@@ -380,13 +381,16 @@ export function EggAnimation({
                             RARITY_RATES[rarity] * 100
                         )}% discount`,
                         isUsing: false,
-                        company: "Generic",
+                        //FIXME: This is a temporary fix
+                        storeName: selectedStore?.name || "Default Store", // Associate character with selected store
                     };
                 };
 
-                // Try to find characters of the selected rarity from game state
+                // Try to find characters of the selected rarity from game state that belong to the current store
                 const availableCharacters = gameCharacters.filter(
-                    (c: Character) => c.rarity === selectedRarity
+                    (c: Character) =>
+                        c.rarity === selectedRarity &&
+                        c.storeName === (selectedStore?.name || "Default Store") //FIXME:
                 );
 
                 // If we have available characters of this rarity, pick a random one
@@ -433,7 +437,13 @@ export function EggAnimation({
             setHighestRarity("common");
             setShowAllCards(false);
         };
-    }, [isVisible, drawCount, gameCharacters, showCharacters]);
+    }, [
+        isVisible,
+        drawCount,
+        gameCharacters,
+        showCharacters,
+        selectedStore?.name,
+    ]);
 
     const handleNext = () => {
         if (currentCharacterIndex < characters.length - 1) {
@@ -714,3 +724,4 @@ export function EggAnimation({
 }
 
 export default SummonPage;
+

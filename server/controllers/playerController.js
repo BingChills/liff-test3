@@ -42,19 +42,13 @@ const createPlayer = async (req, res) => {
     
     console.log('Creating new player with userId:', userId);
     
-    // Create new player with default values
+    // Create new player with minimal default values
+    // Schema defaults will handle the rest
     const newPlayer = {
       userId,
       score: 0,
-      point: 0,
-      stores: [
-        { name: 'Parabola', point: 1600, color: 'emerald' },
-        { name: 'KFC', point: 850, color: 'red' },
-        { name: 'Pizza Company', point: 1200, color: 'blue' },
-        { name: 'Pizza Hut', point: 950, color: 'orange' }
-      ],
-      selectedStore: { name: 'Parabola', point: 1600, color: 'emerald' },
-      stamina: { current: 20, max: 20 },
+      stores: [],  // Will be populated from DB or through API
+      selectedStore: null, // Will be set when player selects a store
       characters: [],
       coupons: []
     };
