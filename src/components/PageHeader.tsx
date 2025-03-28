@@ -13,10 +13,21 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const { stores, selectedStore, setSelectedStore, stamina, score } =
         useGameState();
-    const { profilePicture, userName } = useLiff();
+    const { liff } = useLiff();
     const [showStoreSelector, setShowStoreSelector] = useState(false);
-    
-    // No need for any profile loading logic here - it's handled at the app level in LiffWrapper
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+
+    // Simple approach directly following LINE docs
+    useEffect(() => {
+        if (liff && liff.isLoggedIn()) {
+            liff.getProfile()
+                .then(profile => {
+                    console.log("Got profile:", profile);
+                    setProfilePicture(profile.pictureUrl || null);
+                })
+                .catch(err => console.error("Error getting profile:", err));
+        }
+    }, [liff]); // Only run when liff object changes
 
     const getStoreColor = (color: string) => {
         switch (color) {
@@ -45,13 +56,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                 {/* User profile icon */}
                 <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
                     {profilePicture ? (
-                        <Image
+                        <img
                             src={profilePicture}
-                            alt={userName || "Profile"}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                            priority  // Add priority to ensure fast loading
+                            alt="Profile"
+                            className="w-full h-full object-cover rounded-2xl"
                         />
                     ) : (
                         <div className="w-full h-full bg-blue-100 flex items-center justify-center">

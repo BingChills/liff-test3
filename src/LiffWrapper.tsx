@@ -41,44 +41,18 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 await liff.init({ liffId });
                 setLiffObject(liff);
 
-                // Get user profile directly if logged in - following LINE docs
+                // Just perform basic initialization
                 if (liff.isLoggedIn()) {
                     try {
-                        // Get ID token and set it
+                        // Get ID token only
                         const token = liff.getIDToken();
                         setIdToken(token);
-                        
-                        // Get profile directly without token verification
-                        // This follows the recommended approach from LINE's documentation
-                        const profile = await liff.getProfile();
-                        
-                        // Store profile data at the app level to avoid reloading
-                        setProfilePicture(profile.pictureUrl || null);
-                        setUserName(profile.displayName || null);
-                        
-                        // Create a simplified user info object
-                        const userInfo: UserInformation = {
-                            iss: "",
-                            sub: profile.userId,
-                            aud: "",
-                            exp: 0,
-                            iat: 0,
-                            amr: [],
-                            name: profile.displayName,
-                            picture: profile.pictureUrl || ""
-                        };
-                        
-                        setDecodedToken(userInfo);
-                        console.log("Profile loaded successfully:", profile.displayName);
+                        console.log("LIFF initialized and logged in");
                     } catch (error) {
-                        console.error("Error getting profile:", error);
+                        console.error("Error initializing LIFF:", error);
                     }
                 } else {
                     console.log("User is not logged in");
-                    // If running locally, you might want to consider logging in
-                    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-                    //   liff.login();
-                    // }
                 }
             } catch (error) {
                 console.error("Error initializing LIFF:", error);
