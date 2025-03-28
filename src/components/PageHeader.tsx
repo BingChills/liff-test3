@@ -13,37 +13,10 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const { stores, selectedStore, setSelectedStore, stamina, score } =
         useGameState();
-    const { liff, liffDecodedIDToken } = useLiff();
+    const { profilePicture, userName } = useLiff();
     const [showStoreSelector, setShowStoreSelector] = useState(false);
-    const [profilePicture, setProfilePicture] = useState<string | null>(null);
-
-    // Simplified profile picture loading
-    useEffect(() => {
-        const loadProfilePicture = async () => {
-            // First, try to use the picture from decoded token (already set in LiffWrapper)
-            if (liffDecodedIDToken?.picture) {
-                console.log("Using profile picture from decoded token");
-                setProfilePicture(liffDecodedIDToken.picture);
-                return;
-            }
-            
-            // Fallback: directly fetch profile if LIFF is available
-            if (liff && liff.isLoggedIn()) {
-                try {
-                    console.log("Trying to fetch profile directly from LIFF");
-                    const profile = await liff.getProfile();
-                    if (profile.pictureUrl) {
-                        console.log("Profile picture found:", profile.pictureUrl);
-                        setProfilePicture(profile.pictureUrl);
-                    }
-                } catch (error) {
-                    console.error("Error fetching profile picture:", error);
-                }
-            }
-        };
-
-        loadProfilePicture();
-    }, [liff, liffDecodedIDToken]);
+    
+    // No need for any profile loading logic here - it's handled at the app level in LiffWrapper
 
     const getStoreColor = (color: string) => {
         switch (color) {
@@ -74,10 +47,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                     {profilePicture ? (
                         <Image
                             src={profilePicture}
-                            alt="Profile"
+                            alt={userName || "Profile"}
                             width={48}
                             height={48}
                             className="w-full h-full object-cover"
+                            priority  // Add priority to ensure fast loading
                         />
                     ) : (
                         <div className="w-full h-full bg-blue-100 flex items-center justify-center">

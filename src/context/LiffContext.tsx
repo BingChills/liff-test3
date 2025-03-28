@@ -51,6 +51,8 @@ interface LiffContextProps {
   liffIDToken: string | null;
   liffDecodedIDToken: UserInformation | null;
   user: User | null;
+  profilePicture: string | null;
+  userName: string | null;
   setUser: (user: User | null) => void;
 }
 
@@ -60,6 +62,8 @@ const LiffContext = createContext<LiffContextProps>({
   liffIDToken: null,
   liffDecodedIDToken: null,
   user: null,
+  profilePicture: null,
+  userName: null,
   setUser: () => {},
 });
 

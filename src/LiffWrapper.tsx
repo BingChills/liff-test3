@@ -17,10 +17,10 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [liffObject, setLiffObject] = useState<Liff | null>(null);
     const [liffError, setLiffError] = useState<string | null>(null);
     const [idToken, setIdToken] = useState<string | null>(null);
-    const [decodedToken, setDecodedToken] = useState<UserInformation | null>(
-        null
-    );
+    const [decodedToken, setDecodedToken] = useState<UserInformation | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
 
     useEffect(() => {
         const initializeLiff = async () => {
@@ -41,7 +41,7 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 await liff.init({ liffId });
                 setLiffObject(liff);
 
-                // Get user profile directly if logged in
+                // Get user profile directly if logged in - following LINE docs
                 if (liff.isLoggedIn()) {
                     try {
                         // Get ID token and set it
@@ -49,7 +49,12 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                         setIdToken(token);
                         
                         // Get profile directly without token verification
+                        // This follows the recommended approach from LINE's documentation
                         const profile = await liff.getProfile();
+                        
+                        // Store profile data at the app level to avoid reloading
+                        setProfilePicture(profile.pictureUrl || null);
+                        setUserName(profile.displayName || null);
                         
                         // Create a simplified user info object
                         const userInfo: UserInformation = {
@@ -70,6 +75,10 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                     }
                 } else {
                     console.log("User is not logged in");
+                    // If running locally, you might want to consider logging in
+                    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+                    //   liff.login();
+                    // }
                 }
             } catch (error) {
                 console.error("Error initializing LIFF:", error);
@@ -90,6 +99,8 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 liffIDToken: idToken,
                 liffDecodedIDToken: decodedToken,
                 user,
+                profilePicture,
+                userName,
                 setUser,
             }}
         >
