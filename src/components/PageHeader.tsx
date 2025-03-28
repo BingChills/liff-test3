@@ -17,31 +17,32 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-    // Fetch the user profile directly from LIFF when available
+    // Simplified profile picture loading
     useEffect(() => {
-        const fetchProfile = async () => {
-            // Approach 1: Try direct LIFF profile fetch (preferred method)
+        const loadProfilePicture = async () => {
+            // First, try to use the picture from decoded token (already set in LiffWrapper)
+            if (liffDecodedIDToken?.picture) {
+                console.log("Using profile picture from decoded token");
+                setProfilePicture(liffDecodedIDToken.picture);
+                return;
+            }
+            
+            // Fallback: directly fetch profile if LIFF is available
             if (liff && liff.isLoggedIn()) {
                 try {
+                    console.log("Trying to fetch profile directly from LIFF");
                     const profile = await liff.getProfile();
                     if (profile.pictureUrl) {
+                        console.log("Profile picture found:", profile.pictureUrl);
                         setProfilePicture(profile.pictureUrl);
                     }
                 } catch (error) {
-                    console.error("Error fetching LIFF profile:", error);
-                    // Fallback to decoded ID token if available
-                    if (liffDecodedIDToken?.picture) {
-                        setProfilePicture(liffDecodedIDToken.picture);
-                    }
+                    console.error("Error fetching profile picture:", error);
                 }
-            } 
-            // Approach 2: Use decoded token if LIFF is unavailable or user not logged in
-            else if (liffDecodedIDToken?.picture) {
-                setProfilePicture(liffDecodedIDToken.picture);
             }
         };
 
-        fetchProfile();
+        loadProfilePicture();
     }, [liff, liffDecodedIDToken]);
 
     const getStoreColor = (color: string) => {

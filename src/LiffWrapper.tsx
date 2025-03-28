@@ -41,29 +41,32 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 await liff.init({ liffId });
                 setLiffObject(liff);
 
-                // Get ID token if user is logged in
+                // Get user profile directly if logged in
                 if (liff.isLoggedIn()) {
-                    const token = liff.getIDToken();
-                    setIdToken(token);
-
-                    // Verify token on backend to get decoded info
-                    if (token) {
-                        try {
-                            const response = await fetch("/api/verify-token", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({ token }),
-                            });
-
-                            const data = await response.json();
-                            if (data.decoded) {
-                                setDecodedToken(data.decoded);
-                            }
-                        } catch (error) {
-                            console.error("Error verifying token:", error);
-                        }
+                    try {
+                        // Get ID token and set it
+                        const token = liff.getIDToken();
+                        setIdToken(token);
+                        
+                        // Get profile directly without token verification
+                        const profile = await liff.getProfile();
+                        
+                        // Create a simplified user info object
+                        const userInfo: UserInformation = {
+                            iss: "",
+                            sub: profile.userId,
+                            aud: "",
+                            exp: 0,
+                            iat: 0,
+                            amr: [],
+                            name: profile.displayName,
+                            picture: profile.pictureUrl || ""
+                        };
+                        
+                        setDecodedToken(userInfo);
+                        console.log("Profile loaded successfully:", profile.displayName);
+                    } catch (error) {
+                        console.error("Error getting profile:", error);
                     }
                 } else {
                     console.log("User is not logged in");
