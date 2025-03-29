@@ -57,7 +57,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                 <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
                     {profilePicture ? (
                         // NOTE: 'Image' is not working so use this for now
-                        <img
+                        <Image
                             src={profilePicture}
                             alt="Profile"
                             className="w-full h-full object-cover rounded-2xl"
