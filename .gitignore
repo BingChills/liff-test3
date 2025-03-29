@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -28,6 +26,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -38,8 +37,10 @@ next-env.d.ts
 
 # todo list
 TODO.md
-.vercel
 list.todo
 
 # windsurf
 .windsurfrules
+
+# test DB
+create-test-data.js

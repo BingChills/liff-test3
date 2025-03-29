@@ -1,4 +1,3 @@
-// server/models/Player.js
 const mongoose = require("mongoose");
 
 // Store schema - each store has a unique point system
@@ -14,15 +13,19 @@ const StaminaSchema = new mongoose.Schema({
     max: { type: Number, default: 20 },
 });
 
-// Coupon schema
+// Coupon schema - resets monthly with limited quantity per store
 const CouponSchema = new mongoose.Schema({
     id: { type: String, required: true },
     code: { type: String, required: true },
     discount: { type: String, required: true },
-    expiry: { type: String },
+    expiry: { type: Date }, // Actual expiry date
     image: { type: String },
     isUsed: { type: Boolean, default: false },
     storeName: { type: String, required: true }, // Store this coupon belongs to
+    totalQuantity: { type: Number }, // How many of this coupon type are available this month
+    remainingQuantity: { type: Number }, // How many are left
+    resetDate: { type: Date, default: Date.now }, // When this coupon was last reset
+    couponType: { type: String }, // Type of coupon (e.g. discount, free item, etc.)
 });
 
 // Character schema
@@ -31,7 +34,7 @@ const CharacterSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: { type: String, required: true },
     rarity: { type: String, enum: ["common", "rare", "epic", "legendary"] },
-    discount: { type: String },
+    dropRate: { type: Number }, // Base chance to drop a coupon
     isUsing: { type: Boolean, default: false },
     storeName: { type: String, required: true }, // Store this character belongs to
 });
@@ -62,4 +65,3 @@ const PlayerSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Player", PlayerSchema, "users");
-
