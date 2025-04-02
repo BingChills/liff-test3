@@ -12,7 +12,7 @@ const StaminaSchema = new mongoose.Schema({
     current: { type: Number, default: 20 },
     max: { type: Number, default: 20 },
 });
-
+t;
 // Coupon schema - resets monthly with limited quantity per store
 const CouponSchema = new mongoose.Schema({
     id: { type: String, required: true },
@@ -42,7 +42,7 @@ const CharacterSchema = new mongoose.Schema({
 // Main Player schema
 const PlayerSchema = new mongoose.Schema(
     {
-        userId: {
+        u_id: {
             type: String,
             required: true,
             unique: true,

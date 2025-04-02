@@ -7,8 +7,8 @@ const getPlayerByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Look for existing player
-    const player = await Player.findOne({ userId });
+    // Look for player by LINE user ID
+    const player = await Player.findOne({ u_id: userId });
     
     // Return 404 if player doesn't exist
     if (!player) {
@@ -34,7 +34,7 @@ const createPlayer = async (req, res) => {
     }
     
     // Check if player already exists
-    const existingPlayer = await Player.findOne({ userId });
+    const existingPlayer = await Player.findOne({ u_id: userId });
     
     if (existingPlayer) {
       return res.status(409).json({ message: 'Player already exists' });
@@ -45,7 +45,7 @@ const createPlayer = async (req, res) => {
     // Create new player with minimal default values
     // Schema defaults will handle the rest
     const newPlayer = {
-      userId,
+      u_id: userId,    // LINE user identifier
       score: 0,
       stores: [],  // Will be populated from DB or through API
       selectedStore: null, // Will be set when player selects a store
@@ -73,8 +73,9 @@ const updatePlayer = async (req, res) => {
     const { userId } = req.params;
     const updates = req.body;
     
+    // Update player by LINE user ID
     const player = await Player.findOneAndUpdate(
-      { userId },
+      { u_id: userId },
       { ...updates, lastUpdated: Date.now() },
       { new: true, runValidators: true }
     );
@@ -104,8 +105,9 @@ const updatePlayerField = async (req, res) => {
       lastUpdated: Date.now()
     };
     
+    // Update player using LINE user ID (u_id)
     const player = await Player.findOneAndUpdate(
-      { userId },
+      { u_id: userId },
       { $set: updateObject },
       { new: true, runValidators: true }
     );
