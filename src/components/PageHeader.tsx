@@ -16,17 +16,24 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-    // Simple approach directly following LINE docs
+    // Import useGameState to access the global state
+    const { setUserId } = useGameState();
+
+    // Get profile and set userId in game state
     useEffect(() => {
         if (liff && liff.isLoggedIn()) {
             liff.getProfile()
                 .then((profile) => {
                     console.log("Got profile:", profile);
                     setProfilePicture(profile.pictureUrl || null);
+                    
+                    // Set the userId in game state to trigger data loading
+                    console.log("Setting user ID in game state:", profile.userId);
+                    setUserId(profile.userId);
                 })
                 .catch((err) => console.error("Error getting profile:", err));
         }
-    }, [liff]); // Only run when liff object changes
+    }, [liff, setUserId]); // Only run when liff object or setUserId changes
 
     const getStoreColor = (color: string) => {
         switch (color) {

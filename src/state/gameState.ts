@@ -86,8 +86,8 @@ const fetchPlayerData = async (userId: string) => {
     return response.data;
   } catch (error) {
     if ((error as any)?.response?.status === 404) {
-      // Player not found, create a new player
-      const createResponse = await axios.post('/api/players', { userId });
+      // Player not found, create a new player with u_id
+      const createResponse = await axios.post('/api/players', { userId: userId });
       return createResponse.data;
     }
     console.error('Error fetching player data:', error);
@@ -103,7 +103,7 @@ const savePlayerData = async (userId: string, data: any) => {
     if ((error as any)?.response?.status === 404) {
       // Player not found, create a new player with the data
       const createResponse = await axios.post('/api/players', { 
-        userId,
+        userId: userId,  // Using userId as u_id
         ...data
       });
       return createResponse.data;
