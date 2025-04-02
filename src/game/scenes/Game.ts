@@ -34,7 +34,7 @@ export class Game extends Scene {
             discount: "50% Discount",
             expiresIn: 7,
             qrCode: "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=300&q=80",
-            storeName: "McDonald's"
+            storeName: "McDonald's",
         },
         // ... (rest of your coupons array)
     ];
@@ -138,12 +138,10 @@ export class Game extends Scene {
         bg.setOrigin(0, 0);
         bg.setDisplaySize(360, 640);
 
-        // Add and play background music
         this.backgroundMusic = this.sound.add("bgMusic", {
             volume: 0.1,
             loop: true,
         });
-        this.backgroundMusic.play();
 
         // Create animations
         this.createAnimations();
@@ -201,6 +199,10 @@ export class Game extends Scene {
 
     // Method to set up event listeners for game events
     private setupEventListeners(): void {
+        // Listen for music control events from UI
+        EventBus.on("playGameMusic", this.playBackgroundMusic, this);
+        EventBus.on("pauseGameMusic", this.pauseBackgroundMusic, this);
+
         // Listen for chest opened event
         this.gameEventBus.on(
             "chestOpened",
@@ -355,5 +357,20 @@ export class Game extends Scene {
 
         // Update auto mode controller
         this.autoModeController.update();
+    }
+
+    // Music control methods
+    public playBackgroundMusic(): void {
+        if (this.backgroundMusic && !this.backgroundMusic.isPlaying) {
+            this.backgroundMusic.play();
+            console.log("Game background music started");
+        }
+    }
+
+    public pauseBackgroundMusic(): void {
+        if (this.backgroundMusic && this.backgroundMusic.isPlaying) {
+            this.backgroundMusic.pause();
+            console.log("Game background music paused");
+        }
     }
 }

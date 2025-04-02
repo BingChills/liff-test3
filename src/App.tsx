@@ -8,6 +8,7 @@ import SummonPage from "./components/SummonPage";
 import TradePage from "./components/TradePage";
 import LeaderboardPage from "./components/LeaderboardPage";
 import PageHeader from "./components/PageHeader";
+import { useUrlNavigation } from "./hooks/useUrlNavigation";
 
 // Main App wrapper with GameStateProvider
 function AppWrapper() {
@@ -23,6 +24,9 @@ function AppContent() {
     // References to the PhaserGame component
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const { activeTab } = useGameState();
+    
+    // Use the URL navigation hook to handle deep linking
+    useUrlNavigation();
 
     // Render the correct page based on the active tab
     const renderActivePage = () => {
