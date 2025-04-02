@@ -43,16 +43,14 @@ const createPlayer = async (req, res) => {
     console.log('Creating new player with userId:', userId);
     
     // Create new player with minimal default values
-    // Initialize all fields to match Player.js model
+    // Schema defaults will handle the rest
     const newPlayer = {
       u_id: userId,    // LINE user identifier
       score: 0,
       stores: [],  // Will be populated from DB or through API
       selectedStore: null, // Will be set when player selects a store
-      stamina: { current: 20, max: 20 },  // Initialize stamina field
       characters: [],
-      coupons: [],
-      lastUpdated: Date.now()
+      coupons: []
     };
     
     const player = new Player(newPlayer);

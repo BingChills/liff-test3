@@ -86,8 +86,8 @@ const fetchPlayerData = async (userId: string) => {
     return response.data;
   } catch (error) {
     if ((error as any)?.response?.status === 404) {
-      // Player not found, create a new player with u_id
-      const createResponse = await axios.post('/api/players', { userId: userId });
+      // Player not found, create a new player
+      const createResponse = await axios.post('/api/players', { userId });
       return createResponse.data;
     }
     console.error('Error fetching player data:', error);
@@ -103,7 +103,7 @@ const savePlayerData = async (userId: string, data: any) => {
     if ((error as any)?.response?.status === 404) {
       // Player not found, create a new player with the data
       const createResponse = await axios.post('/api/players', { 
-        userId: userId,  // Using userId as u_id
+        userId,
         ...data
       });
       return createResponse.data;
@@ -241,24 +241,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     stores
   ]);
   
-  // Initialize userId from sessionStorage if available
-  useEffect(() => {
-    // Get LINE user ID from sessionStorage (set in LiffWrapper)
-    try {
-      const storedUserId = sessionStorage.getItem('LINE_USER_ID');
-      if (storedUserId && !userId) {
-        console.log('Loading user data with LINE_USER_ID:', storedUserId);
-        setUserId(storedUserId);
-      }
-    } catch (error) {
-      console.error('Error accessing sessionStorage:', error);
-    }
-  }, []);
-
   // Load player data when userId changes
   useEffect(() => {
     if (userId) {
-      console.log('Loading game state for userId:', userId);
       loadGameState();
     }
   }, [userId, loadGameState]);

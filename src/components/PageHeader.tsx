@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { User, Coins, Timer, Gem, ChevronDown } from "lucide-react";
 import { useGameState, StoreCurrency } from "../state/gameState";
 import { useLiff } from "../context/LiffContext";
-import ProfileModal from "./ProfileModal";
 
 interface PageHeaderProps {
     title?: string;
@@ -13,29 +12,21 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const { stores, selectedStore, setSelectedStore, stamina, score } =
         useGameState();
-    const { liff, profilePicture: liffProfilePicture } = useLiff();
+    const { liff } = useLiff();
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
-    const [showProfileModal, setShowProfileModal] = useState(false);
 
-    // We don't need to fetch profile here anymore - it's handled in LiffWrapper
-    // This component just needs to use the profile picture that's already fetched
+    // Simple approach directly following LINE docs
     useEffect(() => {
-        // First check if we already have a profile picture from LiffContext
-        if (liffProfilePicture) {
-            setProfilePicture(liffProfilePicture);
-        }
-        // Only try to fetch profile picture if LIFF is available and we don't already have one
-        else if (liff && liff.isLoggedIn() && !profilePicture) {
+        if (liff && liff.isLoggedIn()) {
             liff.getProfile()
-                .then(profile => {
+                .then((profile) => {
+                    console.log("Got profile:", profile);
                     setProfilePicture(profile.pictureUrl || null);
                 })
-                .catch(err => {
-                    console.error("Backup profile picture fetch failed:", err);
-                });
+                .catch((err) => console.error("Error getting profile:", err));
         }
-    }, [liff, profilePicture, liffProfilePicture]); // Re-run if any of these change
+    }, [liff]); // Only run when liff object changes
 
     const getStoreColor = (color: string) => {
         switch (color) {
@@ -61,11 +52,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
         <div className="px-4 py-3">
             {/* Resources bar - only the profile and resources */}
             <div className="flex items-center justify-between">
-                {/* User profile icon - clickable to open profile modal */}
-                <div 
-                    className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden cursor-pointer"
-                    onClick={() => setShowProfileModal(true)}
-                >
+                {/* User profile icon */}
+                <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
                     {profilePicture ? (
                         <img
                             src={profilePicture}
@@ -78,12 +66,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                         </div>
                     )}
                 </div>
-                
-                {/* Profile Modal */}
-                <ProfileModal 
-                    isOpen={showProfileModal} 
-                    onClose={() => setShowProfileModal(false)} 
-                />
 
                 {/* Right side: Resources */}
                 <div className="flex items-center gap-2">
