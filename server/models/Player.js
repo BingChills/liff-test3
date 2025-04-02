@@ -47,6 +47,14 @@ const PlayerSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
+        displayName: {
+            type: String,
+            default: "Player", // Default name if LINE doesn't provide one
+        },
+        profilePicture: {
+            type: String,
+            default: null, // URL for the LINE profile picture
+        },
         score: {
             type: Number,
             default: 0,

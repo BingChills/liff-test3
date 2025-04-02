@@ -49,26 +49,18 @@ interface LiffContextProps {
   liff: Liff | null;
   liffError: string | null;
   liffIDToken: string | null;
-  liffDecodedIDToken: UserInformation | null;
-  user: User | null;
   profilePicture: string | null;
   userName: string | null;
-  lineUserId: string | null; // Add LINE user ID for easier access across components
-  setUser: (user: User | null) => void;
-  resetPermissions: () => void; // Function to reset LIFF permissions
+  lineUserId: string | null; // User ID from LINE profile
 }
 
 const LiffContext = createContext<LiffContextProps>({
   liff: null,
   liffError: null,
   liffIDToken: null,
-  liffDecodedIDToken: null,
-  user: null,
   profilePicture: null,
   userName: null,
-  lineUserId: null, // Initialize as null
-  setUser: () => {},
-  resetPermissions: () => {}, // Default empty function
+  lineUserId: null
 });
 
 export const useLiff = () => useContext(LiffContext);
