@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     // GET request - Get player by userId
     if (req.method === 'GET') {
       // Look for existing player
-      const player = await Player.findOne({ userId });
+      const player = await Player.findOne({ u_id: userId });
       
       // Return 404 if player doesn't exist
       if (!player) {
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       const updates = req.body;
       
       const player = await Player.findOneAndUpdate(
-        { userId },
+        { u_id: userId },
         { ...updates, lastUpdated: Date.now() },
         { new: true, runValidators: true }
       );

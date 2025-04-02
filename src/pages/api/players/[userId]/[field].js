@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       };
       
       const player = await Player.findOneAndUpdate(
-        { userId },
+        { u_id: userId },
         { $set: updateObject },
         { new: true, runValidators: true }
       );

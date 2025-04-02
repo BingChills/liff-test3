@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             }
 
             // Check if player already exists
-            const existingPlayer = await Player.findOne({ userId });
+            const existingPlayer = await Player.findOne({ u_id: userId });
 
             if (existingPlayer) {
                 return res
@@ -43,9 +43,9 @@ export default async function handler(req, res) {
 
             console.log("Creating new player with userId:", userId);
 
-            // FIXME:
+            // Create new player with u_id (LINE user ID)
             const newPlayer = {
-                userId,
+                u_id: userId,  // Use u_id instead of userId to match the model
                 score: 0,
                 point: 0,
                 stores: [{ name: "Default Store", point: 0, color: "blue" }],
