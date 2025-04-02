@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { LiffProvider } from "./context/LiffContext";
 import type { Liff } from "@line/liff";
 import type { User, UserInformation } from "./context/LiffContext";
+import { useGameState } from "./state/gameState";
 
 declare global {
     interface Window {
@@ -21,6 +22,10 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
+    
+    // Access game state to set user ID when LIFF initializes
+    // This is important to connect the LINE auth flow with your game database
+    const { setUserId } = useGameState ? useGameState() : { setUserId: () => {} };
 
     useEffect(() => {
         const initializeLiff = async () => {
@@ -41,18 +46,37 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 await liff.init({ liffId });
                 setLiffObject(liff);
 
-                // Just perform basic initialization
+                // Perform complete initialization and get user profile
                 if (liff.isLoggedIn()) {
                     try {
-                        // Get ID token only
+                        // Get ID token 
                         const token = liff.getIDToken();
                         setIdToken(token);
+                        
+                        // Get user profile directly from LIFF
+                        liff.getProfile()
+                            .then((profile) => {
+                                console.log("LIFF profile loaded:", profile);
+                                setProfilePicture(profile.pictureUrl || null);
+                                setUserName(profile.displayName || null);
+                                
+                                // Important: Set the LINE userId in game state
+                                // This triggers the database operations
+                                if (setUserId) {
+                                    console.log("Setting userId in game state:", profile.userId);
+                                    setUserId(profile.userId);
+                                }
+                            })
+                            .catch((err) => {
+                                console.error("Error getting LIFF profile:", err);
+                            });
+                            
                         console.log("LIFF initialized and logged in");
                     } catch (error) {
-                        console.error("Error initializing LIFF:", error);
+                        console.error("Error during LIFF initialization:", error);
                     }
                 } else {
-                    console.log("User is not logged in");
+                    console.log("User is not logged in, cannot get profile");
                 }
             } catch (error) {
                 console.error("Error initializing LIFF:", error);

@@ -16,24 +16,24 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-    // Import useGameState to access the global state
-    const { setUserId } = useGameState();
-
-    // Get profile and set userId in game state
+    // We don't need to fetch profile here anymore - it's handled in LiffWrapper
+    // This component just needs to use the profile picture that's already fetched
     useEffect(() => {
+        // Only set profile picture if LIFF is available
         if (liff && liff.isLoggedIn()) {
-            liff.getProfile()
-                .then((profile) => {
-                    console.log("Got profile:", profile);
-                    setProfilePicture(profile.pictureUrl || null);
-                    
-                    // Set the userId in game state to trigger data loading
-                    console.log("Setting user ID in game state:", profile.userId);
-                    setUserId(profile.userId);
-                })
-                .catch((err) => console.error("Error getting profile:", err));
+            // This handles the case where we navigate to this component after LIFF is initialized
+            // Most users will already have their profile picture from LiffWrapper initialization
+            if (!profilePicture) {
+                liff.getProfile()
+                    .then(profile => {
+                        setProfilePicture(profile.pictureUrl || null);
+                    })
+                    .catch(err => {
+                        console.error("Backup profile picture fetch failed:", err);
+                    });
+            }
         }
-    }, [liff, setUserId]); // Only run when liff object or setUserId changes
+    }, [liff, profilePicture]); // Only re-run if liff object changes or we don't have a picture
 
     const getStoreColor = (color: string) => {
         switch (color) {
