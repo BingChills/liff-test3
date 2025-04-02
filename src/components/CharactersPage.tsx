@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Cat, Gem } from "lucide-react";
 import { useGameState } from "../state/gameState";
 import PageHeader from "./PageHeader";
-import Image from "next/image";
 
 const CharactersPage = () => {
     const {
@@ -147,7 +146,7 @@ const CharactersPage = () => {
                             >
                                 <Gem className="w-3.5 h-3.5 text-white" />
                             </div>
-                            <Image
+                            <img
                                 src={char.image}
                                 alt={char.name}
                                 width={100}
@@ -205,7 +204,7 @@ const CharactersPage = () => {
                             >
                                 <Gem className="w-3.5 h-3.5 text-white" />
                             </div>
-                            <Image
+                            <img
                                 src={char.image}
                                 alt={char.name}
                                 width={100}

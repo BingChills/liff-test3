@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { User, Coins, Timer, Gem, ChevronDown } from "lucide-react";
 import { useGameState, StoreCurrency } from "../state/gameState";
 import { useLiff } from "../context/LiffContext";
-import Image from "next/image";
 
 interface PageHeaderProps {
     title?: string;
@@ -56,8 +55,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                 {/* User profile icon */}
                 <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
                     {profilePicture ? (
-                        // NOTE: 'Image' is not working so use this for now
-                        <Image
+                        <img
                             src={profilePicture}
                             alt="Profile"
                             className="w-full h-full object-cover rounded-2xl"
@@ -147,4 +145,3 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
 };
 
 export default PageHeader;
-

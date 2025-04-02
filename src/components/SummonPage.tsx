@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Store, Gem, ChevronDown, Percent, Box, Ticket } from "lucide-react";
 import { useGameState, Character, StoreCurrency } from "../state/gameState";
 import PageHeader from "./PageHeader";
-import Image from "next/image";
 
 // Define rarity type for consistency
 type CharacterRarity = "common" | "rare" | "epic" | "legendary";
@@ -582,7 +581,7 @@ export function EggAnimation({
                                 >
                                     <div className="bg-white/90 rounded-xl p-3 space-y-3">
                                         <div className="w-full aspect-square rounded-lg overflow-hidden ring-4 ring-white/50">
-                                            <Image
+                                            <img
                                                 src={char.image}
                                                 alt={char.name}
                                                 width={200}
@@ -655,7 +654,7 @@ export function EggAnimation({
                             >
                                 <div className="bg-white/90 rounded-2xl p-4 space-y-4">
                                     <div className="w-full aspect-square rounded-xl overflow-hidden ring-4 ring-white/50">
-                                        <Image
+                                        <img
                                             src={currentCharacter.image}
                                             alt={currentCharacter.name}
                                             width={300}
@@ -724,4 +723,3 @@ export function EggAnimation({
 }
 
 export default SummonPage;
-

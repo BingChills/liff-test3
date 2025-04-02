@@ -13,7 +13,6 @@ import {
     Plus,
 } from "lucide-react";
 import PageHeader from "./PageHeader";
-import Image from "next/image";
 
 type CharacterRarity = "common" | "rare" | "epic" | "legendary";
 
@@ -503,7 +502,7 @@ export function TradePage() {
                                                     offer.have.rarity
                                                 )}`}
                                             >
-                                                <Image
+                                                <img
                                                     src={offer.have.image}
                                                     alt={offer.have.name}
                                                     className="w-full h-full object-cover"
@@ -560,7 +559,7 @@ export function TradePage() {
                                                     offer.want.rarity
                                                 )}`}
                                             >
-                                                <Image
+                                                <img
                                                     src={offer.want.image}
                                                     alt={offer.want.name}
                                                     className="w-full h-full object-cover"
@@ -630,4 +629,3 @@ export function TradePage() {
 
 // Add default export to support both named and default imports
 export default TradePage;
-

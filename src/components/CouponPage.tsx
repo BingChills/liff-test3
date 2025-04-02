@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useGameState, Coupon, StoreCurrency } from "../state/gameState";
 import PageHeader from "./PageHeader";
-import Image from "next/image";
 
 type FilterStatus = "active" | "used" | "expired" | "all";
 type DaysFilter = "all" | "3days" | "7days" | "30days";
@@ -416,7 +415,7 @@ const CouponPage = () => {
 
                                 {/* Logo */}
                                 <div className="w-16 h-16 rounded-xl overflow-hidden shadow-md relative">
-                                    <Image
+                                    <img
                                         src={coupon.logo}
                                         alt={coupon.brand}
                                         width={64}
@@ -504,7 +503,7 @@ const CouponPage = () => {
                     >
                         <div className="text-center mb-6">
                             <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4 relative">
-                                <Image
+                                <img
                                     src={selectedCoupon.logo}
                                     alt={selectedCoupon.brand}
                                     width={80}
@@ -522,7 +521,7 @@ const CouponPage = () => {
 
                         <div className="bg-gray-50 rounded-2xl p-4 mb-6">
                             <div className="aspect-square bg-white rounded-xl p-4 shadow-inner relative">
-                                <Image
+                                <img
                                     src={selectedCoupon.qrCode}
                                     alt="QR Code"
                                     width={200}
@@ -563,4 +562,3 @@ const CouponPage = () => {
 };
 
 export default CouponPage;
-

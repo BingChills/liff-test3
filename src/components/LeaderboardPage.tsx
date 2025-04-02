@@ -12,7 +12,6 @@ import {
     Timer,
 } from "lucide-react";
 import PageHeader from "./PageHeader";
-import Image from "next/image";
 
 interface LeaderboardEntry {
     rank: number;
@@ -259,7 +258,7 @@ export function LeaderboardPage() {
                             className={`${getBgColor(
                                 entry.rank,
                                 entry.isCurrentUser
-                            )} 
+                            )}
                 rounded-2xl p-4 shadow-lg flex items-center gap-4
                 ${entry.isCurrentUser ? "animate-pulse ring-2 ring-white" : ""}
                 ${isNearCurrentUser ? "scale-[1.02] z-10" : "scale-100"}
@@ -283,7 +282,7 @@ export function LeaderboardPage() {
                             </div>
 
                             <div className="w-14 h-14 rounded-xl overflow-hidden ring-2 ring-white/30">
-                                <Image
+                                <img
                                     src={entry.avatar}
                                     alt={`Rank ${entry.rank}`}
                                     className="w-full h-full object-cover"
@@ -303,7 +302,7 @@ export function LeaderboardPage() {
                                         key={index}
                                         className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/30 flex-shrink-0"
                                     >
-                                        <Image
+                                        <img
                                             src={character}
                                             alt={`Character ${index + 1}`}
                                             className="w-full h-full object-cover"
@@ -377,7 +376,7 @@ export function LeaderboardPage() {
                             </span>
                         </div>
                         <div className="w-14 h-14 rounded-xl overflow-hidden ring-2 ring-white/30">
-                            <Image
+                            <img
                                 src={currentUserEntry.avatar}
                                 alt="Your Rank"
                                 className="w-full h-full object-cover"
@@ -397,7 +396,7 @@ export function LeaderboardPage() {
                                         key={index}
                                         className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/30 flex-shrink-0"
                                     >
-                                        <Image
+                                        <img
                                             src={character}
                                             alt={`Character ${index + 1}`}
                                             className="w-full h-full object-cover"
@@ -413,4 +412,3 @@ export function LeaderboardPage() {
 }
 
 export default LeaderboardPage;
-
