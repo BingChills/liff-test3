@@ -12,21 +12,36 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const { stores, selectedStore, setSelectedStore, stamina, score } =
         useGameState();
-    const { liff } = useLiff();
+    const { liff, user, profilePicture: liffProfilePicture } = useLiff();
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-    // Simple approach directly following LINE docs
+    // Use profile picture from database if available, otherwise get from LINE
     useEffect(() => {
-        if (liff && liff.isLoggedIn()) {
+        console.log("User data in PageHeader:", user);
+        console.log("LIFF profile picture:", liffProfilePicture);
+        
+        // Priority 1: Use picture from user data in database
+        if (user?.profile_picture) {
+            console.log("Using profile picture from user data:", user.profile_picture);
+            setProfilePicture(user.profile_picture);
+        }
+        // Priority 2: Use picture from LIFF context
+        else if (liffProfilePicture) {
+            console.log("Using profile picture from LIFF context:", liffProfilePicture);
+            setProfilePicture(liffProfilePicture);
+        }
+        // Priority 3: Fetch directly from LINE API as fallback
+        else if (liff && liff.isLoggedIn()) {
+            console.log("Fetching profile picture directly from LINE API");
             liff.getProfile()
                 .then((profile) => {
-                    console.log("Got profile:", profile);
+                    console.log("Got profile from LINE API:", profile);
                     setProfilePicture(profile.pictureUrl || null);
                 })
                 .catch((err) => console.error("Error getting profile:", err));
         }
-    }, [liff]); // Only run when liff object changes
+    }, [liff, user, liffProfilePicture]); // Run when any of these dependencies change
 
     const getStoreColor = (color: string) => {
         switch (color) {

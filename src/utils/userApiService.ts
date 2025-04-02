@@ -4,9 +4,10 @@ import axios from 'axios';
 /**
  * Create or fetch a user by their LINE user ID
  * @param u_id The LINE user ID
+ * @param profileInfo Optional profile information (picture URL, display name)
  * @returns Promise resolving to the user data or null if error
  */
-export const createOrFetchUser = async (u_id: string) => {
+export const createOrFetchUser = async (u_id: string, profileInfo?: { pictureUrl?: string; displayName?: string }) => {
   try {
     console.log('Attempting to fetch user with ID:', u_id);
     
@@ -19,7 +20,15 @@ export const createOrFetchUser = async (u_id: string) => {
       // If 404, create new user
       if (error?.response?.status === 404) {
         console.log('User not found, creating new user with ID:', u_id);
-        const createResponse = await axios.post('/api/players', { userId: u_id });
+        // Include profile information if available
+        const userData = { 
+          userId: u_id,
+          profile_picture: profileInfo?.pictureUrl || null,
+          display_name: profileInfo?.displayName || null
+        };
+        console.log('Creating user with data:', userData);
+        
+        const createResponse = await axios.post('/api/players', userData);
         console.log('Created new user:', createResponse.data);
         return createResponse.data;
       }

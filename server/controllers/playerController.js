@@ -27,7 +27,7 @@ const getPlayerByUserId = async (req, res) => {
 // @access  Private
 const createPlayer = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, profile_picture, display_name } = req.body;
     
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
@@ -41,11 +41,14 @@ const createPlayer = async (req, res) => {
     }
     
     console.log('Creating new player with userId:', userId);
+    console.log('Profile data:', { profile_picture, display_name });
     
     // Create new player with minimal default values
     // Schema defaults will handle the rest
     const newPlayer = {
       u_id: userId,    // LINE user identifier
+      profile_picture, // LINE profile picture URL
+      display_name,    // LINE display name
       score: 0,
       stores: [],  // Will be populated from DB or through API
       selectedStore: null, // Will be set when player selects a store

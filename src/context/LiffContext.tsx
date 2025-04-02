@@ -15,7 +15,10 @@ export interface UserInformation {
 
 export interface User {
     _id?: string;
-    userId: string;
+    u_id?: string;
+    userId?: string; // Original field name, might still be used in some places
+    profile_picture?: string | null;
+    display_name?: string | null;
     score: number;
     coins: number;
     stores: Array<{

@@ -62,7 +62,17 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                         // Create or fetch user in database
                         if (profile.userId) {
                             console.log("Creating/fetching user with LINE ID:", profile.userId);
-                            const userData = await createOrFetchUser(profile.userId);
+                            console.log("Profile data:", {
+                                pictureUrl: profile.pictureUrl,
+                                displayName: profile.displayName
+                            });
+                            
+                            // Pass the complete profile info for user creation
+                            const userData = await createOrFetchUser(profile.userId, {
+                                pictureUrl: profile.pictureUrl,
+                                displayName: profile.displayName
+                            });
+                            
                             if (userData) {
                                 setUser(userData);
                                 console.log("User data loaded:", userData);

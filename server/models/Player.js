@@ -51,6 +51,10 @@ const PlayerSchema = new mongoose.Schema(
             type: String,
             default: null, // URL for the LINE profile picture
         },
+        display_name: {
+            type: String,
+            default: null, // User's display name from LINE
+        },
         score: {
             type: Number,
             default: 0,
