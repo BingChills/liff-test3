@@ -53,6 +53,7 @@ interface LiffContextProps {
   user: User | null;
   profilePicture: string | null;
   userName: string | null;
+  lineUserId: string | null; // Add LINE user ID for easier access across components
   setUser: (user: User | null) => void;
 }
 
@@ -64,6 +65,7 @@ const LiffContext = createContext<LiffContextProps>({
   user: null,
   profilePicture: null,
   userName: null,
+  lineUserId: null, // Initialize as null
   setUser: () => {},
 });
 

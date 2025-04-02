@@ -241,9 +241,24 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     stores
   ]);
   
+  // Initialize userId from sessionStorage if available
+  useEffect(() => {
+    // Check if we have a LINE user ID stored in sessionStorage
+    try {
+      const storedUserId = sessionStorage.getItem('LINE_USER_ID');
+      if (storedUserId && !userId) {
+        console.log('Found LINE_USER_ID in sessionStorage:', storedUserId);
+        setUserId(storedUserId);
+      }
+    } catch (error) {
+      console.error('Error accessing sessionStorage:', error);
+    }
+  }, []);
+
   // Load player data when userId changes
   useEffect(() => {
     if (userId) {
+      console.log('Loading game state for userId:', userId);
       loadGameState();
     }
   }, [userId, loadGameState]);
