@@ -1,6 +1,6 @@
 // Profile modal to display player data
 import React from 'react';
-import { X, User, Trophy, Heart } from 'lucide-react';
+import { X, User, Trophy, Heart, RefreshCw } from 'lucide-react';
 import { useGameState } from '../state/gameState';
 import { useLiff } from '../context/LiffContext';
 
@@ -11,7 +11,14 @@ interface ProfileModalProps {
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const { stamina, score, characters, coupons } = useGameState();
-  const { profilePicture, userName, lineUserId } = useLiff();
+  const { profilePicture, userName, lineUserId, resetPermissions } = useLiff();
+  
+  // Function to handle reset button click
+  const handleReset = () => {
+    if (confirm('This will reset all LINE permissions and require you to log in again. Continue?')) {
+      resetPermissions();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -88,12 +95,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 p-4 space-y-3">
           <button 
             onClick={onClose}
             className="w-full py-2 bg-blue-500 text-white font-medium rounded-lg"
           >
             Close
+          </button>
+          
+          {/* Reset Permissions Button */}
+          <button 
+            onClick={handleReset}
+            className="w-full py-2 border border-red-500 text-red-500 font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-red-50"
+          >
+            <RefreshCw className="w-4 h-4" /> 
+            Reset LINE Permissions
           </button>
         </div>
       </div>

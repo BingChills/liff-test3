@@ -55,6 +55,7 @@ interface LiffContextProps {
   userName: string | null;
   lineUserId: string | null; // Add LINE user ID for easier access across components
   setUser: (user: User | null) => void;
+  resetPermissions: () => void; // Function to reset LIFF permissions
 }
 
 const LiffContext = createContext<LiffContextProps>({
@@ -67,6 +68,7 @@ const LiffContext = createContext<LiffContextProps>({
   userName: null,
   lineUserId: null, // Initialize as null
   setUser: () => {},
+  resetPermissions: () => {}, // Default empty function
 });
 
 export const useLiff = () => useContext(LiffContext);

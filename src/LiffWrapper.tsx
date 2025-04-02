@@ -1,12 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext } from "react";
 import { LiffProvider } from "./context/LiffContext";
 import type { Liff } from "@line/liff";
 import type { User, UserInformation } from "./context/LiffContext";
-import { useGameState } from "./state/gameState";
+
+// Function to perform a full logout and reset permissions
+export const resetLiffPermissions = () => {
+    try {
+        // Clear session storage
+        sessionStorage.clear();
+        
+        // Clear all local storage items related to LIFF
+        Object.keys(localStorage).forEach(key => {
+            if (key.includes('liff') || key.includes('LINE')) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        // Force reload to completely reset the application state
+        window.location.reload();
+    } catch (error) {
+        console.error('Error resetting permissions:', error);
+    }
+};
 
 declare global {
     interface Window {
         liff: Liff;
+        LINE_USER_ID?: string;  // Add LINE_USER_ID to Window interface
     }
 }
 
@@ -15,6 +35,21 @@ interface LiffWrapperProps {
 }
 
 const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
+    // Check for reset flag in URL
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        const resetParam = url.searchParams.get('reset');
+        
+        if (resetParam === 'true') {
+            console.log('Reset parameter detected, logging out and clearing data...');
+            // Clear URL parameter first
+            url.searchParams.delete('reset');
+            window.history.replaceState({}, document.title, url.toString());
+            
+            // Then perform reset
+            resetLiffPermissions();
+        }
+    }, []);
     const [liffObject, setLiffObject] = useState<Liff | null>(null);
     const [liffError, setLiffError] = useState<string | null>(null);
     const [idToken, setIdToken] = useState<string | null>(null);
@@ -23,9 +58,9 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
     
-    // Access game state to set user ID when LIFF initializes
-    // This is important to connect the LINE auth flow with your game database
-    const { setUserId } = useGameState ? useGameState() : { setUserId: () => {} };
+    // Create an event context to allow other components to react to LIFF initialization
+    // We can't use gameState directly here to avoid circular dependencies
+    const [lineUserId, setLineUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const initializeLiff = async () => {
@@ -60,11 +95,17 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                                 setProfilePicture(profile.pictureUrl || null);
                                 setUserName(profile.displayName || null);
                                 
-                                // Important: Set the LINE userId in game state
-                                // This triggers the database operations
-                                if (setUserId) {
-                                    console.log("Setting userId in game state:", profile.userId);
-                                    setUserId(profile.userId);
+                                // Store the LINE userId for other components to access
+                                console.log("Setting LINE userId in wrapper state:", profile.userId);
+                                setLineUserId(profile.userId);
+                                
+                                // Use sessionStorage instead of window for better persistence
+                                // This avoids TypeScript errors and provides better data storage
+                                try {
+                                    sessionStorage.setItem('LINE_USER_ID', profile.userId);
+                                    console.log('Stored LINE_USER_ID in sessionStorage');
+                                } catch (err) {
+                                    console.error('Failed to store LINE_USER_ID:', err);
                                 }
                             })
                             .catch((err) => {
@@ -100,6 +141,8 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 profilePicture,
                 userName,
                 setUser,
+                lineUserId,  // Expose the LINE user ID through context
+                resetPermissions: resetLiffPermissions, // Add reset function to context
             }}
         >
             {children}
