@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User, Coins, Timer, Gem, ChevronDown } from "lucide-react";
 import { useGameState, StoreCurrency } from "../state/gameState";
 import { useLiff } from "../context/LiffContext";
+import ProfileModal from "./ProfileModal";
 
 interface PageHeaderProps {
     title?: string;
@@ -12,28 +13,29 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
     const { stores, selectedStore, setSelectedStore, stamina, score } =
         useGameState();
-    const { liff } = useLiff();
+    const { liff, profilePicture: liffProfilePicture } = useLiff();
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     // We don't need to fetch profile here anymore - it's handled in LiffWrapper
     // This component just needs to use the profile picture that's already fetched
     useEffect(() => {
-        // Only set profile picture if LIFF is available
-        if (liff && liff.isLoggedIn()) {
-            // This handles the case where we navigate to this component after LIFF is initialized
-            // Most users will already have their profile picture from LiffWrapper initialization
-            if (!profilePicture) {
-                liff.getProfile()
-                    .then(profile => {
-                        setProfilePicture(profile.pictureUrl || null);
-                    })
-                    .catch(err => {
-                        console.error("Backup profile picture fetch failed:", err);
-                    });
-            }
+        // First check if we already have a profile picture from LiffContext
+        if (liffProfilePicture) {
+            setProfilePicture(liffProfilePicture);
         }
-    }, [liff, profilePicture]); // Only re-run if liff object changes or we don't have a picture
+        // Only try to fetch profile picture if LIFF is available and we don't already have one
+        else if (liff && liff.isLoggedIn() && !profilePicture) {
+            liff.getProfile()
+                .then(profile => {
+                    setProfilePicture(profile.pictureUrl || null);
+                })
+                .catch(err => {
+                    console.error("Backup profile picture fetch failed:", err);
+                });
+        }
+    }, [liff, profilePicture, liffProfilePicture]); // Re-run if any of these change
 
     const getStoreColor = (color: string) => {
         switch (color) {
@@ -59,8 +61,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
         <div className="px-4 py-3">
             {/* Resources bar - only the profile and resources */}
             <div className="flex items-center justify-between">
-                {/* User profile icon */}
-                <div className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden">
+                {/* User profile icon - clickable to open profile modal */}
+                <div 
+                    className="w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden cursor-pointer"
+                    onClick={() => setShowProfileModal(true)}
+                >
                     {profilePicture ? (
                         <img
                             src={profilePicture}
@@ -73,6 +78,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                         </div>
                     )}
                 </div>
+                
+                {/* Profile Modal */}
+                <ProfileModal 
+                    isOpen={showProfileModal} 
+                    onClose={() => setShowProfileModal(false)} 
+                />
 
                 {/* Right side: Resources */}
                 <div className="flex items-center gap-2">
