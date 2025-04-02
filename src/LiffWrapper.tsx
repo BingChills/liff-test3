@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { LiffProvider } from "./context/LiffContext";
 import type { Liff } from "@line/liff";
 import type { User, UserInformation } from "./context/LiffContext";
+import { revokeLineToken } from "./utils/liffUtils";
+import { createOrFetchUser } from "./utils/userApiService";
 
 declare global {
     interface Window {
@@ -17,7 +19,9 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [liffObject, setLiffObject] = useState<Liff | null>(null);
     const [liffError, setLiffError] = useState<string | null>(null);
     const [idToken, setIdToken] = useState<string | null>(null);
-    const [decodedToken, setDecodedToken] = useState<UserInformation | null>(null);
+    const [decodedToken, setDecodedToken] = useState<UserInformation | null>(
+        null
+    );
     const [user, setUser] = useState<User | null>(null);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
@@ -44,15 +48,37 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
                 // Just perform basic initialization
                 if (liff.isLoggedIn()) {
                     try {
-                        // Get ID token only
+                        // Get ID token and profile
                         const token = liff.getIDToken();
                         setIdToken(token);
                         console.log("LIFF initialized and logged in");
+                        
+                        // Get user profile
+                        const profile = await liff.getProfile();
+                        setProfilePicture(profile.pictureUrl || null);
+                        setUserName(profile.displayName || null);
+                        console.log("Got LINE profile:", profile);
+                        
+                        // Create or fetch user in database
+                        if (profile.userId) {
+                            console.log("Creating/fetching user with LINE ID:", profile.userId);
+                            const userData = await createOrFetchUser(profile.userId);
+                            if (userData) {
+                                setUser(userData);
+                                console.log("User data loaded:", userData);
+                            } else {
+                                console.error("Failed to create/fetch user");
+                            }
+                        } else {
+                            console.error("No userId in LINE profile");
+                        }
                     } catch (error) {
                         console.error("Error initializing LIFF:", error);
                     }
                 } else {
                     console.log("User is not logged in");
+                    // Optionally: Redirect to login
+                    // liff.login();
                 }
             } catch (error) {
                 console.error("Error initializing LIFF:", error);
@@ -84,4 +110,3 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
 };
 
 export default LiffWrapper;
-
