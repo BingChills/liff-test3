@@ -26,6 +26,9 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
 
+    // Define useGameState at the top level, not conditionally
+    // const { setUserId } = useGameState(); // Commented out to fix the conditional hooks error
+    
     useEffect(() => {
         const initializeLiff = async () => {
             try {
@@ -99,7 +102,8 @@ const LiffWrapper: React.FC<LiffWrapperProps> = ({ children }) => {
         };
 
         initializeLiff();
-    }, []);
+        // Include setUserId in dependencies if you need it (currently commented out to fix the hook error)
+    }, [/* setUserId */]);
 
     return (
         <LiffProvider
