@@ -46,7 +46,7 @@ const TabNavigation = () => {
                         >
                             <Icon size={20} />
                             {isActive && (
-                                <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></span>
+                                <span className="absolute -bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-blue-600" style={{ borderRadius: '0' }}></span>
                             )}
                         </button>
                     );
