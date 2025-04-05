@@ -67,26 +67,28 @@ function AppContent() {
     };
 
     return (
-        <div className="app-container">
-            <div className="game-wrapper">
+        <div className="app-container h-screen flex flex-col">
+            {/* PageHeader at the top */}
+            {activeTab === 'game' && (
+                <div className="z-10">
+                    <PageHeader title="Game" />
+                </div>
+            )}
+            
+            {/* Content area */}
+            <div className="flex-1 overflow-hidden relative">
                 {/* The Phaser game is always rendered but only visible on game tab */}
-                <div className={`game-container ${activeTab === 'game' ? 'active' : 'inactive'}`}>
-                    {/* Add PageHeader on top of the game for the game tab */}
-                    {activeTab === 'game' && (
-                        <div className="absolute top-0 left-0 right-0 z-10">
-                            <PageHeader title="Game" />
-                        </div>
-                    )}
+                <div className={`game-container absolute inset-0 ${activeTab === 'game' ? 'active' : 'inactive h-0 overflow-hidden'}`}>
                     <PhaserGame ref={phaserRef} />
                 </div>
 
                 {/* Overlay pages for non-game tabs */}
-                {activeTab !== 'game' && <div className="page-container">{renderActivePage()}</div>}
+                {activeTab !== 'game' && <div className="page-container h-full overflow-auto pb-16">{renderActivePage()}</div>}
+            </div>
 
-                {/* Tab navigation at bottom */}
-                <div className="tab-navigation">
-                    <TabNavigation />
-                </div>
+            {/* Tab navigation fixed at bottom */}
+            <div className="tab-navigation w-full bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-50">
+                <TabNavigation />
             </div>
         </div>
     );
