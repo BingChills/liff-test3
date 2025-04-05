@@ -1,5 +1,5 @@
-import { Game as MainGame } from "./scenes/Game";
-import { AUTO, Game, Types, Scale } from "phaser";
+import { Game as MainGame } from './scenes/Game';
+import { AUTO, Game, Types, Scale } from 'phaser';
 
 // The main **game** entry point. This contains the game configuration and start the game.
 //  Find out more information about the Game Config at:
@@ -11,17 +11,17 @@ const config: Types.Core.GameConfig = {
         mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH,
         width: 360,
-        height: 640
+        height: 640,
     },
     physics: {
-        default: "arcade",
+        default: 'arcade',
         arcade: {
-            debug: false
-        }
+            debug: false,
+        },
     },
-    parent: "game-container",
-    backgroundColor: "#028af8",
-    scene: [MainGame]
+    parent: 'game-container',
+    backgroundColor: '#028af8',
+    scene: [MainGame],
 };
 
 const StartGame = (parent: string) => {

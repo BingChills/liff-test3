@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Store, Gem, ChevronDown, Percent, Box, Ticket } from "lucide-react";
-import { useGameState, Character, StoreCurrency } from "../state/gameState";
-import PageHeader from "./PageHeader";
+import React, { useState, useEffect } from 'react';
+import { Store, Gem, ChevronDown, Percent, Box, Ticket } from 'lucide-react';
+import { useGameState, Character, StoreCurrency } from '../state/gameState';
+import PageHeader from './PageHeader';
 
 // Define rarity type for consistency
-type CharacterRarity = "common" | "rare" | "epic" | "legendary";
+type CharacterRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 // Define rarity rates
 const RARITY_RATES: Record<CharacterRarity, number> = {
@@ -25,65 +25,58 @@ interface EggAnimationProps {
 
 const getRarityColor = (rarity: CharacterRarity) => {
     switch (rarity) {
-        case "common":
-            return "bg-gray-100";
-        case "rare":
-            return "bg-blue-100";
-        case "epic":
-            return "bg-purple-100";
-        case "legendary":
-            return "bg-yellow-100";
+        case 'common':
+            return 'bg-gray-100';
+        case 'rare':
+            return 'bg-blue-100';
+        case 'epic':
+            return 'bg-purple-100';
+        case 'legendary':
+            return 'bg-yellow-100';
         default:
-            return "bg-gray-100";
+            return 'bg-gray-100';
     }
 };
 
 const getRarityEggStyle = (rarity: CharacterRarity) => {
     switch (rarity) {
-        case "legendary":
+        case 'legendary':
             return {
-                egg: "from-yellow-500 via-yellow-400 to-yellow-600",
-                glow: "from-yellow-400/30 to-transparent",
-                rays: "bg-yellow-400/20",
+                egg: 'from-yellow-500 via-yellow-400 to-yellow-600',
+                glow: 'from-yellow-400/30 to-transparent',
+                rays: 'bg-yellow-400/20',
             };
-        case "epic":
+        case 'epic':
             return {
-                egg: "from-purple-500 via-purple-400 to-purple-600",
-                glow: "from-purple-400/30 to-transparent",
-                rays: "bg-purple-400/20",
+                egg: 'from-purple-500 via-purple-400 to-purple-600',
+                glow: 'from-purple-400/30 to-transparent',
+                rays: 'bg-purple-400/20',
             };
-        case "rare":
+        case 'rare':
             return {
-                egg: "from-blue-500 via-blue-400 to-blue-600",
-                glow: "from-blue-400/30 to-transparent",
-                rays: "bg-blue-400/20",
+                egg: 'from-blue-500 via-blue-400 to-blue-600',
+                glow: 'from-blue-400/30 to-transparent',
+                rays: 'bg-blue-400/20',
             };
         default:
             return {
-                egg: "from-gray-800 via-gray-700 to-gray-900",
-                glow: "from-white/10 to-transparent",
-                rays: "bg-white/10",
+                egg: 'from-gray-800 via-gray-700 to-gray-900',
+                glow: 'from-white/10 to-transparent',
+                rays: 'bg-white/10',
             };
     }
 };
 
 const determineRarity = (rand: number): CharacterRarity => {
-    if (rand < RARITY_RATES.legendary) return "legendary";
-    if (rand < RARITY_RATES.legendary + RARITY_RATES.epic) return "epic";
-    if (rand < RARITY_RATES.legendary + RARITY_RATES.epic + RARITY_RATES.rare)
-        return "rare";
-    return "common";
+    if (rand < RARITY_RATES.legendary) return 'legendary';
+    if (rand < RARITY_RATES.legendary + RARITY_RATES.epic) return 'epic';
+    if (rand < RARITY_RATES.legendary + RARITY_RATES.epic + RARITY_RATES.rare) return 'rare';
+    return 'common';
 };
 
 const SummonPage = () => {
-    const {
-        stores,
-        setStores,
-        selectedStore,
-        setSelectedStore,
-        characters,
-        setCharacters,
-    } = useGameState();
+    const { stores, setStores, selectedStore, setSelectedStore, characters, setCharacters } =
+        useGameState();
     const [showDropRates, setShowDropRates] = useState(false);
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [showEggAnimation, setShowEggAnimation] = useState(false);
@@ -91,16 +84,16 @@ const SummonPage = () => {
 
     const getStoreColor = (color: string) => {
         switch (color) {
-            case "emerald":
-                return "bg-emerald-400";
-            case "red":
-                return "bg-red-500";
-            case "blue":
-                return "bg-blue-500";
-            case "orange":
-                return "bg-orange-500";
+            case 'emerald':
+                return 'bg-emerald-400';
+            case 'red':
+                return 'bg-red-500';
+            case 'blue':
+                return 'bg-blue-500';
+            case 'orange':
+                return 'bg-orange-500';
             default:
-                return "bg-blue-400";
+                return 'bg-blue-400';
         }
     };
 
@@ -119,7 +112,7 @@ const SummonPage = () => {
         if (!selectedStore || selectedStore.point < drawCost) {
             console.log(
                 `You only have ${selectedStore?.point || 0} ${
-                    selectedStore?.name || ""
+                    selectedStore?.name || ''
                 } points. Need ${drawCost} points.`
             );
             return;
@@ -127,9 +120,7 @@ const SummonPage = () => {
 
         // Update the points for the selected store
         const updatedStores = stores.map((store) =>
-            store.name === selectedStore.name
-                ? { ...store, point: store.point - drawCost }
-                : store
+            store.name === selectedStore.name ? { ...store, point: store.point - drawCost } : store
         );
 
         // Update the selected store with reduced points
@@ -164,9 +155,7 @@ const SummonPage = () => {
                     <Store className="w-8 h-8 text-blue-600" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-black text-gray-800 drop-shadow-sm">
-                        Summon
-                    </h1>
+                    <h1 className="text-3xl font-black text-gray-800 drop-shadow-sm">Summon</h1>
                     <p className="text-gray-700 text-sm mt-1">
                         Get new characters for your collection
                     </p>
@@ -182,25 +171,23 @@ const SummonPage = () => {
                     <div className="flex items-center gap-3">
                         <div
                             className={`w-10 h-10 rounded-full ${getStoreColor(
-                                selectedStore?.color || "blue"
+                                selectedStore?.color || 'blue'
                             )} flex items-center justify-center`}
                         >
                             <Gem className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-bold">
-                                {selectedStore?.name || "Select Store"}
-                            </h3>
+                            <h3 className="font-bold">{selectedStore?.name || 'Select Store'}</h3>
                             <p className="text-sm text-gray-500">
                                 {selectedStore
                                     ? `${selectedStore.point} points available`
-                                    : "Choose a store to summon from"}
+                                    : 'Choose a store to summon from'}
                             </p>
                         </div>
                     </div>
                     <ChevronDown
                         className={`text-gray-500 transition-transform ${
-                            showStoreSelector ? "rotate-180" : ""
+                            showStoreSelector ? 'rotate-180' : ''
                         }`}
                     />
                 </div>
@@ -238,11 +225,11 @@ const SummonPage = () => {
                 <div className="bg-white/90 rounded-xl p-6 shadow-lg">
                     <div className="text-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                            {selectedStore?.name || "Character"} Summon
+                            {selectedStore?.name || 'Character'} Summon
                         </h2>
                         <p className="text-gray-600">
-                            Spend points to get characters{" "}
-                            {selectedStore ? `from ${selectedStore.name}` : ""}
+                            Spend points to get characters{' '}
+                            {selectedStore ? `from ${selectedStore.name}` : ''}
                         </p>
                     </div>
 
@@ -255,13 +242,11 @@ const SummonPage = () => {
                     <div className="flex flex-col gap-4 mb-6">
                         <button
                             onClick={() => handleSummon(false)}
-                            disabled={
-                                !selectedStore || selectedStore.point < 100
-                            }
+                            disabled={!selectedStore || selectedStore.point < 100}
                             className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
                                 !selectedStore || selectedStore.point < 100
-                                    ? "bg-gray-400"
-                                    : "bg-blue-500 hover:bg-blue-600"
+                                    ? 'bg-gray-400'
+                                    : 'bg-blue-500 hover:bg-blue-600'
                             }`}
                         >
                             Single Draw (100 points)
@@ -269,13 +254,11 @@ const SummonPage = () => {
 
                         <button
                             onClick={() => handleSummon(true)}
-                            disabled={
-                                !selectedStore || selectedStore.point < 1000
-                            }
+                            disabled={!selectedStore || selectedStore.point < 1000}
                             className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
                                 !selectedStore || selectedStore.point < 1000
-                                    ? "bg-gray-400"
-                                    : "bg-green-500 hover:bg-green-600"
+                                    ? 'bg-gray-400'
+                                    : 'bg-green-500 hover:bg-green-600'
                             }`}
                         >
                             10x Draw (1,000 points)
@@ -288,22 +271,16 @@ const SummonPage = () => {
                             className="flex items-center gap-2 mx-auto text-blue-600 font-medium"
                         >
                             <Percent size={16} />
-                            {showDropRates
-                                ? "Hide Drop Rates"
-                                : "View Drop Rates"}
+                            {showDropRates ? 'Hide Drop Rates' : 'View Drop Rates'}
                         </button>
                     </div>
 
                     {showDropRates && (
                         <div className="mt-4 bg-gray-50 rounded-lg p-4">
-                            <h3 className="font-bold text-gray-700 mb-2">
-                                Character Drop Rates
-                            </h3>
+                            <h3 className="font-bold text-gray-700 mb-2">Character Drop Rates</h3>
                             <div className="space-y-2">
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">
-                                        Common
-                                    </span>
+                                    <span className="text-gray-600">Common</span>
                                     <span className="font-medium">70%</span>
                                 </div>
                                 <div className="flex justify-between">
@@ -311,15 +288,11 @@ const SummonPage = () => {
                                     <span className="font-medium">20%</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-purple-600">
-                                        Epic
-                                    </span>
+                                    <span className="text-purple-600">Epic</span>
                                     <span className="font-medium">9%</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-yellow-600">
-                                        Legendary
-                                    </span>
+                                    <span className="text-yellow-600">Legendary</span>
                                     <span className="font-medium">1%</span>
                                 </div>
                             </div>
@@ -340,17 +313,12 @@ const SummonPage = () => {
     );
 };
 
-export function EggAnimation({
-    isVisible,
-    onAnimationEnd,
-    drawCount = 1,
-}: EggAnimationProps) {
+export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAnimationProps) {
     const { characters: gameCharacters, selectedStore } = useGameState();
     const [showCharacters, setShowCharacters] = useState(false);
     const [characters, setCharacters] = useState<Character[]>([]);
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
-    const [highestRarity, setHighestRarity] =
-        useState<CharacterRarity>("common");
+    const [highestRarity, setHighestRarity] = useState<CharacterRarity>('common');
     const [showAllCards, setShowAllCards] = useState(false);
 
     useEffect(() => {
@@ -362,26 +330,18 @@ export function EggAnimation({
 
                 // FIXME: This is a temporary fix
                 // Function to generate a character with the selected rarity
-                const generateCharacter = (
-                    rarity: CharacterRarity
-                ): Character => {
+                const generateCharacter = (rarity: CharacterRarity): Character => {
                     return {
-                        id: `generated-${Date.now()}-${Math.random()
-                            .toString(36)
-                            .substr(2, 9)}`,
-                        name: `${
-                            rarity.charAt(0).toUpperCase() + rarity.slice(1)
-                        } Character`,
+                        id: `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Character`,
                         image: `https://placehold.co/400x400/gray/white?text=${rarity
                             .substring(0, 2)
                             .toUpperCase()}`,
                         rarity: rarity,
-                        discount: `${Math.round(
-                            RARITY_RATES[rarity] * 100
-                        )}% discount`,
+                        discount: `${Math.round(RARITY_RATES[rarity] * 100)}% discount`,
                         isUsing: false,
                         //FIXME: This is a temporary fix
-                        storeName: selectedStore?.name || "Default Store", // Associate character with selected store
+                        storeName: selectedStore?.name || 'Default Store', // Associate character with selected store
                     };
                 };
 
@@ -389,7 +349,7 @@ export function EggAnimation({
                 const availableCharacters = gameCharacters.filter(
                     (c: Character) =>
                         c.rarity === selectedRarity &&
-                        c.storeName === (selectedStore?.name || "Default Store") //FIXME:
+                        c.storeName === (selectedStore?.name || 'Default Store') //FIXME:
                 );
 
                 // If we have available characters of this rarity, pick a random one
@@ -412,11 +372,10 @@ export function EggAnimation({
             };
 
             const highest = newCharacters.reduce((acc, char) => {
-                return rarityOrder[char.rarity as CharacterRarity] >
-                    rarityOrder[acc]
+                return rarityOrder[char.rarity as CharacterRarity] > rarityOrder[acc]
                     ? (char.rarity as CharacterRarity)
                     : acc;
-            }, "common" as CharacterRarity);
+            }, 'common' as CharacterRarity);
 
             setHighestRarity(highest);
             setCharacters(newCharacters);
@@ -433,16 +392,10 @@ export function EggAnimation({
             setShowCharacters(false);
             setCharacters([]);
             setCurrentCharacterIndex(0);
-            setHighestRarity("common");
+            setHighestRarity('common');
             setShowAllCards(false);
         };
-    }, [
-        isVisible,
-        drawCount,
-        gameCharacters,
-        showCharacters,
-        selectedStore?.name,
-    ]);
+    }, [isVisible, drawCount, gameCharacters, showCharacters, selectedStore?.name]);
 
     const handleNext = () => {
         if (currentCharacterIndex < characters.length - 1) {
@@ -466,7 +419,7 @@ export function EggAnimation({
                 // Egg cracking animation with rarity-based effects
                 <div className="relative w-80 h-80">
                     {/* Background rays */}
-                    {highestRarity !== "common" && (
+                    {highestRarity !== 'common' && (
                         <>
                             {[...Array(12)].map((_, i) => (
                                 <div
@@ -474,11 +427,9 @@ export function EggAnimation({
                                     className={`absolute top-1/2 left-1/2 h-40 w-2 ${styles.rays} rounded-full animate-rays`}
                                     style={
                                         {
-                                            "--rotation": `${i * 30}deg`,
-                                            transform: `rotate(${
-                                                i * 30
-                                            }deg) translateY(-50%)`,
-                                            transformOrigin: "50% 0",
+                                            '--rotation': `${i * 30}deg`,
+                                            transform: `rotate(${i * 30}deg) translateY(-50%)`,
+                                            transformOrigin: '50% 0',
                                         } as any
                                     }
                                 />
@@ -487,7 +438,7 @@ export function EggAnimation({
                     )}
 
                     {/* Glow effect */}
-                    {highestRarity !== "common" && (
+                    {highestRarity !== 'common' && (
                         <div
                             className={`absolute inset-0 rounded-full bg-gradient-radial ${styles.glow} animate-pulse`}
                         />
@@ -500,25 +451,25 @@ export function EggAnimation({
                                 className={`absolute inset-0 bg-gradient-to-br ${
                                     styles.egg
                                 } rounded-[45%] shadow-xl ${
-                                    highestRarity === "legendary"
-                                        ? "animate-legendary-pulse"
-                                        : highestRarity === "epic"
-                                        ? "animate-epic-pulse"
-                                        : highestRarity === "rare"
-                                        ? "animate-rare-pulse"
-                                        : "animate-pulse"
+                                    highestRarity === 'legendary'
+                                        ? 'animate-legendary-pulse'
+                                        : highestRarity === 'epic'
+                                          ? 'animate-epic-pulse'
+                                          : highestRarity === 'rare'
+                                            ? 'animate-rare-pulse'
+                                            : 'animate-pulse'
                                 }`}
                             >
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div
                                         className={`text-6xl font-bold ${
-                                            highestRarity === "legendary"
-                                                ? "text-yellow-300"
-                                                : highestRarity === "epic"
-                                                ? "text-purple-300"
-                                                : highestRarity === "rare"
-                                                ? "text-blue-300"
-                                                : "text-gray-400"
+                                            highestRarity === 'legendary'
+                                                ? 'text-yellow-300'
+                                                : highestRarity === 'epic'
+                                                  ? 'text-purple-300'
+                                                  : highestRarity === 'rare'
+                                                    ? 'text-blue-300'
+                                                    : 'text-gray-400'
                                         } animate-pulse`}
                                     >
                                         ?
@@ -527,16 +478,15 @@ export function EggAnimation({
                             </div>
 
                             {/* Sparkles for legendary and epic */}
-                            {(highestRarity === "legendary" ||
-                                highestRarity === "epic") && (
+                            {(highestRarity === 'legendary' || highestRarity === 'epic') && (
                                 <>
                                     {[...Array(6)].map((_, i) => (
                                         <div
                                             key={i}
                                             className={`absolute w-4 h-4 rounded-full ${
-                                                highestRarity === "legendary"
-                                                    ? "bg-yellow-300"
-                                                    : "bg-purple-300"
+                                                highestRarity === 'legendary'
+                                                    ? 'bg-yellow-300'
+                                                    : 'bg-purple-300'
                                             } animate-sparkle`}
                                             style={{
                                                 top: `${Math.random() * 100}%`,
@@ -562,21 +512,21 @@ export function EggAnimation({
                             >
                                 <div
                                     className={`rounded-2xl overflow-hidden bg-gradient-to-br ${
-                                        char.rarity === "legendary"
-                                            ? "from-yellow-400 to-yellow-500"
-                                            : char.rarity === "epic"
-                                            ? "from-purple-400 to-purple-500"
-                                            : char.rarity === "rare"
-                                            ? "from-blue-400 to-blue-500"
-                                            : "from-gray-400 to-gray-500"
+                                        char.rarity === 'legendary'
+                                            ? 'from-yellow-400 to-yellow-500'
+                                            : char.rarity === 'epic'
+                                              ? 'from-purple-400 to-purple-500'
+                                              : char.rarity === 'rare'
+                                                ? 'from-blue-400 to-blue-500'
+                                                : 'from-gray-400 to-gray-500'
                                     } p-3 shadow-2xl ${
-                                        char.rarity === "legendary"
-                                            ? "animate-legendary-shine"
-                                            : char.rarity === "epic"
-                                            ? "animate-epic-shine"
-                                            : char.rarity === "rare"
-                                            ? "animate-rare-shine"
-                                            : ""
+                                        char.rarity === 'legendary'
+                                            ? 'animate-legendary-shine'
+                                            : char.rarity === 'epic'
+                                              ? 'animate-epic-shine'
+                                              : char.rarity === 'rare'
+                                                ? 'animate-rare-shine'
+                                                : ''
                                     }`}
                                 >
                                     <div className="bg-white/90 rounded-xl p-3 space-y-3">
@@ -596,23 +546,19 @@ export function EggAnimation({
                                             </h3>
                                             <div
                                                 className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-1 ${
-                                                    char.rarity === "legendary"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : char.rarity === "epic"
-                                                        ? "bg-purple-100 text-purple-700"
-                                                        : char.rarity === "rare"
-                                                        ? "bg-blue-100 text-blue-700"
-                                                        : "bg-gray-100 text-gray-700"
+                                                    char.rarity === 'legendary'
+                                                        ? 'bg-yellow-100 text-yellow-700'
+                                                        : char.rarity === 'epic'
+                                                          ? 'bg-purple-100 text-purple-700'
+                                                          : char.rarity === 'rare'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : 'bg-gray-100 text-gray-700'
                                                 }`}
                                             >
-                                                {char.rarity
-                                                    .charAt(0)
-                                                    .toUpperCase() +
+                                                {char.rarity.charAt(0).toUpperCase() +
                                                     char.rarity.slice(1)}
                                             </div>
-                                            <p className="text-xs text-gray-600">
-                                                {char.discount}
-                                            </p>
+                                            <p className="text-xs text-gray-600">{char.discount}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -635,21 +581,21 @@ export function EggAnimation({
                         <div className="transform animate-scale-up">
                             <div
                                 className={`rounded-3xl overflow-hidden bg-gradient-to-br ${
-                                    currentCharacter.rarity === "legendary"
-                                        ? "from-yellow-400 to-yellow-500"
-                                        : currentCharacter.rarity === "epic"
-                                        ? "from-purple-400 to-purple-500"
-                                        : currentCharacter.rarity === "rare"
-                                        ? "from-blue-400 to-blue-500"
-                                        : "from-gray-400 to-gray-500"
+                                    currentCharacter.rarity === 'legendary'
+                                        ? 'from-yellow-400 to-yellow-500'
+                                        : currentCharacter.rarity === 'epic'
+                                          ? 'from-purple-400 to-purple-500'
+                                          : currentCharacter.rarity === 'rare'
+                                            ? 'from-blue-400 to-blue-500'
+                                            : 'from-gray-400 to-gray-500'
                                 } p-4 shadow-2xl ${
-                                    currentCharacter.rarity === "legendary"
-                                        ? "animate-legendary-shine"
-                                        : currentCharacter.rarity === "epic"
-                                        ? "animate-epic-shine"
-                                        : currentCharacter.rarity === "rare"
-                                        ? "animate-rare-shine"
-                                        : ""
+                                    currentCharacter.rarity === 'legendary'
+                                        ? 'animate-legendary-shine'
+                                        : currentCharacter.rarity === 'epic'
+                                          ? 'animate-epic-shine'
+                                          : currentCharacter.rarity === 'rare'
+                                            ? 'animate-rare-shine'
+                                            : ''
                                 }`}
                             >
                                 <div className="bg-white/90 rounded-2xl p-4 space-y-4">
@@ -669,24 +615,17 @@ export function EggAnimation({
                                         </h3>
                                         <div
                                             className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-2 ${
-                                                currentCharacter.rarity ===
-                                                "legendary"
-                                                    ? "bg-yellow-100 text-yellow-700"
-                                                    : currentCharacter.rarity ===
-                                                      "epic"
-                                                    ? "bg-purple-100 text-purple-700"
-                                                    : currentCharacter.rarity ===
-                                                      "rare"
-                                                    ? "bg-blue-100 text-blue-700"
-                                                    : "bg-gray-100 text-gray-700"
+                                                currentCharacter.rarity === 'legendary'
+                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                    : currentCharacter.rarity === 'epic'
+                                                      ? 'bg-purple-100 text-purple-700'
+                                                      : currentCharacter.rarity === 'rare'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-gray-100 text-gray-700'
                                             }`}
                                         >
-                                            {currentCharacter.rarity
-                                                .charAt(0)
-                                                .toUpperCase() +
-                                                currentCharacter.rarity.slice(
-                                                    1
-                                                )}
+                                            {currentCharacter.rarity.charAt(0).toUpperCase() +
+                                                currentCharacter.rarity.slice(1)}
                                         </div>
                                         <p className="text-sm text-gray-600">
                                             {currentCharacter.discount}
@@ -704,14 +643,12 @@ export function EggAnimation({
                                     </button>
                                 )}
                                 <p className="text-white text-sm">
-                                    {currentCharacterIndex <
-                                    characters.length - 1
-                                        ? "Tap to reveal next character"
-                                        : "Tap to continue"}
+                                    {currentCharacterIndex < characters.length - 1
+                                        ? 'Tap to reveal next character'
+                                        : 'Tap to continue'}
                                 </p>
                                 <p className="text-white/60 text-xs mt-1">
-                                    {currentCharacterIndex + 1} of{" "}
-                                    {characters.length}
+                                    {currentCharacterIndex + 1} of {characters.length}
                                 </p>
                             </div>
                         </div>

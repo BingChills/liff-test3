@@ -1,4 +1,4 @@
-import { GameObjects, Physics, Scene } from "phaser";
+import { GameObjects, Physics, Scene } from 'phaser';
 
 export class Player {
     private scene: Scene;
@@ -11,21 +11,19 @@ export class Player {
 
     constructor(scene: Scene, x: number, y: number) {
         this.scene = scene;
-        
+
         // Create player sprite
-        this.sprite = scene.physics.add
-            .sprite(x, y, "ninjaTurtle_idle")
-            .setScale(1);
-            
+        this.sprite = scene.physics.add.sprite(x, y, 'ninjaTurtle_idle').setScale(1);
+
         // Set smaller collision box for player
         this.sprite.setSize(this.sprite.width * 0.5, this.sprite.height * 0.5);
         this.sprite.setOffset(this.sprite.width * 0.25, this.sprite.height * 0.25);
-        
+
         // Configure physics
         this.sprite.setCollideWorldBounds(true);
-        
+
         // Play idle animation by default
-        this.sprite.play("ninjaTurtle_idle");
+        this.sprite.play('ninjaTurtle_idle');
     }
 
     public getSprite(): Physics.Arcade.Sprite {
@@ -52,7 +50,7 @@ export class Player {
         return this.attackDamage;
     }
 
-    public getTargetPosition(): { x: number, y: number } {
+    public getTargetPosition(): { x: number; y: number } {
         return { x: this.targetX, y: this.targetY };
     }
 
@@ -60,8 +58,8 @@ export class Player {
         // Create player animations if they don't exist
         if (!this.scene.anims.exists('ninjaTurtle_walk')) {
             this.scene.anims.create({
-                key: "ninjaTurtle_walk",
-                frames: this.scene.anims.generateFrameNumbers("ninjaTurtle_walk", {
+                key: 'ninjaTurtle_walk',
+                frames: this.scene.anims.generateFrameNumbers('ninjaTurtle_walk', {
                     start: 0,
                     end: 3,
                 }),
@@ -72,8 +70,8 @@ export class Player {
 
         if (!this.scene.anims.exists('ninjaTurtle_idle')) {
             this.scene.anims.create({
-                key: "ninjaTurtle_idle",
-                frames: this.scene.anims.generateFrameNumbers("ninjaTurtle_idle", {
+                key: 'ninjaTurtle_idle',
+                frames: this.scene.anims.generateFrameNumbers('ninjaTurtle_idle', {
                     start: 0,
                     end: 3,
                 }),
@@ -87,13 +85,13 @@ export class Player {
         // Clamp position to world bounds
         this.targetX = Phaser.Math.Clamp(x, 32, 328);
         this.targetY = Phaser.Math.Clamp(y, 32, 608);
-        
+
         this.isMoving = true;
         this.scene.physics.moveTo(this.sprite, this.targetX, this.targetY, speed);
-        
+
         // Play walking animation
-        this.sprite.play("ninjaTurtle_walk", true);
-        
+        this.sprite.play('ninjaTurtle_walk', true);
+
         // Flip sprite based on movement direction
         if (x < this.sprite.x) {
             this.sprite.setFlipX(true);
@@ -102,29 +100,28 @@ export class Player {
         }
     }
 
-    public moveTowardObject(object: Physics.Arcade.Sprite, distance: number, speed: number = 150): void {
+    public moveTowardObject(
+        object: Physics.Arcade.Sprite,
+        distance: number,
+        speed: number = 150
+    ): void {
         // Calculate angle between player and object
-        const angle = Phaser.Math.Angle.Between(
-            this.sprite.x, 
-            this.sprite.y, 
-            object.x, 
-            object.y
-        );
-        
+        const angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, object.x, object.y);
+
         // Calculate position near the object
         this.targetX = object.x - Math.cos(angle) * distance;
         this.targetY = object.y - Math.sin(angle) * distance;
-        
+
         // Clamp the target position to world bounds
         this.targetX = Phaser.Math.Clamp(this.targetX, 32, 328);
         this.targetY = Phaser.Math.Clamp(this.targetY, 32, 608);
-        
+
         this.isMoving = true;
         this.scene.physics.moveTo(this.sprite, this.targetX, this.targetY, speed);
-        
+
         // Play walking animation
-        this.sprite.play("ninjaTurtle_walk", true);
-        
+        this.sprite.play('ninjaTurtle_walk', true);
+
         // Flip sprite based on movement direction
         if (object.x < this.sprite.x) {
             this.sprite.setFlipX(true);
@@ -136,9 +133,9 @@ export class Player {
     public stopMovement(): void {
         this.sprite.setVelocity(0, 0);
         this.isMoving = false;
-        
+
         if (!this.isAttacking) {
-            this.sprite.play("ninjaTurtle_idle", true);
+            this.sprite.play('ninjaTurtle_idle', true);
         }
     }
 
@@ -151,7 +148,7 @@ export class Player {
                 this.targetX,
                 this.targetY
             );
-            
+
             if (distance < 5) {
                 this.stopMovement();
             }

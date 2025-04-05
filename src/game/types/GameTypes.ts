@@ -8,7 +8,7 @@ export interface Coupon {
     qrCode: string;
     storeName: string; // Added this property
 }
-import { Events } from "phaser";
+import { Events } from 'phaser';
 
 export interface Coupon {
     id: string;
@@ -22,7 +22,7 @@ export interface Coupon {
 }
 
 export interface ChestRarity {
-    type: "common" | "rare" | "epic" | "legendary";
+    type: 'common' | 'rare' | 'epic' | 'legendary';
     pointRange: [number, number]; // [min, max]
     couponDropChance: number;
     hp: number; // Add base HP for each rarity
@@ -31,4 +31,3 @@ export interface ChestRarity {
 export interface GameConfig {
     eventBus: Events.EventEmitter;
 }
-

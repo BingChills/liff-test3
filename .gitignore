@@ -44,3 +44,9 @@ list.todo
 
 # test DB
 create-test-data.js
+
+# cspell
+.cspell.json
+
+# formatting
+.prettierrc

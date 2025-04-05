@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 import {
     User,
     ChevronDown,
@@ -11,12 +11,12 @@ import {
     ArrowUpDown,
     ArrowRightLeft,
     Plus,
-} from "lucide-react";
-import PageHeader from "./PageHeader";
+} from 'lucide-react';
+import PageHeader from './PageHeader';
 
-type CharacterRarity = "common" | "rare" | "epic" | "legendary";
+type CharacterRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
-type SortOption = "newest" | "oldest" | "rarity-asc" | "rarity-desc";
+type SortOption = 'newest' | 'oldest' | 'rarity-asc' | 'rarity-desc';
 
 interface StoreCurrency {
     name: string;
@@ -47,167 +47,167 @@ const RARITY_ORDER: Record<string, number> = {
 export function TradePage() {
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedRarities, setSelectedRarities] = useState<string[]>([]);
-    const [sortBy, setSortBy] = useState<SortOption>("newest");
+    const [sortBy, setSortBy] = useState<SortOption>('newest');
 
     const [stores] = useState<StoreCurrency[]>([
-        { name: "Parabola", gems: 1600, color: "emerald" },
-        { name: "KFC", gems: 850, color: "red" },
-        { name: "Pizza Company", gems: 1200, color: "blue" },
-        { name: "Pizza Hut", gems: 950, color: "orange" },
+        { name: 'Parabola', gems: 1600, color: 'emerald' },
+        { name: 'KFC', gems: 850, color: 'red' },
+        { name: 'Pizza Company', gems: 1200, color: 'blue' },
+        { name: 'Pizza Hut', gems: 950, color: 'orange' },
     ]);
     const [selectedStore, setSelectedStore] = useState(stores[0]);
 
     const [tradeOffers] = useState<TradeOffer[]>([
         {
-            id: "1",
+            id: '1',
             have: {
-                name: "Phoenix Bird",
-                image: "https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80",
-                discount: "50% Off Any Order",
-                rarity: "legendary",
+                name: 'Phoenix Bird',
+                image: 'https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80',
+                discount: '50% Off Any Order',
+                rarity: 'legendary',
             },
             want: {
-                name: "Dragon Spirit",
-                image: "https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 1 Get 2 Free",
-                rarity: "legendary",
+                name: 'Dragon Spirit',
+                image: 'https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 1 Get 2 Free',
+                rarity: 'legendary',
             },
         },
         {
-            id: "2",
+            id: '2',
             have: {
-                name: "Spirit Tiger",
-                image: "https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 2 Get 1 Free",
-                rarity: "epic",
+                name: 'Spirit Tiger',
+                image: 'https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 2 Get 1 Free',
+                rarity: 'epic',
             },
             want: {
-                name: "Crystal Fox",
-                image: "https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80",
-                discount: "40% Weekend Discount",
-                rarity: "epic",
+                name: 'Crystal Fox',
+                image: 'https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80',
+                discount: '40% Weekend Discount',
+                rarity: 'epic',
             },
         },
         {
-            id: "3",
+            id: '3',
             have: {
-                name: "Mystic Wolf",
-                image: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=200&q=80",
-                discount: "30% Off Everything",
-                rarity: "epic",
+                name: 'Mystic Wolf',
+                image: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=200&q=80',
+                discount: '30% Off Everything',
+                rarity: 'epic',
             },
             want: {
-                name: "Ancient Guardian",
-                image: "https://images.unsplash.com/photo-1533582437341-eac7c1f8229c?auto=format&fit=crop&w=200&q=80",
-                discount: "70% Special Discount",
-                rarity: "legendary",
+                name: 'Ancient Guardian',
+                image: 'https://images.unsplash.com/photo-1533582437341-eac7c1f8229c?auto=format&fit=crop&w=200&q=80',
+                discount: '70% Special Discount',
+                rarity: 'legendary',
             },
         },
         {
-            id: "4",
+            id: '4',
             have: {
-                name: "Golden Retriever",
-                image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80",
-                discount: "15% Discount",
-                rarity: "rare",
+                name: 'Golden Retriever',
+                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80',
+                discount: '15% Discount',
+                rarity: 'rare',
             },
             want: {
-                name: "Arctic Fox",
-                image: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80",
-                discount: "20% Off",
-                rarity: "rare",
+                name: 'Arctic Fox',
+                image: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80',
+                discount: '20% Off',
+                rarity: 'rare',
             },
         },
         {
-            id: "5",
+            id: '5',
             have: {
-                name: "Mysterious Cat",
-                image: "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 1 Get 1 Free",
-                rarity: "rare",
+                name: 'Mysterious Cat',
+                image: 'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 1 Get 1 Free',
+                rarity: 'rare',
             },
             want: {
-                name: "Spirit Tiger",
-                image: "https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 2 Get 1 Free",
-                rarity: "epic",
+                name: 'Spirit Tiger',
+                image: 'https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 2 Get 1 Free',
+                rarity: 'epic',
             },
         },
         {
-            id: "6",
+            id: '6',
             have: {
-                name: "Red Panda",
-                image: "https://images.unsplash.com/photo-1590692464430-96ff0b53f82f?auto=format&fit=crop&w=200&q=80",
-                discount: "Free Appetizer",
-                rarity: "rare",
+                name: 'Red Panda',
+                image: 'https://images.unsplash.com/photo-1590692464430-96ff0b53f82f?auto=format&fit=crop&w=200&q=80',
+                discount: 'Free Appetizer',
+                rarity: 'rare',
             },
             want: {
-                name: "Crystal Fox",
-                image: "https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80",
-                discount: "40% Weekend Discount",
-                rarity: "epic",
+                name: 'Crystal Fox',
+                image: 'https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80',
+                discount: '40% Weekend Discount',
+                rarity: 'epic',
             },
         },
         {
-            id: "7",
+            id: '7',
             have: {
-                name: "Friendly Hamster",
-                image: "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80",
-                discount: "10% Discount",
-                rarity: "common",
+                name: 'Friendly Hamster',
+                image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80',
+                discount: '10% Discount',
+                rarity: 'common',
             },
             want: {
-                name: "Mysterious Cat",
-                image: "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 1 Get 1 Free",
-                rarity: "rare",
+                name: 'Mysterious Cat',
+                image: 'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 1 Get 1 Free',
+                rarity: 'rare',
             },
         },
         {
-            id: "8",
+            id: '8',
             have: {
-                name: "Sleepy Cat",
-                image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=200&q=80",
-                discount: "5% Off",
-                rarity: "common",
+                name: 'Sleepy Cat',
+                image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=200&q=80',
+                discount: '5% Off',
+                rarity: 'common',
             },
             want: {
-                name: "Golden Retriever",
-                image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80",
-                discount: "15% Discount",
-                rarity: "rare",
+                name: 'Golden Retriever',
+                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80',
+                discount: '15% Discount',
+                rarity: 'rare',
             },
         },
         {
-            id: "9",
+            id: '9',
             have: {
-                name: "Playful Puppy",
-                image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80",
-                discount: "Free Drink",
-                rarity: "common",
+                name: 'Playful Puppy',
+                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80',
+                discount: 'Free Drink',
+                rarity: 'common',
             },
             want: {
-                name: "Arctic Fox",
-                image: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80",
-                discount: "20% Off",
-                rarity: "rare",
+                name: 'Arctic Fox',
+                image: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80',
+                discount: '20% Off',
+                rarity: 'rare',
             },
         },
         {
-            id: "10",
+            id: '10',
             have: {
-                name: "Dragon Spirit",
-                image: "https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80",
-                discount: "Buy 1 Get 2 Free",
-                rarity: "legendary",
+                name: 'Dragon Spirit',
+                image: 'https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80',
+                discount: 'Buy 1 Get 2 Free',
+                rarity: 'legendary',
             },
             want: {
-                name: "Phoenix Bird",
-                image: "https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80",
-                discount: "50% Off Any Order",
-                rarity: "legendary",
+                name: 'Phoenix Bird',
+                image: 'https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80',
+                discount: '50% Off Any Order',
+                rarity: 'legendary',
             },
         },
     ]);
@@ -237,19 +237,13 @@ export function TradePage() {
         // Apply sorting
         result.sort((a, b) => {
             switch (sortBy) {
-                case "rarity-asc":
-                    return (
-                        RARITY_ORDER[a.have.rarity] -
-                        RARITY_ORDER[b.have.rarity]
-                    );
-                case "rarity-desc":
-                    return (
-                        RARITY_ORDER[b.have.rarity] -
-                        RARITY_ORDER[a.have.rarity]
-                    );
-                case "oldest":
+                case 'rarity-asc':
+                    return RARITY_ORDER[a.have.rarity] - RARITY_ORDER[b.have.rarity];
+                case 'rarity-desc':
+                    return RARITY_ORDER[b.have.rarity] - RARITY_ORDER[a.have.rarity];
+                case 'oldest':
                     return Number(a.id) - Number(b.id);
-                case "newest":
+                case 'newest':
                 default:
                     return Number(b.id) - Number(a.id);
             }
@@ -260,31 +254,31 @@ export function TradePage() {
 
     const getRarityStyle = (rarity: string) => {
         switch (rarity) {
-            case "common":
-                return "from-gray-100 to-gray-200 text-gray-700 ring-gray-300";
-            case "rare":
-                return "from-blue-100 to-blue-200 text-blue-700 ring-blue-300";
-            case "epic":
-                return "from-purple-100 to-purple-200 text-purple-700 ring-purple-300";
-            case "legendary":
-                return "from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300";
+            case 'common':
+                return 'from-gray-100 to-gray-200 text-gray-700 ring-gray-300';
+            case 'rare':
+                return 'from-blue-100 to-blue-200 text-blue-700 ring-blue-300';
+            case 'epic':
+                return 'from-purple-100 to-purple-200 text-purple-700 ring-purple-300';
+            case 'legendary':
+                return 'from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300';
             default:
-                return "from-gray-100 to-gray-200 text-gray-700 ring-gray-300";
+                return 'from-gray-100 to-gray-200 text-gray-700 ring-gray-300';
         }
     };
 
     const getStoreColor = (color: string) => {
         switch (color) {
-            case "emerald":
-                return "bg-emerald-400";
-            case "red":
-                return "bg-red-500";
-            case "blue":
-                return "bg-blue-500";
-            case "orange":
-                return "bg-orange-500";
+            case 'emerald':
+                return 'bg-emerald-400';
+            case 'red':
+                return 'bg-red-500';
+            case 'blue':
+                return 'bg-blue-500';
+            case 'orange':
+                return 'bg-orange-500';
             default:
-                return "bg-emerald-400";
+                return 'bg-emerald-400';
         }
     };
 
@@ -295,16 +289,14 @@ export function TradePage() {
 
     const toggleRarity = (rarity: string) => {
         setSelectedRarities((prev) =>
-            prev.includes(rarity)
-                ? prev.filter((r) => r !== rarity)
-                : [...prev, rarity]
+            prev.includes(rarity) ? prev.filter((r) => r !== rarity) : [...prev, rarity]
         );
     };
 
     const clearFilters = () => {
         setSelectedRarities([]);
-        setSortBy("newest");
-        setSearchQuery("");
+        setSortBy('newest');
+        setSearchQuery('');
     };
 
     return (
@@ -321,9 +313,7 @@ export function TradePage() {
                     <h1 className="text-3xl font-black text-gray-800 drop-shadow-sm">
                         Trade Center
                     </h1>
-                    <p className="text-gray-700 text-sm mt-1">
-                        Exchange your characters!
-                    </p>
+                    <p className="text-gray-700 text-sm mt-1">Exchange your characters!</p>
                 </div>
             </div>
 
@@ -340,7 +330,7 @@ export function TradePage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     {searchQuery && (
                         <button
-                            onClick={() => setSearchQuery("")}
+                            onClick={() => setSearchQuery('')}
                             className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600"
                         >
                             <X className="w-5 h-5" />
@@ -351,8 +341,8 @@ export function TradePage() {
                     onClick={() => setShowFilters(!showFilters)}
                     className={`h-12 px-4 rounded-xl flex items-center gap-2 shadow-lg transition-colors ${
                         showFilters || selectedRarities.length > 0
-                            ? "bg-blue-500 text-white"
-                            : "bg-white/90 text-gray-600 hover:bg-white"
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white/90 text-gray-600 hover:bg-white'
                     }`}
                 >
                     <Filter className="w-5 h-5" />
@@ -369,9 +359,7 @@ export function TradePage() {
             {showFilters && (
                 <div className="mt-4 mx-4 bg-white/95 rounded-xl p-4 shadow-lg backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-800">
-                            Filters
-                        </h3>
+                        <h3 className="text-lg font-bold text-gray-800">Filters</h3>
                         <button
                             onClick={clearFilters}
                             className="text-sm text-blue-600 font-medium hover:text-blue-700"
@@ -382,61 +370,53 @@ export function TradePage() {
 
                     {/* Rarity Filters */}
                     <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-600 mb-2">
-                            Rarity
-                        </h4>
+                        <h4 className="text-sm font-medium text-gray-600 mb-2">Rarity</h4>
                         <div className="flex flex-wrap gap-2">
-                            {["common", "rare", "epic", "legendary"].map(
-                                (rarity) => (
-                                    <button
-                                        key={rarity}
-                                        onClick={() => toggleRarity(rarity)}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
-                                            selectedRarities.includes(rarity)
-                                                ? rarity === "legendary"
-                                                    ? "bg-yellow-100 text-yellow-700"
-                                                    : rarity === "epic"
-                                                    ? "bg-purple-100 text-purple-700"
-                                                    : rarity === "rare"
-                                                    ? "bg-blue-100 text-blue-700"
-                                                    : "bg-gray-100 text-gray-700"
-                                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                                        }`}
-                                    >
-                                        {rarity}
-                                    </button>
-                                )
-                            )}
+                            {['common', 'rare', 'epic', 'legendary'].map((rarity) => (
+                                <button
+                                    key={rarity}
+                                    onClick={() => toggleRarity(rarity)}
+                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                                        selectedRarities.includes(rarity)
+                                            ? rarity === 'legendary'
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : rarity === 'epic'
+                                                  ? 'bg-purple-100 text-purple-700'
+                                                  : rarity === 'rare'
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : 'bg-gray-100 text-gray-700'
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {rarity}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
                     {/* Sort Options */}
                     <div>
-                        <h4 className="text-sm font-medium text-gray-600 mb-2">
-                            Sort by
-                        </h4>
+                        <h4 className="text-sm font-medium text-gray-600 mb-2">Sort by</h4>
                         <div className="grid grid-cols-2 gap-2">
                             {[
-                                { value: "newest", label: "Newest First" },
-                                { value: "oldest", label: "Oldest First" },
+                                { value: 'newest', label: 'Newest First' },
+                                { value: 'oldest', label: 'Oldest First' },
                                 {
-                                    value: "rarity-asc",
-                                    label: "Rarity: Low to High",
+                                    value: 'rarity-asc',
+                                    label: 'Rarity: Low to High',
                                 },
                                 {
-                                    value: "rarity-desc",
-                                    label: "Rarity: High to Low",
+                                    value: 'rarity-desc',
+                                    label: 'Rarity: High to Low',
                                 },
                             ].map((option) => (
                                 <button
                                     key={option.value}
-                                    onClick={() =>
-                                        setSortBy(option.value as SortOption)
-                                    }
+                                    onClick={() => setSortBy(option.value as SortOption)}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                         sortBy === option.value
-                                            ? "bg-blue-100 text-blue-700"
-                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                                 >
                                     <ArrowUpDown className="w-4 h-4" />
@@ -455,12 +435,9 @@ export function TradePage() {
                         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                             <Search className="w-8 h-8 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">
-                            No trades found
-                        </h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">No trades found</h3>
                         <p className="text-gray-600">
-                            Try adjusting your search or filters to find what
-                            you're looking for.
+                            Try adjusting your search or filters to find what you're looking for.
                         </p>
                         <button
                             onClick={clearFilters}
@@ -515,34 +492,24 @@ export function TradePage() {
                                                     </span>
                                                     <div
                                                         className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                                            offer.have
-                                                                .rarity ===
-                                                            "legendary"
-                                                                ? "bg-yellow-100 text-yellow-700"
-                                                                : offer.have
-                                                                      .rarity ===
-                                                                  "epic"
-                                                                ? "bg-purple-100 text-purple-700"
-                                                                : offer.have
-                                                                      .rarity ===
-                                                                  "rare"
-                                                                ? "bg-blue-100 text-blue-700"
-                                                                : "bg-gray-100 text-gray-700"
+                                                            offer.have.rarity === 'legendary'
+                                                                ? 'bg-yellow-100 text-yellow-700'
+                                                                : offer.have.rarity === 'epic'
+                                                                  ? 'bg-purple-100 text-purple-700'
+                                                                  : offer.have.rarity === 'rare'
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : 'bg-gray-100 text-gray-700'
                                                         }`}
                                                     >
-                                                        {offer.have.rarity
-                                                            .charAt(0)
-                                                            .toUpperCase() +
-                                                            offer.have.rarity.slice(
-                                                                1
-                                                            )}
+                                                        {offer.have.rarity.charAt(0).toUpperCase() +
+                                                            offer.have.rarity.slice(1)}
                                                     </div>
                                                 </div>
                                                 <span
                                                     className={`text-sm font-medium ${
-                                                        getRarityStyle(
-                                                            offer.have.rarity
-                                                        ).split(" ")[2]
+                                                        getRarityStyle(offer.have.rarity).split(
+                                                            ' '
+                                                        )[2]
                                                     } block mt-1`}
                                                 >
                                                     {offer.have.discount}
@@ -572,34 +539,24 @@ export function TradePage() {
                                                     </span>
                                                     <div
                                                         className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                                            offer.want
-                                                                .rarity ===
-                                                            "legendary"
-                                                                ? "bg-yellow-100 text-yellow-700"
-                                                                : offer.want
-                                                                      .rarity ===
-                                                                  "epic"
-                                                                ? "bg-purple-100 text-purple-700"
-                                                                : offer.want
-                                                                      .rarity ===
-                                                                  "rare"
-                                                                ? "bg-blue-100 text-blue-700"
-                                                                : "bg-gray-100 text-gray-700"
+                                                            offer.want.rarity === 'legendary'
+                                                                ? 'bg-yellow-100 text-yellow-700'
+                                                                : offer.want.rarity === 'epic'
+                                                                  ? 'bg-purple-100 text-purple-700'
+                                                                  : offer.want.rarity === 'rare'
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : 'bg-gray-100 text-gray-700'
                                                         }`}
                                                     >
-                                                        {offer.want.rarity
-                                                            .charAt(0)
-                                                            .toUpperCase() +
-                                                            offer.want.rarity.slice(
-                                                                1
-                                                            )}
+                                                        {offer.want.rarity.charAt(0).toUpperCase() +
+                                                            offer.want.rarity.slice(1)}
                                                     </div>
                                                 </div>
                                                 <span
                                                     className={`text-sm font-medium ${
-                                                        getRarityStyle(
-                                                            offer.want.rarity
-                                                        ).split(" ")[2]
+                                                        getRarityStyle(offer.want.rarity).split(
+                                                            ' '
+                                                        )[2]
                                                     } block mt-1`}
                                                 >
                                                     {offer.want.discount}

@@ -1,14 +1,14 @@
-import { useRef } from "react";
-import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
-import { GameStateProvider, useGameState } from "./state/gameState";
-import TabNavigation from "./components/TabNavigation";
-import CouponPage from "./components/CouponPage";
-import CharactersPage from "./components/CharactersPage";
-import SummonPage from "./components/SummonPage";
-import TradePage from "./components/TradePage";
-import LeaderboardPage from "./components/LeaderboardPage";
-import PageHeader from "./components/PageHeader";
-import { useUrlNavigation } from "./hooks/useUrlNavigation";
+import { useRef } from 'react';
+import { IRefPhaserGame, PhaserGame } from './game/PhaserGame';
+import { GameStateProvider, useGameState } from './state/gameState';
+import TabNavigation from './components/TabNavigation';
+import CouponPage from './components/CouponPage';
+import CharactersPage from './components/CharactersPage';
+import SummonPage from './components/SummonPage';
+import TradePage from './components/TradePage';
+import LeaderboardPage from './components/LeaderboardPage';
+import PageHeader from './components/PageHeader';
+import { useUrlNavigation } from './hooks/useUrlNavigation';
 
 // Main App wrapper with GameStateProvider
 function AppWrapper() {
@@ -24,7 +24,7 @@ function AppContent() {
     // References to the PhaserGame component
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const { activeTab } = useGameState();
-    
+
     // Use the URL navigation hook to handle deep linking
     useUrlNavigation();
 
@@ -32,15 +32,35 @@ function AppContent() {
     const renderActivePage = () => {
         switch (activeTab) {
             case 'coupon':
-                return <div className="page-content coupon-page"><CouponPage /></div>;
+                return (
+                    <div className="page-content coupon-page">
+                        <CouponPage />
+                    </div>
+                );
             case 'character':
-                return <div className="page-content character-page"><CharactersPage /></div>;
+                return (
+                    <div className="page-content character-page">
+                        <CharactersPage />
+                    </div>
+                );
             case 'summon':
-                return <div className="page-content summon-page"><SummonPage /></div>;
+                return (
+                    <div className="page-content summon-page">
+                        <SummonPage />
+                    </div>
+                );
             case 'trade':
-                return <div className="page-content trade-page"><TradePage /></div>;
+                return (
+                    <div className="page-content trade-page">
+                        <TradePage />
+                    </div>
+                );
             case 'leaderboard':
-                return <div className="page-content leaderboard-page"><LeaderboardPage /></div>;
+                return (
+                    <div className="page-content leaderboard-page">
+                        <LeaderboardPage />
+                    </div>
+                );
             default:
                 return null;
         }
@@ -61,12 +81,8 @@ function AppContent() {
                 </div>
 
                 {/* Overlay pages for non-game tabs */}
-                {activeTab !== 'game' && (
-                    <div className="page-container">
-                        {renderActivePage()}
-                    </div>
-                )}
-                
+                {activeTab !== 'game' && <div className="page-container">{renderActivePage()}</div>}
+
                 {/* Tab navigation at bottom */}
                 <div className="tab-navigation">
                     <TabNavigation />

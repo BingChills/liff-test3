@@ -1,4 +1,4 @@
-import { Events } from "phaser";
+import { Events } from 'phaser';
 
 // A simple event bus to communicate between React and Phaser.
 
