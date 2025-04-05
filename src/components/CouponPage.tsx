@@ -8,7 +8,7 @@ import {
    Clock,
    User,
    Gem,
-   Points,
+   Coins,
    Timer,
    ChevronDown,
    Check,
