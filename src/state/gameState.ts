@@ -69,6 +69,7 @@ interface GameState {
     // Score
     score: number;
     setScore: (score: number) => void;
+    updateScore: (newScore: number) => void; // Dedicated function to update score and save to database
 
     // User information
     userId: string | null;
@@ -77,6 +78,9 @@ interface GameState {
     // Data management
     saveGameState: () => Promise<void>;
     loadGameState: () => Promise<void>;
+    
+    // Loading state
+    isLoading: boolean;
 }
 
 // Functions to interact with API
@@ -114,8 +118,8 @@ const savePlayerData = async (userId: string, data: any) => {
 };
 
 // Create context with default values
-const GameStateContext = createContext<GameState>({
-    activeTab: 'coupon',
+const defaultContextValue: GameState = {
+    activeTab: 'game',
     setActiveTab: () => {},
     point: 0,
     setPoint: () => {},
@@ -125,21 +129,32 @@ const GameStateContext = createContext<GameState>({
     setCoupons: () => {},
     stores: [],
     setStores: () => {},
-    selectedStore: { name: '', point: 0, color: '' }, //TODO: Fix this
+    selectedStore: {
+        name: 'Default Store',
+        point: 0,
+        color: 'blue',
+    },
     setSelectedStore: () => {},
-    stamina: { current: 0, max: 0 },
+    stamina: { current: 20, max: 20 },
     setStamina: () => {},
     drawCount: 0,
     setDrawCount: () => {},
     remainingDraws: 0,
     setRemainingDraws: () => {},
-    score: 0,
-    setScore: () => {},
     userId: null,
     setUserId: () => {},
     saveGameState: async () => {},
     loadGameState: async () => {},
-});
+    score: 0,
+    setScore: () => {},
+    updateScore: () => {},
+    isLoading: false,
+};
+
+const GameStateContext = createContext<GameState>(defaultContextValue);
+
+// Throttle timer for score updates - outside component to persist between renders
+let throttleTimer: NodeJS.Timeout | null = null;
 
 // Provider component to wrap our app
 export const GameStateProvider = (props: { children: ReactNode }) => {
@@ -202,6 +217,32 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         score,
     ]);
 
+    // Function to update just the score in the database
+    const updateScoreInDatabase = async (userId: string, newScore: number) => {
+        try {
+            await axios.patch(`/api/players/${userId}/score`, { value: newScore });
+            console.log('Score updated in database:', newScore);
+        } catch (error) {
+            console.error('Error updating score:', error);
+            throw error; // Re-throw to allow caller to handle
+        }
+    };
+    
+    // Synchronous save for beforeunload event
+    const saveScoreSynchronously = (userId: string, finalScore: number) => {
+        try {
+            // Use synchronous XMLHttpRequest (old-school but works for beforeunload)
+            const xhr = new XMLHttpRequest();
+            xhr.open('PATCH', `/api/players/${userId}/score`, false); // false = synchronous
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ value: finalScore }));
+            
+            console.log('Final score saved synchronously:', finalScore);
+        } catch (error) {
+            console.error('Failed to save final score:', error);
+        }
+    };
+
     // Function to load game state from MongoDB
     const loadGameState = useCallback(async () => {
         if (!userId) return;
@@ -263,6 +304,8 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
     // Listen for events from the Phaser game
     useEffect(() => {
+        if (!userId) return;
+        
         // Handle coupon collection event from the game
         const handleCouponCollected = (coupon: Coupon) => {
             setCoupons((prev) => [...prev, coupon]);
@@ -271,8 +314,15 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         // Handle score update event from the game
         const handleScoreUpdated = (newScore: number) => {
             setScore(newScore);
+            
+            // If userId exists, immediately update score in database without waiting for debounce
+            if (userId) {
+                updateScoreInDatabase(userId, newScore).catch((err) => 
+                    console.error('Failed to update score:', err)
+                );
+            }
         };
-
+        
         // Handle point collection event from the game
         const handlePointCollected = (amount: number) => {
             setPoint((prev) => prev + amount);
@@ -283,12 +333,67 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         EventBus.on('pointCollected', handlePointCollected);
 
         return () => {
-            // Clean up event listeners
             EventBus.removeListener('couponCollected', handleCouponCollected);
             EventBus.removeListener('scoreUpdated', handleScoreUpdated);
             EventBus.removeListener('pointCollected', handlePointCollected);
         };
+    }, [userId]);
+    
+    // Handle beforeunload event to save score when closing app
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            // If we have a score and userId, ensure it's saved
+            if (score > 0 && userId) {
+                // Clear any pending throttled save
+                if (throttleTimer) {
+                    clearTimeout(throttleTimer);
+                    throttleTimer = null;
+                }
+                
+                // Save synchronously
+                saveScoreSynchronously(userId, score);
+            }
+        };
+        
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [score, userId]);
+    
+    // Listen for game initialization
+    useEffect(() => {
+        const handleGameInitialized = () => {
+            console.log('Game initialized');
+        };
+        
+        EventBus.on('gameInitialized', handleGameInitialized);
+        
+        return () => {
+            EventBus.removeListener('gameInitialized', handleGameInitialized);
+        };
     }, []);
+
+    // Define updateScore function with throttling for direct score updates
+    const updateScore = useCallback((newScore: number) => {
+        // Always update UI immediately
+        setScore(newScore);
+        
+        if (!userId) return;
+        
+        // Skip if a save is already pending
+        if (throttleTimer) return;
+        
+        // Set throttle timer
+        throttleTimer = setTimeout(() => {
+            updateScoreInDatabase(userId, newScore)
+                .catch(err => console.error('Failed to update score:', err))
+                .finally(() => {
+                    throttleTimer = null;
+                });
+        }, 300); // 300ms throttle is a good balance
+    }, [userId]);
 
     // Define the value object to be provided to consumers
     const value: GameState = {
@@ -316,6 +421,8 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         setUserId,
         saveGameState,
         loadGameState,
+        updateScore,
+        isLoading,
     };
 
     // Use React.createElement instead of JSX
