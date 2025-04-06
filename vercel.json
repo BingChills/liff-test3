@@ -2,8 +2,14 @@
   "version": 2,
   "buildCommand": "next build",
   "outputDirectory": ".next",
+  "functions": {
+    "api/server.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/api/(.*)", "destination": "/api/server.js" },
     { "source": "/assets/(.*)", "destination": "/assets/$1" }
   ]
 }

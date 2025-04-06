@@ -28,10 +28,16 @@ if (process.env.NODE_ENV === "production") {
     app.use(express.static("public"));
 }
 
-// Set port
-const PORT = process.env.PORT || 5000;
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Check if this is being run directly (local dev) or as a module (Vercel)
+if (require.main === module) {
+    // Set port for local development
+    const PORT = process.env.PORT || 5000;
+    
+    // Start server locally
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+} else {
+    // Export for serverless use
+    module.exports = app;
+}
