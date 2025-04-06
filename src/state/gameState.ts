@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import React from 'react';
 import { EventBus } from '../game/EventBus';
-import axios from 'axios';
+import apiClient from '../config/api';
 
 // Define types for our game state
 export interface Coupon {
@@ -86,12 +86,12 @@ interface GameState {
 // Functions to interact with API
 const fetchPlayerData = async (userId: string) => {
     try {
-        const response = await axios.get(`/api/players/${userId}`);
+        const response = await apiClient.get(`/api/players/${userId}`);
         return response.data;
     } catch (error) {
         if ((error as any)?.response?.status === 404) {
             // Player not found, create a new player
-            const createResponse = await axios.post('/api/players', { userId });
+            const createResponse = await apiClient.post('/api/players', { userId });
             return createResponse.data;
         }
         console.error('Error fetching player data:', error);
@@ -101,12 +101,12 @@ const fetchPlayerData = async (userId: string) => {
 
 const savePlayerData = async (userId: string, data: any) => {
     try {
-        const response = await axios.put(`/api/players/${userId}`, data);
+        const response = await apiClient.put(`/api/players/${userId}`, data);
         return response.data;
     } catch (error) {
         if ((error as any)?.response?.status === 404) {
             // Player not found, create a new player with the data
-            const createResponse = await axios.post('/api/players', {
+            const createResponse = await apiClient.post('/api/players', {
                 userId,
                 ...data,
             });
@@ -222,15 +222,15 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         try {
             console.log(`Attempting to update score for user ${userId} to ${newScore}`);
             
-            // More explicit error handling and logging
-            const response = await axios.patch(`/api/players/${userId}/score`, { value: newScore });
+            // Using apiClient that points to Railway backend
+            const response = await apiClient.patch(`/api/players/${userId}/score`, { value: newScore });
             
             console.log('Score update response:', response.status);
             console.log('Score updated in database:', newScore);
             return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error('Axios error updating score:', {
+        } catch (error: any) {
+            if (error.response) {
+                console.error('API error updating score:', {
                     status: error.response?.status,
                     statusText: error.response?.statusText,
                     data: error.response?.data,
@@ -248,16 +248,17 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         try {
             console.log(`Attempting to save final score synchronously: ${finalScore} for user ${userId}`);
             
-            // Get the absolute URL for the API endpoint
-            const baseUrl = window.location.origin;
-            const apiUrl = `${baseUrl}/api/players/${userId}/score`;
+            // Get the API URL for the Railway backend
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const fullUrl = `${apiUrl}/api/players/${userId}/score`;
             
-            console.log('Sync API URL:', apiUrl);
+            console.log('Sync API URL:', fullUrl);
             
             // Use synchronous XMLHttpRequest (old-school but works for beforeunload)
             const xhr = new XMLHttpRequest();
-            xhr.open('PATCH', apiUrl, false); // false = synchronous
+            xhr.open('PATCH', fullUrl, false); // false = synchronous
             xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
             xhr.send(JSON.stringify({ value: finalScore }));
             
             console.log(`XHR Status: ${xhr.status} - Final score saved synchronously: ${finalScore}`);

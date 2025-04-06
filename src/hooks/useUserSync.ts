@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useLiff } from '../context/LiffContext'
 import { UserProfile, PlayerType } from '../context/LiffContext' // Import the UserProfile type
-import axios from 'axios'
+import apiClient from '../config/api'
 
 // NOTE: Maybe can improve this later
 export const useUserSync = () => {
@@ -17,19 +17,19 @@ export const useUserSync = () => {
          try {
             // First check if the user already exists
             try {
-               const getResponse = await axios.get(`/api/players/${userProfile.userId}`)
+               const getResponse = await apiClient.get(`/api/players/${userProfile.userId}`)
                setUser(getResponse.data)
                return
-            } catch (error) {
+            } catch (error: any) {
                // If 404 -> continue to create user
                // If other error -> throw
-               if (axios.isAxiosError(error) && error.response?.status !== 404) {
+               if (error.response && error.response.status !== 404) {
                   throw error
                }
             }
 
             // If user wasn't found, create a new one
-            const createResponse = await axios.post('/api/players', {
+            const createResponse = await apiClient.post('/api/players', {
                userId: userProfile.userId,
                displayName: userProfile.displayName,
                pictureUrl: userProfile.pictureUrl,

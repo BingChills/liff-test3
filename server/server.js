@@ -10,8 +10,23 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors());
+// Enhanced CORS configuration for Railway deployment
+app.use(cors({
+   origin: process.env.NODE_ENV === 'production' 
+      ? ['https://linkz-gameplay-4qmxw9gte-rievos-projects-b5753fbf.vercel.app', 'https://linkz-gameplay.vercel.app']
+      : '*',
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+   allowedHeaders: ['Content-Type', 'Authorization'],
+   credentials: true
+}));
+
+// Request logging middleware
+app.use((req, res, next) => {
+   console.log(`${new Date().toISOString()} | ${req.method} ${req.url}`);
+   next();
+});
+
+// JSON and URL encoded parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
