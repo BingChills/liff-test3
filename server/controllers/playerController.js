@@ -114,15 +114,25 @@ const updatePlayer = async (req, res) => {
 // @access  Private
 const updatePlayerField = async (req, res) => {
    try {
+      console.log('PATCH request received:', { 
+         params: req.params,
+         body: req.body,
+         headers: req.headers
+      })
+
       const { userId, field } = req.params
       const { value } = req.body
 
+      console.log(`Updating player field: ${field} to ${value} for user ${userId}`)
+
       // Validate parameters
       if (!userId || !field) {
+         console.error('Missing parameter:', { userId, field })
          return res.status(400).json({ message: 'Both userId and field parameters are required' })
       }
 
       if (value === undefined) {
+         console.error('Missing value in request body')
          return res.status(400).json({ message: 'Value is required in request body' })
       }
 
@@ -132,6 +142,18 @@ const updatePlayerField = async (req, res) => {
          updatedAt: Date.now()
       }
 
+      console.log('Searching for player with userId:', userId)
+
+      // First verify the player exists
+      const existingPlayer = await Player.findOne({ userId })
+      if (!existingPlayer) {
+         console.error('Player not found with userId:', userId)
+         return res.status(404).json({ message: 'Player not found' })
+      }
+
+      console.log('Found player:', existingPlayer.userId)
+      console.log('Update object:', updateObject)
+
       // Update player using consistent userId field
       const player = await Player.findOneAndUpdate(
          { userId },
@@ -140,16 +162,17 @@ const updatePlayerField = async (req, res) => {
       )
 
       if (!player) {
+         console.error('Player not found after update attempt')
          return res.status(404).json({ message: 'Player not found' })
       }
 
+      console.log(`Successfully updated ${field} to ${value} for player ${userId}`)
+
+      // Return updated player data
       res.json(player)
    } catch (error) {
-      console.error(`Error in updatePlayerField: ${error.message}`)
-      res.status(500).json({
-         message: 'Failed to update player field',
-         error: process.env.NODE_ENV === 'production' ? null : error.message
-      })
+      console.error('Error updating player field:', error)
+      res.status(500).json({ message: 'Server error', details: error.message })
    }
 }
 

@@ -220,10 +220,25 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     // Function to update just the score in the database
     const updateScoreInDatabase = async (userId: string, newScore: number) => {
         try {
-            await axios.patch(`/api/players/${userId}/score`, { value: newScore });
+            console.log(`Attempting to update score for user ${userId} to ${newScore}`);
+            
+            // More explicit error handling and logging
+            const response = await axios.patch(`/api/players/${userId}/score`, { value: newScore });
+            
+            console.log('Score update response:', response.status);
             console.log('Score updated in database:', newScore);
+            return response.data;
         } catch (error) {
-            console.error('Error updating score:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Axios error updating score:', {
+                    status: error.response?.status,
+                    statusText: error.response?.statusText,
+                    data: error.response?.data,
+                    url: `/api/players/${userId}/score`,
+                });
+            } else {
+                console.error('Unknown error updating score:', error);
+            }
             throw error; // Re-throw to allow caller to handle
         }
     };
@@ -231,13 +246,21 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     // Synchronous save for beforeunload event
     const saveScoreSynchronously = (userId: string, finalScore: number) => {
         try {
+            console.log(`Attempting to save final score synchronously: ${finalScore} for user ${userId}`);
+            
+            // Get the absolute URL for the API endpoint
+            const baseUrl = window.location.origin;
+            const apiUrl = `${baseUrl}/api/players/${userId}/score`;
+            
+            console.log('Sync API URL:', apiUrl);
+            
             // Use synchronous XMLHttpRequest (old-school but works for beforeunload)
             const xhr = new XMLHttpRequest();
-            xhr.open('PATCH', `/api/players/${userId}/score`, false); // false = synchronous
+            xhr.open('PATCH', apiUrl, false); // false = synchronous
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify({ value: finalScore }));
             
-            console.log('Final score saved synchronously:', finalScore);
+            console.log(`XHR Status: ${xhr.status} - Final score saved synchronously: ${finalScore}`);
         } catch (error) {
             console.error('Failed to save final score:', error);
         }
@@ -308,14 +331,26 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     useEffect(() => {
         // Handle score update event from the game - This should ALWAYS work
         const handleScoreUpdated = (newScore: number) => {
-            console.log('Score updated:', newScore);
+            console.log('Score event received from game:', newScore);
+            
+            // Always update UI immediately
             setScore(newScore);
             
             // If userId exists, also update the database
             if (userId) {
-                updateScoreInDatabase(userId, newScore).catch((err) => 
-                    console.error('Failed to update score:', err)
-                );
+                console.log(`User ID available (${userId}), updating score in database`);
+                
+                // Attempt to update score in database with better error handling
+                updateScoreInDatabase(userId, newScore)
+                    .then(data => {
+                        console.log('Database update successful:', data);
+                    })
+                    .catch(err => {
+                        console.error('Failed to update score in database:', err);
+                        // Store failed updates to retry later if needed
+                    });
+            } else {
+                console.warn('Score updated but userId not available - database not updated');
             }
         };
         
