@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { User, Coins, Timer, Gem, ChevronDown } from 'lucide-react'
+import { User, Coins, Timer, Gem, ChevronDown, X, MessageCircle, Calendar, Award } from 'lucide-react'
 import { useLiff } from '../context/LiffContext'
 import { useGameState, StoreCurrency } from '../state/gameState'
 
@@ -14,6 +14,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const { liff, userProfile } = useLiff()
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
+   const [showProfileModal, setShowProfileModal] = useState(false)
 
    // Use profile picture from LINE
    useEffect(() => {
@@ -60,11 +61,15 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    }
 
    return (
+      <>
       <div className='px-4 py-3'>
          {/* Resources bar - only the profile and resources */}
          <div className='flex items-center justify-between'>
             {/* User profile icon */}
-            <div className='w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden'>
+            <button 
+               onClick={() => setShowProfileModal(true)}
+               className='w-12 h-12 rounded-2xl shadow-md flex items-center justify-center overflow-hidden transition-transform active:scale-95'
+            >
                {profilePicture ? (
                   <img src={profilePicture} alt='Profile' className='w-full h-full object-cover rounded-2xl' />
                ) : (
@@ -72,7 +77,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      <User className='w-6 h-6 text-blue-600' />
                   </div>
                )}
-            </div>
+            </button>
 
             {/* Right side: Resources */}
             <div className='flex items-center gap-2'>
@@ -138,6 +143,96 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
             </div>
          </div>
       </div>
+
+      {/* Player Information Modal */}
+      {showProfileModal && userProfile && (
+         <div 
+            className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
+            onClick={() => setShowProfileModal(false)}
+         >
+            <div 
+               className='bg-white w-[85%] max-w-sm rounded-3xl p-6 transform transition-all'
+               onClick={(e) => e.stopPropagation()}
+            >
+               {/* Close button */}
+               <button 
+                  className='absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors'
+                  onClick={() => setShowProfileModal(false)}
+               >
+                  <X size={20} className='text-gray-500' />
+               </button>
+               
+               {/* Profile header */}
+               <div className='text-center mb-6'>
+                  <div className='w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-blue-100'>
+                     {profilePicture ? (
+                        <img src={profilePicture} alt={userProfile?.displayName || 'Profile'} className='w-full h-full object-cover' />
+                     ) : (
+                        <div className='w-full h-full bg-blue-100 flex items-center justify-center'>
+                           <User className='w-10 h-10 text-blue-600' />
+                        </div>
+                     )}
+                  </div>
+                  <h2 className='text-xl font-bold text-gray-800'>{userProfile?.displayName}</h2>
+                  {userProfile?.statusMessage && (
+                     <div className='flex items-center justify-center mt-1 text-gray-500'>
+                        <MessageCircle size={14} className='mr-1' />
+                        <p className='text-sm italic'>"{userProfile?.statusMessage}"</p>
+                     </div>
+                  )}
+               </div>
+
+               {/* Stats section */}
+               <div className='bg-gray-50 rounded-2xl p-4 mb-4'>
+                  <h3 className='text-sm font-semibold text-gray-500 mb-3'>PLAYER STATS</h3>
+                  
+                  <div className='space-y-3'>
+                     {/* Score */}
+                     <div className='flex items-center justify-between'>
+                        <div className='flex items-center'>
+                           <div className='w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3'>
+                              <Award className='w-4 h-4 text-yellow-600' />
+                           </div>
+                           <span className='text-gray-700'>Total Score</span>
+                        </div>
+                        <span className='font-bold text-gray-900'>{score}</span>
+                     </div>
+                     
+                     {/* Stamina */}
+                     <div className='flex items-center justify-between'>
+                        <div className='flex items-center'>
+                           <div className='w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3'>
+                              <Timer className='w-4 h-4 text-red-600' />
+                           </div>
+                           <span className='text-gray-700'>Energy</span>
+                        </div>
+                        <span className='font-bold text-gray-900'>{stamina.current}/{stamina.max}</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Currencies section */}
+               <div className='bg-gray-50 rounded-2xl p-4'>
+                  <h3 className='text-sm font-semibold text-gray-500 mb-3'>STORE POINTS</h3>
+                  
+                  <div className='space-y-3'>
+                     {stores.map(store => (
+                        <div key={store.name} className='flex items-center justify-between'>
+                           <div className='flex items-center'>
+                              <div className={`w-8 h-8 rounded-full ${getStoreColor(store.color)} flex items-center justify-center mr-3`}>
+                                 <Gem className='w-4 h-4 text-white' />
+                              </div>
+                              <span className='text-gray-700'>{store.name}</span>
+                           </div>
+                           <span className='font-bold text-gray-900'>{store.point}</span>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+         </div>
+      )}
+      </>
    )
 }
 
