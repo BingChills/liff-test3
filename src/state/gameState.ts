@@ -302,20 +302,16 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         return () => clearTimeout(timeoutId);
     }, [point, characters, coupons, stores, selectedStore, stamina, score, userId, saveGameState]);
 
-    // Listen for events from the Phaser game
+    // Split event listeners into two groups: those that need userId and those that don't
+    
+    // Listen for essential game events that should work regardless of authentication
     useEffect(() => {
-        if (!userId) return;
-        
-        // Handle coupon collection event from the game
-        const handleCouponCollected = (coupon: Coupon) => {
-            setCoupons((prev) => [...prev, coupon]);
-        };
-
-        // Handle score update event from the game
+        // Handle score update event from the game - This should ALWAYS work
         const handleScoreUpdated = (newScore: number) => {
+            console.log('Score updated:', newScore);
             setScore(newScore);
             
-            // If userId exists, immediately update score in database without waiting for debounce
+            // If userId exists, also update the database
             if (userId) {
                 updateScoreInDatabase(userId, newScore).catch((err) => 
                     console.error('Failed to update score:', err)
@@ -328,14 +324,29 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             setPoint((prev) => prev + amount);
         };
 
-        EventBus.on('couponCollected', handleCouponCollected);
+        // Always listen for score and point updates regardless of userId status
         EventBus.on('scoreUpdated', handleScoreUpdated);
         EventBus.on('pointCollected', handlePointCollected);
 
         return () => {
-            EventBus.removeListener('couponCollected', handleCouponCollected);
             EventBus.removeListener('scoreUpdated', handleScoreUpdated);
             EventBus.removeListener('pointCollected', handlePointCollected);
+        };
+    }, [userId]); // Include userId as dependency for the database update
+    
+    // Listen for user-specific events (needs userId)
+    useEffect(() => {
+        if (!userId) return;
+        
+        // Handle coupon collection event from the game
+        const handleCouponCollected = (coupon: Coupon) => {
+            setCoupons((prev) => [...prev, coupon]);
+        };
+
+        EventBus.on('couponCollected', handleCouponCollected);
+
+        return () => {
+            EventBus.removeListener('couponCollected', handleCouponCollected);
         };
     }, [userId]);
     
