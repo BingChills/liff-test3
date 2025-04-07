@@ -13,10 +13,16 @@ const connectDB = async () => {
     
     console.log('Connecting to MongoDB...');
     
-    // Simple connection options
+    // Enhanced connection options for better reliability
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000, // Timeout after 30 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      retryWrites: true,
+      retryReads: true,
+      w: 'majority', // Write to primary and wait for acknowledgment from a majority of members
+      maxPoolSize: 10, // Maintain up to 10 socket connections
     };
     
     const conn = await mongoose.connect(process.env.MONGODB_URI, options);
