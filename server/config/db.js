@@ -1,52 +1,47 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Very simple connection for the demo
+// Lightweight connection function for the demo
+let isConnected = false;
+
+// Simplest possible connection function
 const connectDB = async () => {
   try {
+    // If already connected, return the existing connection
+    if (isConnected) {
+      console.log('🟢 Using existing MongoDB connection');
+      return mongoose.connection;
+    }
+    
     // Check for MongoDB URI
     if (!process.env.MONGODB_URI) {
-      console.error('MONGODB_URI is not defined in environment variables');
-      console.log('Please check your .env file or Vercel environment variables');
+      console.error('❌ MONGODB_URI is not defined');
       return null;
     }
     
-    console.log('Connecting to MongoDB...');
+    console.log('🔌 Connecting to MongoDB...');
     
-    // Minimal connection options, optimized for Vercel
-    const options = {
-      // Remove deprecated options
-      // Add SSL options to fix connection issues
-      ssl: true,
-      sslValidate: false, // For demo only
-      retryWrites: false, // Disable retryWrites which can cause issues
-      maxPoolSize: 2, // Reduce connection pool for Vercel
-      connectTimeoutMS: 5000 // Shorter timeout
-    };
+    // For this demo, use absolutely minimal connection options
+    // Everything defaults to MongoDB driver defaults
+    await mongoose.connect(process.env.MONGODB_URI);
     
-    // Extract the main part of the connection string
-    const uri = process.env.MONGODB_URI.split('?')[0];
-    console.log('Using simplified MongoDB connection');
+    // Mark as connected
+    isConnected = true;
     
-    const conn = await mongoose.connect(uri, options);
-    
-    // Log connection success details
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    console.log(`Using database: ${conn.connection.db.databaseName}`);
-    
-    // Set up connection event handlers
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Simple event handlers
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-    });
-
-    return conn;
+    // Log success
+    console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
+    return mongoose.connection;
   } catch (error) {
-    console.error(`Error connecting to MongoDB:`, error);
-    // Don't exit the process, just log the error
-    console.log('Will continue without database connection');
+    // Handle specific error types with more helpful messages
+    if (error.name === 'MongoParseError') {
+      console.error('❌ MongoDB connection string error:', error.message);
+    } else if (error.name === 'MongoNetworkError') {
+      console.error('❌ MongoDB network error - check your connection and VPN');
+    } else {
+      console.error('❌ MongoDB connection error:', error);
+    }
+    
+    isConnected = false;
     return null;
   }
 };
