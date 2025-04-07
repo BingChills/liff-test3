@@ -135,70 +135,95 @@ const updatePlayer = async (req, res) => {
    }
 }
 
-// @desc    Update specific field of player data
+// @desc    Update a specific field for a player by user ID
 // @route   PATCH /api/players/:userId/:field
 // @access  Private
 const updatePlayerField = async (req, res) => {
    try {
-      console.log('PATCH request received:', { 
-         params: req.params,
-         body: req.body,
-         headers: req.headers
-      })
+      const { userId, field } = req.params;
+      const { value } = req.body;
 
-      const { userId, field } = req.params
-      const { value } = req.body
-
-      console.log(`Updating player field: ${field} to ${value} for user ${userId}`)
+      console.log(`🔄 Score update request: ${field}=${value} for user ${userId}`);
 
       // Validate parameters
       if (!userId || !field) {
-         console.error('Missing parameter:', { userId, field })
-         return res.status(400).json({ message: 'Both userId and field parameters are required' })
+         console.error('❌ Missing parameter:', { userId, field });
+         return res.status(400).json({ message: 'Both userId and field parameters are required' });
       }
 
       if (value === undefined) {
-         console.error('Missing value in request body')
-         return res.status(400).json({ message: 'Value is required in request body' })
+         console.error('❌ Missing value in request body');
+         return res.status(400).json({ message: 'Value is required in request body' });
       }
 
-      // Construct update object with the field to update
+      // Special handling for score updates - simplified for better reliability
+      if (field === 'score') {
+         try {
+            console.log(`🏆 Processing SCORE UPDATE for ${userId}: ${value}`);
+            
+            // Use a very direct update approach for scores
+            const result = await Player.updateOne(
+               { userId }, 
+               { $set: { score: value } }
+            );
+            
+            if (result.matchedCount === 0) {
+               console.log(`⚠️ No player found with userId ${userId} for score update. Creating new player.`);
+               
+               // Create basic player if not found
+               const newPlayer = {
+                  userId,
+                  score: value,
+                  stores: [
+                     { name: "Food", point: 0, color: "#FF5722" },
+                     { name: "Shopping", point: 0, color: "#E91E63" },
+                     { name: "Entertainment", point: 0, color: "#9C27B0" }
+                  ],
+                  updatedAt: Date.now()
+               };
+               
+               const player = await Player.create(newPlayer);
+               console.log(`✅ Created new player with initial score ${value}`);
+               return res.status(201).json(player);
+            }
+            
+            console.log(`✅ Score successfully updated to ${value} for player ${userId}`);
+            return res.json({ userId, field, value, success: true });
+         } catch (scoreError) {
+            console.error('❌ Error in score update:', scoreError);
+            return res.status(500).json({ 
+               message: 'Failed to update score', 
+               error: scoreError.message 
+            });
+         }
+      }
+      
+      // Standard update for non-score fields
+      console.log(`📝 Updating non-score field: ${field}=${value}`);
+      
+      // Construct update object
       const updateObject = {
          [field]: value,
          updatedAt: Date.now()
-      }
+      };
 
-      console.log('Searching for player with userId:', userId)
-
-      // First verify the player exists
-      const existingPlayer = await Player.findOne({ userId })
-      if (!existingPlayer) {
-         console.error('Player not found with userId:', userId)
-         return res.status(404).json({ message: 'Player not found' })
-      }
-
-      console.log('Found player:', existingPlayer.userId)
-      console.log('Update object:', updateObject)
-
-      // Update player using consistent userId field
+      // Simple update operation
       const player = await Player.findOneAndUpdate(
          { userId },
          { $set: updateObject },
-         { new: true, runValidators: true }
-      )
+         { new: true }
+      );
 
       if (!player) {
-         console.error('Player not found after update attempt')
-         return res.status(404).json({ message: 'Player not found' })
+         console.error(`❌ Player not found with userId: ${userId}`);
+         return res.status(404).json({ message: 'Player not found' });
       }
 
-      console.log(`Successfully updated ${field} to ${value} for player ${userId}`)
-
-      // Return updated player data
-      res.json(player)
+      console.log(`✅ Updated ${field} to ${value} for player ${userId}`);
+      res.json(player);
    } catch (error) {
-      console.error('Error updating player field:', error)
-      res.status(500).json({ message: 'Server error', details: error.message })
+      console.error('❌ Error updating player field:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
    }
 }
 

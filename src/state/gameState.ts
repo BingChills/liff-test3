@@ -243,49 +243,83 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         }
     };
     
-    // Synchronous save for beforeunload event - enhanced version
+    // Simplified final score saving to reduce API load
     const saveScoreSynchronously = (userId: string, finalScore: number) => {
         try {
-            console.log(`💾 Saving final score on page close: ${finalScore} for user ${userId}`);
+            console.log(`💾 FINAL SCORE SAVE: ${finalScore} for user ${userId}`);
             
-            // First save to localStorage as reliable backup
-            localStorage.setItem('playerScore', finalScore.toString());
-            localStorage.setItem('playerScoreTimestamp', Date.now().toString());
-            localStorage.setItem('playerScoreUserId', userId);
+            // ALWAYS save to localStorage as the primary reliable storage method
+            localStorage.setItem('finalScore', finalScore.toString());
+            localStorage.setItem('finalScoreTimestamp', Date.now().toString());
+            localStorage.setItem('finalScoreUserId', userId);
+            localStorage.setItem('lastApiScore', finalScore.toString());
             
-            // For the demo, also try using the new sendBeacon API which is more reliable than sync XHR
+            // Get the current origin for full URLs
+            const origin = window.location.origin;
+            
+            // Use sendBeacon as the only API method for closing page
+            // This is the most reliable method and doesn't block page unload
             if (navigator.sendBeacon) {
                 const blob = new Blob([JSON.stringify({ value: finalScore })], { type: 'application/json' });
-                const success = navigator.sendBeacon(`/api/players/${userId}/score`, blob);
-                console.log(`📡 sendBeacon ${success ? 'succeeded' : 'failed'}`);
+                const fullUrl = `${origin}/api/players/${userId}/score`;
+                console.log(`📬 Sending final score via beacon to: ${fullUrl}`);
+                const success = navigator.sendBeacon(fullUrl, blob);
+                console.log(`📬 Final score beacon ${success ? 'accepted' : 'rejected'}`);
+            } else {
+                console.log('⚠️ sendBeacon not available, relying on localStorage');
             }
             
-            // Fallback to synchronous XHR as last resort
-            try {
-                const apiUrl = `/api/players/${userId}/score`;
-                const xhr = new XMLHttpRequest();
-                xhr.open('PATCH', apiUrl, false); // false = synchronous
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({ value: finalScore }));
-                console.log(`✅ XHR Status: ${xhr.status} - Score saved synchronously`);
-            } catch (xhrError) {
-                console.error('❌ XHR failed:', xhrError);
-                // At this point we've already saved to localStorage, so the score isn't lost
-            }
+            // No XHR fallback as it's causing too many connections
+            // We'll restore from localStorage when the app starts again
         } catch (error) {
             console.error('❌ Failed to save final score:', error);
         }
     };
 
-    // Function to load game state from MongoDB
+    // Function to load game state from MongoDB with localStorage fallback
     const loadGameState = useCallback(async () => {
         if (!userId) return;
 
         setIsLoading(true);
+        console.log('👤 Loading game state for user:', userId);
+        
         try {
+            // Try to get data from the API first
+            console.log('🔄 Attempting to load player data from API...');
             const playerData = await fetchPlayerData(userId);
 
             if (playerData) {
+                console.log('✅ Successfully loaded player data from API');
+                
+                // Check if we have a more recent score in localStorage
+                const localFinalScore = localStorage.getItem('finalScore');
+                const localFinalScoreUserId = localStorage.getItem('finalScoreUserId');
+                const localFinalScoreTimestamp = localStorage.getItem('finalScoreTimestamp');
+                
+                let scoreToUse = playerData.score || 0;
+                
+                // If there's a more recent score in localStorage for this user, use it
+                if (localFinalScore && localFinalScoreUserId === userId && localFinalScoreTimestamp) {
+                    const localScore = parseInt(localFinalScore);
+                    const timestamp = parseInt(localFinalScoreTimestamp);
+                    const now = Date.now();
+                    const isRecent = (now - timestamp) < 24 * 60 * 60 * 1000; // Within 24 hours
+                    
+                    if (isRecent && localScore > scoreToUse) {
+                        console.log(`📊 Using higher localStorage score: ${localScore} vs API: ${scoreToUse}`);
+                        scoreToUse = localScore;
+                        
+                        // Update the API with this higher score
+                        try {
+                            apiClient.patch(`/api/players/${userId}/score`, { value: scoreToUse })
+                                .then(() => console.log('✅ API updated with local score'))
+                                .catch(err => console.error('❌ Failed to update API with local score:', err.message));
+                        } catch (e) {
+                            console.error('❌ Error syncing local score to API:', e);
+                        }
+                    }
+                }
+                
                 // Set all state from retrieved data
                 setPoint(playerData.point || 0);
                 setCharacters(playerData.characters || []);
@@ -297,7 +331,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
                 setStamina(playerData.stamina || { current: 20, max: 20 });
                 setDrawCount(playerData.drawCount || 0);
                 setRemainingDraws(playerData.remainingDraws || 0);
-                setScore(playerData.score || 0);
+                setScore(scoreToUse); // Use the higher score we determined
             }
         } catch (error) {
             console.error('Failed to load game state:', error);
@@ -347,45 +381,47 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             // Always update UI immediately
             setScore(newScore);
             
-            // If userId exists, also update the database
+            // Update score in database (only periodically to reduce API calls)
             if (userId) {
-                console.log(`User ID available (${userId}), updating score in database`);
-                
-                // Save the score to localStorage as backup before sending to server
+                // Always save score to localStorage
                 try {
                     localStorage.setItem('lastScore', newScore.toString());
                     localStorage.setItem('lastScoreTimestamp', Date.now().toString());
                     localStorage.setItem('lastScoreUserId', userId);
+                    console.log(`💾 Score ${newScore} saved to localStorage`);
                 } catch (e) {
                     console.error('Error saving score to localStorage:', e);
                 }
                 
-                // Update the score with retry logic
-                console.log(`💰 Updating score for ${userId}: ${newScore}`);
+                // Only update score in database every 5 seconds or when score increases by 50+
+                const lastApiUpdateTime = parseInt(localStorage.getItem('lastApiUpdateTime') || '0');
+                const lastApiScore = parseInt(localStorage.getItem('lastApiScore') || '0');
+                const currentTime = Date.now();
+                const timeSinceLastUpdate = currentTime - lastApiUpdateTime;
+                const scoreDifference = newScore - lastApiScore;
                 
-                // Function to attempt update with retries
-                const attemptScoreUpdate = (score: number, retriesLeft = 3) => {
-                    apiClient.patch(`/api/players/${userId}/score`, { value: score })
+                // Only update if:
+                // 1. It's been 5+ seconds since last update OR
+                // 2. Score increased by 50+ points OR
+                // 3. This is the first update (lastApiUpdateTime is 0)
+                if (timeSinceLastUpdate > 5000 || scoreDifference >= 50 || lastApiUpdateTime === 0) {
+                    console.log(`🏆 Sending score ${newScore} to API (time: ${timeSinceLastUpdate}ms, diff: ${scoreDifference})`);
+                    
+                    // Store current update time and score
+                    localStorage.setItem('lastApiUpdateTime', currentTime.toString());
+                    localStorage.setItem('lastApiScore', newScore.toString());
+                    
+                    // Simple update without retries to reduce complexity
+                    apiClient.patch(`/api/players/${userId}/score`, { value: newScore })
                         .then(response => {
-                            console.log('✅ Score update successful:', response.data);
+                            console.log('✅ Score update successful');
                         })
                         .catch(error => {
-                            console.error('❌ Error updating score:', error);
-                            if (retriesLeft > 0) {
-                                console.log(`🔄 Retrying score update. Attempts left: ${retriesLeft-1}`);
-                                setTimeout(() => attemptScoreUpdate(score, retriesLeft - 1), 1000);
-                            }
+                            console.error('❌ Error updating score:', error.message);
                         });
-                };
-                
-                // Throttle score updates to not overload the server
-                // Use a timeout instead of a throttle function since we're in a plain function
-                if (throttleTimer) {
-                    clearTimeout(throttleTimer);
+                } else {
+                    console.log(`⏱️ Skipping API update (${timeSinceLastUpdate}ms, diff: ${scoreDifference})`);
                 }
-                throttleTimer = setTimeout(() => {
-                    attemptScoreUpdate(newScore);
-                }, 300);
             } else {
                 console.warn('Score updated but userId not available - database not updated');
             }

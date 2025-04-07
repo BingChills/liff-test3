@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Simplified connection function
+// Very simple connection for the demo
 const connectDB = async () => {
   try {
     // Check for MongoDB URI
@@ -13,19 +13,22 @@ const connectDB = async () => {
     
     console.log('Connecting to MongoDB...');
     
-    // Enhanced connection options for better reliability
+    // Minimal connection options, optimized for Vercel
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000, // Timeout after 30 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      retryWrites: true,
-      retryReads: true,
-      w: 'majority', // Write to primary and wait for acknowledgment from a majority of members
-      maxPoolSize: 10, // Maintain up to 10 socket connections
+      // Remove deprecated options
+      // Add SSL options to fix connection issues
+      ssl: true,
+      sslValidate: false, // For demo only
+      retryWrites: false, // Disable retryWrites which can cause issues
+      maxPoolSize: 2, // Reduce connection pool for Vercel
+      connectTimeoutMS: 5000 // Shorter timeout
     };
     
-    const conn = await mongoose.connect(process.env.MONGODB_URI, options);
+    // Extract the main part of the connection string
+    const uri = process.env.MONGODB_URI.split('?')[0];
+    console.log('Using simplified MongoDB connection');
+    
+    const conn = await mongoose.connect(uri, options);
     
     // Log connection success details
     console.log(`MongoDB Connected: ${conn.connection.host}`);
