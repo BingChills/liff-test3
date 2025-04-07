@@ -243,25 +243,37 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         }
     };
     
-    // Synchronous save for beforeunload event
+    // Synchronous save for beforeunload event - enhanced version
     const saveScoreSynchronously = (userId: string, finalScore: number) => {
         try {
-            console.log(`Attempting to save final score synchronously: ${finalScore} for user ${userId}`);
+            console.log(`💾 Saving final score on page close: ${finalScore} for user ${userId}`);
             
-            // Use relative path for Vercel deployment where frontend and backend are together
-            const apiUrl = `/api/players/${userId}/score`;
+            // First save to localStorage as reliable backup
+            localStorage.setItem('playerScore', finalScore.toString());
+            localStorage.setItem('playerScoreTimestamp', Date.now().toString());
+            localStorage.setItem('playerScoreUserId', userId);
             
-            console.log('Sync API URL:', apiUrl);
+            // For the demo, also try using the new sendBeacon API which is more reliable than sync XHR
+            if (navigator.sendBeacon) {
+                const blob = new Blob([JSON.stringify({ value: finalScore })], { type: 'application/json' });
+                const success = navigator.sendBeacon(`/api/players/${userId}/score`, blob);
+                console.log(`📡 sendBeacon ${success ? 'succeeded' : 'failed'}`);
+            }
             
-            // Use synchronous XMLHttpRequest (old-school but works for beforeunload)
-            const xhr = new XMLHttpRequest();
-            xhr.open('PATCH', apiUrl, false); // false = synchronous
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({ value: finalScore }));
-            
-            console.log(`XHR Status: ${xhr.status} - Final score saved synchronously: ${finalScore}`);
+            // Fallback to synchronous XHR as last resort
+            try {
+                const apiUrl = `/api/players/${userId}/score`;
+                const xhr = new XMLHttpRequest();
+                xhr.open('PATCH', apiUrl, false); // false = synchronous
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ value: finalScore }));
+                console.log(`✅ XHR Status: ${xhr.status} - Score saved synchronously`);
+            } catch (xhrError) {
+                console.error('❌ XHR failed:', xhrError);
+                // At this point we've already saved to localStorage, so the score isn't lost
+            }
         } catch (error) {
-            console.error('Failed to save final score:', error);
+            console.error('❌ Failed to save final score:', error);
         }
     };
 
@@ -339,15 +351,41 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             if (userId) {
                 console.log(`User ID available (${userId}), updating score in database`);
                 
-                // Attempt to update score in database with better error handling
-                updateScoreInDatabase(userId, newScore)
-                    .then(data => {
-                        console.log('Database update successful:', data);
-                    })
-                    .catch(err => {
-                        console.error('Failed to update score in database:', err);
-                        // Store failed updates to retry later if needed
-                    });
+                // Save the score to localStorage as backup before sending to server
+                try {
+                    localStorage.setItem('lastScore', newScore.toString());
+                    localStorage.setItem('lastScoreTimestamp', Date.now().toString());
+                    localStorage.setItem('lastScoreUserId', userId);
+                } catch (e) {
+                    console.error('Error saving score to localStorage:', e);
+                }
+                
+                // Update the score with retry logic
+                console.log(`💰 Updating score for ${userId}: ${newScore}`);
+                
+                // Function to attempt update with retries
+                const attemptScoreUpdate = (score: number, retriesLeft = 3) => {
+                    apiClient.patch(`/api/players/${userId}/score`, { value: score })
+                        .then(response => {
+                            console.log('✅ Score update successful:', response.data);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error updating score:', error);
+                            if (retriesLeft > 0) {
+                                console.log(`🔄 Retrying score update. Attempts left: ${retriesLeft-1}`);
+                                setTimeout(() => attemptScoreUpdate(score, retriesLeft - 1), 1000);
+                            }
+                        });
+                };
+                
+                // Throttle score updates to not overload the server
+                // Use a timeout instead of a throttle function since we're in a plain function
+                if (throttleTimer) {
+                    clearTimeout(throttleTimer);
+                }
+                throttleTimer = setTimeout(() => {
+                    attemptScoreUpdate(newScore);
+                }, 300);
             } else {
                 console.warn('Score updated but userId not available - database not updated');
             }
@@ -386,26 +424,45 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
     
     // Handle beforeunload event to save score when closing app
     useEffect(() => {
-        const handleBeforeUnload = () => {
-            // If we have a score and userId, ensure it's saved
-            if (score > 0 && userId) {
-                // Clear any pending throttled save
-                if (throttleTimer) {
-                    clearTimeout(throttleTimer);
-                    throttleTimer = null;
-                }
-                
-                // Save synchronously
+        if (!userId) return;
+        
+        console.log('🔔 Setting up page close handlers for userId:', userId);
+
+        // Handle beforeunload - first event that fires when page is about to close
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            console.log('🚫 Window closing, saving final score...', score);
+            saveScoreSynchronously(userId, score);
+            // Modern browsers don't respect this anymore for security reasons
+            event.returnValue = '';
+            return '';
+        };
+        
+        // Handle visibilitychange - fires when user switches tabs or minimizes
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                console.log('👀 Page hidden, saving score...', score);
                 saveScoreSynchronously(userId, score);
             }
         };
         
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+        // Handle pagehide - more reliable than beforeunload in some browsers
+        const handlePageHide = () => {
+            console.log('🗄️ Page hide, saving score...', score);
+            saveScoreSynchronously(userId, score);
         };
-    }, [score, userId]);
+
+        // Register all events for maximum reliability
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('pagehide', handlePageHide);
+
+        return () => {
+            // Clean up event listeners when component unmounts
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('pagehide', handlePageHide);
+        };
+    }, [userId, score]);
     
     // Listen for game initialization
     useEffect(() => {
