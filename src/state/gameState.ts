@@ -248,17 +248,15 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         try {
             console.log(`Attempting to save final score synchronously: ${finalScore} for user ${userId}`);
             
-            // Get the API URL for the Railway backend
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            const fullUrl = `${apiUrl}/api/players/${userId}/score`;
+            // Use relative path for Vercel deployment where frontend and backend are together
+            const apiUrl = `/api/players/${userId}/score`;
             
-            console.log('Sync API URL:', fullUrl);
+            console.log('Sync API URL:', apiUrl);
             
             // Use synchronous XMLHttpRequest (old-school but works for beforeunload)
             const xhr = new XMLHttpRequest();
-            xhr.open('PATCH', fullUrl, false); // false = synchronous
+            xhr.open('PATCH', apiUrl, false); // false = synchronous
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
             xhr.send(JSON.stringify({ value: finalScore }));
             
             console.log(`XHR Status: ${xhr.status} - Final score saved synchronously: ${finalScore}`);

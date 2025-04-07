@@ -1,12 +1,10 @@
 // API configuration
 import axios from 'axios';
 
-// API base URL - will use Railway in production and local in development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-// Configure axios with base URL for all API requests
+// For Vercel deployment, we use relative API paths 
+// This works because both frontend and backend are deployed together
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  // No baseURL needed - relative paths will work with Vercel's rewrites
 });
 
 export default apiClient;
