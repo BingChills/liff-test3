@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Lightweight connection function for the demo
+/**
+ * Ultra-minimal MongoDB connection for the demo
+ * Just uses the default MongoDB driver options with no custom parameters
+ */
 let isConnected = false;
 
-// Simplest possible connection function
 const connectDB = async () => {
   try {
-    // If already connected, return the existing connection
+    // If already connected, return existing connection
     if (isConnected) {
       console.log('🟢 Using existing MongoDB connection');
       return mongoose.connection;
@@ -15,33 +17,22 @@ const connectDB = async () => {
     
     // Check for MongoDB URI
     if (!process.env.MONGODB_URI) {
-      console.error('❌ MONGODB_URI is not defined');
+      console.error('❌ MONGODB_URI not defined in environment variables');
       return null;
     }
     
-    console.log('🔌 Connecting to MongoDB...');
+    console.log('🔌 Attempting MongoDB connection...');
     
-    // For this demo, use absolutely minimal connection options
-    // Everything defaults to MongoDB driver defaults
+    // ULTRA-SIMPLE CONNECTION - NO CUSTOM OPTIONS
+    // This avoids all parameter errors by using the driver defaults
     await mongoose.connect(process.env.MONGODB_URI);
     
-    // Mark as connected
     isConnected = true;
-    
-    // Log success
-    console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
+    console.log(`✅ MongoDB Connected successfully`);
     return mongoose.connection;
   } catch (error) {
-    // Handle specific error types with more helpful messages
-    if (error.name === 'MongoParseError') {
-      console.error('❌ MongoDB connection string error:', error.message);
-    } else if (error.name === 'MongoNetworkError') {
-      console.error('❌ MongoDB network error - check your connection and VPN');
-    } else {
-      console.error('❌ MongoDB connection error:', error);
-    }
-    
-    isConnected = false;
+    console.error('❌ MongoDB connection failed:', error.message);
+    console.log('Will continue with localStorage only');
     return null;
   }
 };

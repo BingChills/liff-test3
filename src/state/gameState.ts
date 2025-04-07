@@ -393,18 +393,18 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
                     console.error('Error saving score to localStorage:', e);
                 }
                 
-                // Only update score in database every 5 seconds or when score increases by 50+
+                // Only update score in database infrequently to reduce API load
                 const lastApiUpdateTime = parseInt(localStorage.getItem('lastApiUpdateTime') || '0');
                 const lastApiScore = parseInt(localStorage.getItem('lastApiScore') || '0');
                 const currentTime = Date.now();
                 const timeSinceLastUpdate = currentTime - lastApiUpdateTime;
                 const scoreDifference = newScore - lastApiScore;
                 
-                // Only update if:
-                // 1. It's been 5+ seconds since last update OR
-                // 2. Score increased by 50+ points OR
+                // Much less frequent updates to reduce server load:
+                // 1. It's been 10+ seconds since last update OR
+                // 2. Score increased by 100+ points OR
                 // 3. This is the first update (lastApiUpdateTime is 0)
-                if (timeSinceLastUpdate > 5000 || scoreDifference >= 50 || lastApiUpdateTime === 0) {
+                if (timeSinceLastUpdate > 10000 || scoreDifference >= 100 || lastApiUpdateTime === 0) {
                     console.log(`🏆 Sending score ${newScore} to API (time: ${timeSinceLastUpdate}ms, diff: ${scoreDifference})`);
                     
                     // Store current update time and score
@@ -458,45 +458,42 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         };
     }, [userId]);
     
-    // Handle beforeunload event to save score when closing app
+    // Simplified page close handler - one handler instead of multiple
     useEffect(() => {
         if (!userId) return;
         
-        console.log('🔔 Setting up page close handlers for userId:', userId);
+        console.log('🔔 Setting up single page close handler for userId:', userId);
 
-        // Handle beforeunload - first event that fires when page is about to close
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            console.log('🚫 Window closing, saving final score...', score);
-            saveScoreSynchronously(userId, score);
-            // Modern browsers don't respect this anymore for security reasons
+        // Use only one handler for better performance
+        const handlePageClose = (event: BeforeUnloadEvent) => {
+            console.log('🚫 Saving final score:', score);
+            
+            // Just save to localStorage which is synchronous and reliable
+            try {
+                localStorage.setItem('finalScore', score.toString());
+                localStorage.setItem('finalScoreTimestamp', Date.now().toString());
+                localStorage.setItem('finalScoreUserId', userId);
+                
+                // Optional: use sendBeacon for async save that won't block closing
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify({ value: score })], { type: 'application/json' });
+                    navigator.sendBeacon(`/api/players/${userId}/score`, blob);
+                }
+            } catch (e) {
+                console.error('Error saving final score:', e);
+            }
+            
+            // Standard beforeunload handling
             event.returnValue = '';
             return '';
         };
         
-        // Handle visibilitychange - fires when user switches tabs or minimizes
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                console.log('👀 Page hidden, saving score...', score);
-                saveScoreSynchronously(userId, score);
-            }
-        };
-        
-        // Handle pagehide - more reliable than beforeunload in some browsers
-        const handlePageHide = () => {
-            console.log('🗄️ Page hide, saving score...', score);
-            saveScoreSynchronously(userId, score);
-        };
-
-        // Register all events for maximum reliability
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('pagehide', handlePageHide);
+        // Only use beforeunload for better performance
+        window.addEventListener('beforeunload', handlePageClose);
 
         return () => {
             // Clean up event listeners when component unmounts
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('pagehide', handlePageHide);
+            window.removeEventListener('beforeunload', handlePageClose);
         };
     }, [userId, score]);
     
