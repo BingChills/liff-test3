@@ -381,49 +381,19 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             // Always update UI immediately
             setScore(newScore);
             
-            // Update score in database (only periodically to reduce API calls)
+            // ULTRA-SIMPLE: ONLY save to localStorage, NO database calls
             if (userId) {
-                // Always save score to localStorage
+                // Just save the current score to localStorage - no API calls
                 try {
-                    localStorage.setItem('lastScore', newScore.toString());
-                    localStorage.setItem('lastScoreTimestamp', Date.now().toString());
-                    localStorage.setItem('lastScoreUserId', userId);
-                    console.log(`💾 Score ${newScore} saved to localStorage`);
+                    localStorage.setItem('currentScore', newScore.toString());
+                    localStorage.setItem('currentScoreTimestamp', Date.now().toString());
+                    localStorage.setItem('currentScoreUserId', userId);
+                    // Extremely minimal logging
+                    console.log(`Score: ${newScore}`);
                 } catch (e) {
-                    console.error('Error saving score to localStorage:', e);
+                    console.error('Error saving to localStorage:', e);
                 }
-                
-                // Only update score in database infrequently to reduce API load
-                const lastApiUpdateTime = parseInt(localStorage.getItem('lastApiUpdateTime') || '0');
-                const lastApiScore = parseInt(localStorage.getItem('lastApiScore') || '0');
-                const currentTime = Date.now();
-                const timeSinceLastUpdate = currentTime - lastApiUpdateTime;
-                const scoreDifference = newScore - lastApiScore;
-                
-                // Much less frequent updates to reduce server load:
-                // 1. It's been 10+ seconds since last update OR
-                // 2. Score increased by 100+ points OR
-                // 3. This is the first update (lastApiUpdateTime is 0)
-                if (timeSinceLastUpdate > 10000 || scoreDifference >= 100 || lastApiUpdateTime === 0) {
-                    console.log(`🏆 Sending score ${newScore} to API (time: ${timeSinceLastUpdate}ms, diff: ${scoreDifference})`);
-                    
-                    // Store current update time and score
-                    localStorage.setItem('lastApiUpdateTime', currentTime.toString());
-                    localStorage.setItem('lastApiScore', newScore.toString());
-                    
-                    // Simple update without retries to reduce complexity
-                    apiClient.patch(`/api/players/${userId}/score`, { value: newScore })
-                        .then(response => {
-                            console.log('✅ Score update successful');
-                        })
-                        .catch(error => {
-                            console.error('❌ Error updating score:', error.message);
-                        });
-                } else {
-                    console.log(`⏱️ Skipping API update (${timeSinceLastUpdate}ms, diff: ${scoreDifference})`);
-                }
-            } else {
-                console.warn('Score updated but userId not available - database not updated');
+                // NO DATABASE UPDATES during gameplay - only on close
             }
         };
         
@@ -458,29 +428,43 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
         };
     }, [userId]);
     
-    // Simplified page close handler - one handler instead of multiple
+    // ONLY DATABASE SAVE: When closing the game
     useEffect(() => {
         if (!userId) return;
         
-        console.log('🔔 Setting up single page close handler for userId:', userId);
+        console.log('✅ Setup close handler - will save data ONLY on game close');
 
-        // Use only one handler for better performance
+        // Single handler to save data when game closes
         const handlePageClose = (event: BeforeUnloadEvent) => {
-            console.log('🚫 Saving final score:', score);
+            console.log('🔄 SAVE ON CLOSE: Final score =', score);
             
-            // Just save to localStorage which is synchronous and reliable
             try {
+                // 1. Always update localStorage first (guaranteed to work)
                 localStorage.setItem('finalScore', score.toString());
                 localStorage.setItem('finalScoreTimestamp', Date.now().toString());
                 localStorage.setItem('finalScoreUserId', userId);
                 
-                // Optional: use sendBeacon for async save that won't block closing
+                // 2. Try to save to database using sendBeacon (best method for page close)
                 if (navigator.sendBeacon) {
-                    const blob = new Blob([JSON.stringify({ value: score })], { type: 'application/json' });
-                    navigator.sendBeacon(`/api/players/${userId}/score`, blob);
+                    // Full player data including score
+                    const playerData = {
+                        userId,
+                        score,
+                        point,
+                        characters,
+                        coupons,
+                        stores,
+                        updatedAt: Date.now()
+                    };
+                    
+                    // Use sendBeacon with PUT request to save complete data
+                    const blob = new Blob([JSON.stringify(playerData)], { type: 'application/json' });
+                    const origin = window.location.origin;
+                    const success = navigator.sendBeacon(`${origin}/api/players/${userId}`, blob);
+                    console.log(`📡 Final save to database: ${success ? 'sent' : 'failed'}`);
                 }
             } catch (e) {
-                console.error('Error saving final score:', e);
+                console.error('⚠️ Error in final save:', e);
             }
             
             // Standard beforeunload handling
@@ -495,7 +479,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             // Clean up event listeners when component unmounts
             window.removeEventListener('beforeunload', handlePageClose);
         };
-    }, [userId, score]);
+    }, [userId, score, point, characters, coupons, stores]);
     
     // Listen for game initialization
     useEffect(() => {

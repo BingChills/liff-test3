@@ -89,50 +89,45 @@ const createPlayer = async (req, res) => {
    }
 }
 
-// @desc    Update player by user ID
+// @desc    Update player by user ID - OPTIMIZED FOR GAME CLOSE
 // @route   PUT /api/players/:userId
 // @access  Private
 const updatePlayer = async (req, res) => {
-   console.log(`💾 Updating player ${req.params.userId} with data:`, JSON.stringify(req.body, null, 2))
+   // IMPORTANT - THIS IS CALLED BY BEACON ON GAME CLOSE
+   // The client may have already closed - must respond instantly
    
+   // Immediately acknowledge receipt - don't wait for DB
+   res.status(202).json({ 
+      success: true, 
+      message: 'Save request received - processing in background'
+   });
+   
+   // Process the update in background AFTER response
    try {
-      const { userId } = req.params
+      const { userId } = req.params;
       
-      // Look for player by userId
-      const player = await Player.findOne({ userId })
-
-      if (!player) {
-         console.error(`❌ Player not found for userId: ${userId}`)
-         return res.status(404).json({ message: 'Player not found' })
-      }
+      // Skip logging request body - can be large and slow things down
+      console.log(`🔄 Background save for player ${userId}`);
       
-      console.log(`✅ Found player ${player._id} for userId: ${userId}`)
-
-      // Update all fields from request body
-      Object.keys(req.body).forEach(key => {
-         // Don't update the userId
-         if (key !== 'userId') {
-            player[key] = req.body[key];
+      // Use updateOne with upsert for maximum efficiency
+      // Much faster than findOne+save and handles new players too
+      await Player.updateOne(
+         { userId },
+         { $set: req.body },
+         { 
+            upsert: true,
+            runValidators: false // skip for performance
          }
-      });
-
-      // Save and return updated player
-      console.log('💾 Saving updated player data...')
-      const updatedPlayer = await player.save();
-      console.log(`✅ Player data updated successfully for userId: ${userId}`)
+      );
       
-      res.json(updatedPlayer);
+      console.log(`✅ Background save successful for ${userId}`);
    } catch (error) {
-      console.error('❌ Error in updatePlayer:', error);
-      // Always return a useful error message even in production for debugging
-      res.status(500).json({
-         message: 'Failed to update player',
-         error: error.message
-      });
+      // Just log errors - client won't see response anyway
+      console.error(`❌ Background save failed: ${error.message}`);
    }
 }
 
-// @desc    Ultra-simplified score update - Optimized for demo
+// @desc    Ultra-simplified score update - ONLY called from game close
 // @route   PATCH /api/players/:userId/:field
 // @access  Private
 const updatePlayerField = async (req, res) => {
@@ -144,48 +139,28 @@ const updatePlayerField = async (req, res) => {
       if (!userId || !field || value === undefined) {
          return res.status(400).json({ success: false, message: 'Missing parameters' });
       }
-
-      // ONLY handle score updates for better performance
-      if (field === 'score') {
-         console.log(`🏆 Score update: ${userId}=${value}`);
-         
-         try {
-            // Use the fastest possible update method
-            await Player.updateOne(
-               { userId }, 
-               { $set: { score: value } },
-               { upsert: true } // Create if doesn't exist
-            );
-            
-            // Return success immediately without waiting for query to complete
-            return res.json({ success: true });
-            
-         } catch (error) {
-            console.error(`❌ Score update error: ${error.message}`);
-            // Even on error, return success to avoid blocking the game
-            return res.json({ success: true, localOnly: true });
-         }
-      }
       
-      // For all other fields - very simplified handling 
+      // ULTRA MINIMALIST - JUST ACKNOWLEDGE RECEIPT
+      // This function is only used by the game-close beacon
+      // Process the update in the background AFTER sending response
+      res.status(200).json({ success: true, message: 'Update request received' });
+      
+      // Background update after response is sent
       try {
          await Player.updateOne(
             { userId },
             { $set: { [field]: value } },
             { upsert: true }
          );
-         
-         return res.json({ success: true });
-      } catch (error) {
-         console.error(`❌ Field update error: ${error.message}`);
-         return res.json({ success: true, localOnly: true });
+         console.log(`✅ Background update of ${field}=${value} for ${userId} successful`);
+      } catch (err) {
+         console.error(`❌ Background update failed: ${err.message}`);
       }
    } catch (error) {
-      console.error('❌ General error:', error.message);
-      // Always return success to the client for demo purposes
-      res.json({ success: true, localOnly: true });
+      console.error('❌ Field update error:', error.message);
+      res.status(500).json({ success: false, message: 'Update failed' });
    }
-}
+};
 
 module.exports = {
    getPlayerByUserId,
