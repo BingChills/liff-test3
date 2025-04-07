@@ -33,79 +33,105 @@ const getPlayerByUserId = async (req, res) => {
 // @route   POST /api/players
 // @access  Private
 const createPlayer = async (req, res) => {
+   console.log('💾 Creating player with data:', JSON.stringify(req.body, null, 2))
+   
    try {
       const { userId, pictureUrl, displayName, statusMessage } = req.body
 
       // Validate required fields
       if (!userId) {
+         console.error('❌ User ID missing in request body')
          return res.status(400).json({ message: 'User ID is required' })
       }
 
-      // Check if player already exists using consistent userId field
+      // Check if player already exists - if so, do an upsert instead
+      // This makes the API more forgiving for the demo
       const existingPlayer = await Player.findOne({ userId })
 
       if (existingPlayer) {
-         return res.status(409).json({ message: 'Player already exists' })
+         console.log(`✅ Player already exists for userId: ${userId}, updating instead`)
+         // Update the existing player with new data
+         existingPlayer.displayName = displayName || existingPlayer.displayName
+         existingPlayer.pictureUrl = pictureUrl || existingPlayer.pictureUrl
+         existingPlayer.statusMessage = statusMessage || existingPlayer.statusMessage
+         
+         const updatedPlayer = await existingPlayer.save()
+         return res.status(200).json(updatedPlayer)
       }
 
       // Create new player with minimal default values
-      // Schema defaults will handle the rest
+      console.log('👤 Creating new player document in MongoDB...')
       const newPlayer = {
          userId,
-         pictureUrl,
          displayName,
+         pictureUrl,
          statusMessage,
          score: 0,
-         stores: [], // Will be populated from DB or through API
+         // Initialize with empty arrays for store data and other collections
+         stores: [
+            { name: "Food", point: 0, color: "#FF5722" },
+            { name: "Shopping", point: 0, color: "#E91E63" },
+            { name: "Entertainment", point: 0, color: "#9C27B0" },
+         ],
          characters: [],
-         coupons: []
+         coupons: [],
+         stamina: { current: 20, max: 20 }
       }
-
-      const player = new Player(newPlayer)
-      await player.save()
+      
+      const player = await Player.create(newPlayer)
+      console.log(`✅ Successfully created player: ${player._id} for userId: ${userId}`)
 
       res.status(201).json(player)
    } catch (error) {
-      console.error(`Error in createPlayer: ${error.message}`)
-      console.error(error.stack)
+      console.error('❌ Error in createPlayer:', error)
+      // Always return a useful error message even in production for debugging
       res.status(500).json({
          message: 'Failed to create player',
-         error: process.env.NODE_ENV === 'production' ? null : error.message
+         error: error.message
       })
    }
 }
 
-// @desc    Update player data
+// @desc    Update player by user ID
 // @route   PUT /api/players/:userId
 // @access  Private
 const updatePlayer = async (req, res) => {
+   console.log(`💾 Updating player ${req.params.userId} with data:`, JSON.stringify(req.body, null, 2))
+   
    try {
       const { userId } = req.params
-      const updates = req.body
-
-      // Validate userId
-      if (!userId) {
-         return res.status(400).json({ message: 'User ID parameter is required' })
-      }
-
-      // Update player by LINE user ID using consistent field name
-      const player = await Player.findOneAndUpdate(
-         { userId },
-         { ...updates, updatedAt: Date.now() },
-         { new: true, runValidators: true }
-      )
+      
+      // Look for player by userId
+      const player = await Player.findOne({ userId })
 
       if (!player) {
+         console.error(`❌ Player not found for userId: ${userId}`)
          return res.status(404).json({ message: 'Player not found' })
       }
+      
+      console.log(`✅ Found player ${player._id} for userId: ${userId}`)
 
-      res.json(player)
+      // Update all fields from request body
+      Object.keys(req.body).forEach(key => {
+         // Don't update the userId
+         if (key !== 'userId') {
+            player[key] = req.body[key];
+         }
+      });
+
+      // Save and return updated player
+      console.log('💾 Saving updated player data...')
+      const updatedPlayer = await player.save();
+      console.log(`✅ Player data updated successfully for userId: ${userId}`)
+      
+      res.json(updatedPlayer);
    } catch (error) {
-      console.error(`Error in updatePlayer: ${error.message}`)
+      console.error('❌ Error in updatePlayer:', error);
+      // Always return a useful error message even in production for debugging
       res.status(500).json({
          message: 'Failed to update player',
-         error: process.env.NODE_ENV === 'production' ? null : error.message
-      })
+         error: error.message
+      });
    }
 }
 

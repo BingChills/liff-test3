@@ -3,12 +3,30 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const playerRoutes = require("./routes/playerRoutes");
+const debugRoutes = require("./routes/debugRoutes");
 
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB with enhanced error handling
+console.log('🔌 Attempting to connect to MongoDB...');
+try {
+    connectDB().then(connection => {
+        if (connection) {
+            console.log('✅ MongoDB connected successfully!');
+            global.mongoConnected = true;
+        } else {
+            console.error('❌ Failed to establish MongoDB connection');
+            global.mongoConnected = false;
+        }
+    }).catch(err => {
+        console.error('❌ MongoDB connection error:', err);
+        global.mongoConnected = false;
+    });
+} catch (error) {
+    console.error('❌ Unexpected error during MongoDB connection:', error);
+    global.mongoConnected = false;
+}
 
 // Simple CORS configuration - less restrictive for Vercel deployment where frontend and backend are together
 app.use(cors());
@@ -25,10 +43,16 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use("/api/players", playerRoutes);
+app.use("/api/debug", debugRoutes);
 
-// Base route for API health check
+// Enhanced base route for API health check with MongoDB status
 app.get("/api", (req, res) => {
-    res.json({ message: "API is running" });
+    res.json({ 
+        message: "API is running",
+        mongoConnected: global.mongoConnected === true,
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 // Serve static assets in production
