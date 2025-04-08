@@ -242,7 +242,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [])
 
-   // Save data to MongoDB ONLY when app is closing
+   // EMERGENCY MODE: Save data to localStorage instead of API for reliability
    const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
       if (!userId) return
       
@@ -261,26 +261,12 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
       
       try {
-         // Save to localStorage as a backup
+         // Save to localStorage directly - no API calls
          localStorage.setItem('gameData', JSON.stringify(playerData))
-         
-         // Create a synchronous XMLHttpRequest to save data before close
-         const xhr = new XMLHttpRequest()
-         xhr.open('PUT', `/api/players/${userId}`, false) // false = synchronous
-         xhr.setRequestHeader('Content-Type', 'application/json')
-         
-         // Send the data synchronously - will complete before page closes
-         xhr.send(JSON.stringify(playerData))
-         console.log('Player data saved to MongoDB on page close')
+         localStorage.setItem('lastSave', Date.now().toString())
+         console.log('Player data saved to localStorage on page close')
       } catch (error) {
-         console.error('Error saving player data:', error)
-         // Still try to save to localStorage if API fails
-         try {
-            localStorage.setItem('gameData', JSON.stringify(playerData))
-            localStorage.setItem('lastSave', Date.now().toString())
-         } catch (fallbackError) {
-            console.error('Fallback storage also failed:', fallbackError)
-         }
+         console.error('Error saving player data to localStorage:', error)
       }
    }, [userId, score, point, characters, coupons, stores, selectedStore, stamina, drawCount, remainingDraws])
 
