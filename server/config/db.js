@@ -7,6 +7,9 @@ require('dotenv').config();
  */
 let isConnected = false;
 
+// Export MongoDB URI for API routes
+const MongoDBURI = process.env.MONGODB_URI;
+
 const connectDB = async () => {
   try {
     // If already connected, return existing connection
@@ -37,4 +40,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+module.exports = { connectDB, MongoDBURI };
