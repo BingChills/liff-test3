@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { User, Coins, Timer, Gem, ChevronDown, X, MessageCircle, Calendar, Award } from 'lucide-react'
 import { useLiff } from '../context/LiffContext'
-import { useGameState, StoreCurrency } from '../state/gameState'
+import { StoreCurrency } from '../state/gameState'
+import { useUserSync } from '../hooks/useUserSync'
 
 interface PageHeaderProps {
    title?: string
@@ -10,35 +11,38 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
-   const { stores, selectedStore, setSelectedStore, stamina, score } = useGameState()
    const { liff, userProfile } = useLiff()
+   const { user, setUser } = useUserSync()
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
+   
+   // Get data from MongoDB user object
+   const stores = user?.stores || []
+   const stamina = user?.stamina || { current: 0, max: 0 }
+   const score = user?.score || 0
+   const [selectedStore, setSelectedStoreState] = useState<StoreCurrency>({ name: 'Default', point: 0, color: 'blue' })
 
-   // Use profile picture from LINE
+   // Use profile picture from user data or LINE
    useEffect(() => {
-      console.log('LIFF profile picture:', userProfile?.pictureUrl)
-
-      // Priority 1: Use picture from LIFF context
-      if (userProfile?.pictureUrl) {
-         console.log('Using profile picture from LIFF context:', userProfile.pictureUrl)
+      if (user?.pictureUrl) {
+         // Priority 1: Use picture from MongoDB user data
+         setProfilePicture(user.pictureUrl)
+      } else if (userProfile?.pictureUrl) {
+         // Priority 2: Use picture from LIFF context
          setProfilePicture(userProfile.pictureUrl)
-      }
-      // Priority 2: Fetch directly from LINE API as fallback
-      else if (liff && liff.isLoggedIn()) {
-         console.log('Fetching profile picture directly from LINE API')
+      } else if (liff && liff.isLoggedIn()) {
+         // Priority 3: Fetch directly from LINE API as fallback
          liff
             .getProfile()
             .then((profile) => {
-               console.log('Got profile from LINE API:', profile)
                setProfilePicture(profile.pictureUrl || null)
             })
             .catch((err) => console.error('Error getting profile:', err))
       } else {
          setProfilePicture(null) // Will use default image in UI rendering
       }
-   }, [liff, userProfile]) // Run when any of these dependencies change
+   }, [liff, userProfile, user]) // Run when any of these dependencies change
 
    const getStoreColor = (color: string) => {
       switch (color) {
@@ -55,8 +59,23 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
       }
    }
 
+   // Initialize selectedStore when user data is loaded
+   useEffect(() => {
+      if (user?.stores && user.stores.length > 0 && !selectedStore) {
+         setSelectedStoreState(user.stores[0])
+      }
+   }, [user, selectedStore])
+
    const handleStoreSelect = (store: StoreCurrency) => {
-      setSelectedStore(store)
+      // Update selectedStore state
+      setSelectedStoreState(store)
+      
+      // Update user data in MongoDB
+      if (user) {
+         const updatedUser = { ...user, selectedStore: store }
+         setUser(updatedUser)
+      }
+      
       setShowStoreSelector(false)
    }
 
@@ -89,12 +108,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                   >
                      <div
                         className={`w-4 h-4 rounded-full ${getStoreColor(
-                           selectedStore.color
+                           selectedStore?.color || 'blue'
                         )} flex items-center justify-center`}
                      >
                         <Gem className='w-2.5 h-2.5 text-white' />
                      </div>
-                     <span className='text-sm font-bold text-white'>{selectedStore.point}</span>
+                     <span className='text-sm font-bold text-white'>{selectedStore?.point || 0}</span>
                      <ChevronDown className='w-3 h-3 text-white/80' />
                   </button>
 
@@ -128,7 +147,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                   <div className='w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center'>
                      <Coins className='w-2.5 h-2.5 text-white' />
                   </div>
-                  <span className='text-sm font-bold text-white'>{score}</span>
+                  <span className='text-sm font-bold text-white'>{user?.score || 0}</span>
                </div>
 
                {/* Energy/Stamina */}
@@ -137,7 +156,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      <Timer className='w-2.5 h-2.5 text-white' />
                   </div>
                   <span className='text-sm font-bold text-white'>
-                     {stamina.current}/{stamina.max}
+                     {user?.stamina?.current || 0}/{user?.stamina?.max || 0}
                   </span>
                </div>
             </div>
@@ -145,7 +164,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
       </div>
 
       {/* Player Information Modal */}
-      {showProfileModal && userProfile && (
+      {showProfileModal && user && (
          <div 
             className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
             onClick={() => setShowProfileModal(false)}
@@ -173,11 +192,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                         </div>
                      )}
                   </div>
-                  <h2 className='text-xl font-bold text-gray-800'>{userProfile?.displayName}</h2>
-                  {userProfile?.statusMessage && (
+                  <h2 className='text-xl font-bold text-gray-800'>{user.displayName}</h2>
+                  {user.statusMessage && (
                      <div className='flex items-center justify-center mt-1 text-gray-500'>
                         <MessageCircle size={14} className='mr-1' />
-                        <p className='text-sm italic'>"{userProfile?.statusMessage}"</p>
+                        <p className='text-sm italic'>{user.statusMessage}</p>
                      </div>
                   )}
                </div>
@@ -195,7 +214,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                            </div>
                            <span className='text-gray-700'>Total Score</span>
                         </div>
-                        <span className='font-bold text-gray-900'>{score}</span>
+                        <span className='font-bold text-gray-900'>{user?.score || 0}</span>
                      </div>
                      
                      {/* Stamina */}
@@ -206,7 +225,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                            </div>
                            <span className='text-gray-700'>Energy</span>
                         </div>
-                        <span className='font-bold text-gray-900'>{stamina.current}/{stamina.max}</span>
+                        <span className='font-bold text-gray-900'>{user?.stamina?.current || 0}/{user?.stamina?.max || 0}</span>
                      </div>
                   </div>
                </div>
@@ -216,7 +235,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                   <h3 className='text-sm font-semibold text-gray-500 mb-3'>STORE POINTS</h3>
                   
                   <div className='space-y-3'>
-                     {stores.map(store => (
+                     {user?.stores?.map(store => (
                         <div key={store.name} className='flex items-center justify-between'>
                            <div className='flex items-center'>
                               <div className={`w-8 h-8 rounded-full ${getStoreColor(store.color)} flex items-center justify-center mr-3`}>
