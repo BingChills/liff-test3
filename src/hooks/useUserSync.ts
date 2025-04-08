@@ -1,78 +1,70 @@
 // src/hooks/useUserSync.ts
 import { useEffect, useState } from 'react'
 import { useLiff } from '../context/LiffContext'
-import { UserProfile, PlayerType } from '../context/LiffContext' // Import the UserProfile type
+import { PlayerType } from '../context/LiffContext'
+import apiClient from '../config/api'
 
-// EMERGENCY MODE: LOCAL-ONLY version with no API calls
 export const useUserSync = () => {
    const { liff, userProfile } = useLiff()
    const [user, setUser] = useState<PlayerType | null>(null)
-   
-   // Add logging when first loaded
-   useEffect(() => {
-      console.log('🔄 EMERGENCY MODE: useUserSync initialized - LOCAL ONLY')
-      console.log('🪪 User profile from LIFF:', userProfile)
-   }, [userProfile])
 
-   // Main synchronization effect - LOCALSTORAGE ONLY
+   // Main synchronization effect - MongoDB
    useEffect(() => {
       const syncUserData = async () => {
          // Only proceed if we have user profile data
          if (!userProfile || !liff) {
-            console.log('⏳ Waiting for LIFF profile data...')
             return
          }
-         
-         console.log(`🧠 Syncing local data for user: ${userProfile.userId}`)
 
          try {
-            // Check if we have this user's data in localStorage
-            const savedData = localStorage.getItem('gameData')
-            
-            if (savedData) {
-               try {
-                  const savedUser = JSON.parse(savedData)
-                  
-                  // If we have data for this user, use it
-                  if (savedUser.userId === userProfile.userId) {
-                     console.log('✅ Found existing user data in localStorage')
-                     setUser(savedUser)
-                     return
-                  }
-               } catch (e) {
-                  console.error('Failed to parse localStorage data', e)
+            // Try to get user data from MongoDB
+            try {
+               const response = await apiClient.get(`/api/players/${userProfile.userId}`)
+               if (response.data) {
+                  console.log('✅ Found existing user data in database')
+                  setUser(response.data as PlayerType)
+                  return
                }
+            } catch (error) {
+               // Player not found in database, will create a new one
+               console.log('Player not found in database, creating new profile')
             }
-            
+
             // Create new profile if we don't have one
-            console.log('🆕 Creating new local user profile')
-            const defaultStore = { name: 'Default Store', point: 0, color: 'blue' }
             const newProfile = {
                userId: userProfile.userId,
                displayName: userProfile.displayName || 'LIFF User',
                pictureUrl: userProfile.pictureUrl || '',
                statusMessage: userProfile.statusMessage || '',
                score: 0,
-               point: 0,
-               characters: [],
-               coupons: [],
-               stores: [defaultStore],
+               stores: [],
                stamina: { current: 20, max: 20 },
-               selectedStore: defaultStore,  // Use store object instead of string
-               drawCount: 0,
-               remainingDraws: 3
+               characters: [],
+               coupons: []
             }
-            
-            setUser(newProfile as unknown as PlayerType)  // Cast to unknown first
-            localStorage.setItem('gameData', JSON.stringify(newProfile))
-            console.log('💾 New user profile saved to localStorage')
+
+            // Save to database
+            const createResponse = await apiClient.post('/api/players', newProfile)
+            setUser(createResponse.data as PlayerType)
+            console.log('New user profile saved to database')
          } catch (error) {
-            console.error('Local sync error:', error)
+            console.error('Database sync error:', error)
          }
       }
 
       syncUserData()
    }, [userProfile, liff])
 
-   return { user, setUser }
+   // Update user method that saves to database
+   const updateUser = async (updatedUser: PlayerType) => {
+      setUser(updatedUser)
+      try {
+         // Save to database
+         await apiClient.put(`/api/players/${updatedUser.userId}`, updatedUser)
+      } catch (error) {
+         console.error('Error updating user in database:', error)
+      }
+   }
+
+   return { user, setUser: updateUser }
 }
