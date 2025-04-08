@@ -130,52 +130,75 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    const [userId, setUserId] = useState<string | null>(null)
    const [isLoading, setIsLoading] = useState(false)
 
-   // Simple function to load initial player data
+   // EMERGENCY MODE: Load player data from localStorage
    const loadGameState = useCallback(async () => {
       if (!userId) return
       
       setIsLoading(true)
+      console.log('🔄 Loading game data for user:', userId)
       
       try {
-         const response = await apiClient.get(`/api/players/${userId}`)
-         const playerData = response.data
+         // Try to load from localStorage first
+         const savedData = localStorage.getItem('gameData')
          
-         // Set state from API data
-         setScore(playerData.score || 0)
-         setPoint(playerData.point || 0)
-         setCharacters(playerData.characters || [])
-         setCoupons(playerData.coupons || [])
-         
-         if (playerData.stores && playerData.stores.length > 0) {
-            setStores(playerData.stores)
-            setSelectedStore(playerData.stores[0])
-         }
-         
-         if (playerData.stamina) {
-            setStamina(playerData.stamina)
-         }
-         
-         if (playerData.drawCount !== undefined) {
-            setDrawCount(playerData.drawCount)
-         }
-         
-         if (playerData.remainingDraws !== undefined) {
-            setRemainingDraws(playerData.remainingDraws)
+         if (savedData) {
+            console.log('✅ Found saved data in localStorage')
+            
+            try {
+               const playerData = JSON.parse(savedData)
+               
+               // Verify this is the correct user's data
+               if (playerData.userId === userId) {
+                  // Set all game state from localStorage data
+                  setScore(playerData.score || 0)
+                  setPoint(playerData.point || 0)
+                  setCharacters(playerData.characters || [])
+                  setCoupons(playerData.coupons || [])
+                  
+                  if (playerData.stores && playerData.stores.length > 0) {
+                     setStores(playerData.stores)
+                     setSelectedStore(playerData.stores[0])
+                  }
+                  
+                  if (playerData.stamina) {
+                     setStamina(playerData.stamina)
+                  }
+                  
+                  if (playerData.drawCount !== undefined) {
+                     setDrawCount(playerData.drawCount)
+                  }
+                  
+                  if (playerData.remainingDraws !== undefined) {
+                     setRemainingDraws(playerData.remainingDraws)
+                  }
+                  
+                  console.log('🎮 Game data loaded successfully from localStorage')
+               } else {
+                  // Wrong user data - create new profile
+                  console.log('⚠️ Found localStorage data but for different user')
+                  createNewPlayerData()
+               }
+            } catch (parseError) {
+               console.error('❌ Error parsing localStorage data:', parseError)
+               createNewPlayerData()
+            }
+         } else {
+            console.log('⚠️ No saved data found in localStorage')
+            createNewPlayerData()
          }
       } catch (error) {
-         console.error('Error loading player data:', error)
-         // If player doesn't exist, create a new one
-         try {
-            if ((error as any)?.response?.status === 404) {
-               await apiClient.post('/api/players', { userId })
-            }
-         } catch (createError) {
-            console.error('Error creating player:', createError)
-         }
+         console.error('❌ Error accessing localStorage:', error)
+         createNewPlayerData()
       } finally {
          setIsLoading(false)
       }
    }, [userId])
+   
+   // Helper function to create new player data
+   const createNewPlayerData = () => {
+      console.log('🆕 Creating new player data')
+      // Use default state values already set in state initialization
+   }
 
    // Load player data when userId changes
    useEffect(() => {
@@ -219,14 +242,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [])
 
-   // SIMPLIFIED: Save data to database ONLY when app is closing
+   // EMERGENCY MODE: Save data to localStorage instead of API for reliability
    const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
       if (!userId) return
-
-      // Create a synchronous XMLHttpRequest to save data before close
-      const xhr = new XMLHttpRequest()
-      xhr.open('PUT', `/api/players/${userId}`, false) // false = synchronous
-      xhr.setRequestHeader('Content-Type', 'application/json')
       
       const playerData = {
          userId,
@@ -238,14 +256,17 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          selectedStore,
          stamina,
          drawCount,
-         remainingDraws
+         remainingDraws,
+         updatedAt: Date.now()
       }
       
       try {
-         xhr.send(JSON.stringify(playerData))
-         console.log('Player data saved on page close')
+         // Save to localStorage directly - no API calls
+         localStorage.setItem('gameData', JSON.stringify(playerData))
+         localStorage.setItem('lastSave', Date.now().toString())
+         console.log('Player data saved to localStorage on page close')
       } catch (error) {
-         console.error('Error saving player data on close:', error)
+         console.error('Error saving player data to localStorage:', error)
       }
    }, [userId, score, point, characters, coupons, stores, selectedStore, stamina, drawCount, remainingDraws])
 
