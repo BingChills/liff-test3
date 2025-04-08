@@ -17,6 +17,15 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60
   },
+  // Add proper async rewrites for LIFF URLs
+  async rewrites() {
+    return [
+      {
+        source: '/liff/:path*',
+        destination: '/:path*',
+      },
+    ];
+  },
   // Keep configuration simple for Vercel compatibility
   // We're not using assetPrefix, output, or distDir as they can cause issues with Vercel
 };
