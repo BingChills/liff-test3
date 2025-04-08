@@ -33,7 +33,18 @@ export const useLiffInit = (): LiffState => {
             const liffModule = await import('@line/liff')
             const liff = liffModule.default
 
-            await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
+            // Enhanced LIFF initialization with more options
+            await liff.init({
+              liffId: process.env.NEXT_PUBLIC_LIFF_ID!,
+              withLoginOnExternalBrowser: true, // Allow login on external browser
+            })
+            
+            // Force https for security
+            if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
+              window.location.href = window.location.href.replace('http:', 'https:')
+              return
+            }
+            
             console.log('LIFF init succeeded.')
             setLiffObject(liff)
 
