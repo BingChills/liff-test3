@@ -215,27 +215,16 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          return
       }
 
-      const updatedUserData = {
-         score: totalScore,
-         stores,
-         stamina,
-         characters,
-         coupons,
-         updatedAt: Date.now()
-      }
-
       try {
-         // Use the standard PUT endpoint instead of a custom beacon endpoint
-         // as we know this works reliably with Vercel
-         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}`
-
-         const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
-         navigator.sendBeacon(url, blob)
-         console.log('💾 Sending updated user data via beacon to:', url)
+         // Update score using a proven endpoint
+         const scoreUrl = `https://linkz-gameplay.vercel.app/api/players/${userId}/score`
+         const scoreBlob = new Blob([JSON.stringify({ value: totalScore })], { type: 'application/json' })
+         navigator.sendBeacon(scoreUrl, scoreBlob)
+         console.log('💾 Sending score update via beacon:', totalScore)
       } catch (error) {
          console.error('Error saving data on close:', error)
       }
-   }, [totalScore, stores, stamina, characters, coupons, userId])
+   }, [totalScore, userId])
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
@@ -254,28 +243,19 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          return false
       }
 
-      const updatedUserData = {
-         score: totalScore,
-         stores,
-         stamina,
-         characters,
-         coupons,
-         updatedAt: Date.now()
-      }
-
+      // We know the score endpoint works, so let's use that
       try {
-         // Instead of using a custom beacon endpoint, use the standard update endpoint
-         // which we know works with Vercel
-         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}`
-         console.log('Using standard update endpoint:', url)
+         // Use the score endpoint which we know works from previous code
+         const scoreUrl = `https://linkz-gameplay.vercel.app/api/players/${userId}/score`
+         console.log('Using score update endpoint:', scoreUrl)
 
-         // For testing - use fetch instead of beacon so we can see the response
-         fetch(url, {
-            method: 'PUT', // Use PUT instead of POST since we know this works
+         // Send just the score first to test if the endpoint works
+         fetch(scoreUrl, {
+            method: 'PATCH',
             headers: {
                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(updatedUserData)
+            body: JSON.stringify({ value: totalScore })
          })
             .then((response) => {
                console.log('✅ Test save response:', response.status)
@@ -289,7 +269,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          console.error('Error during test save:', error)
          return false
       }
-   }, [userId, totalScore, stores, stamina, characters, coupons])
+   }, [userId, totalScore])
 
    // Define the value object to be provided to consumers
    const value: GameState = {
