@@ -4,6 +4,10 @@ import { useLiff } from '../context/LiffContext'
 import { PlayerType } from '../context/LiffContext'
 import apiClient from '../config/api'
 
+// Global flag to track if sync has already been initialized
+// This prevents multiple syncs when navigating between pages
+let hasSyncedGlobally = false
+
 export const useUserSync = () => {
    const { liff, userProfile } = useLiff()
    const [user, setUser] = useState<PlayerType | null>(null)
@@ -13,10 +17,13 @@ export const useUserSync = () => {
    // Main synchronization effect - MongoDB - Only runs ONCE when app loads
    useEffect(() => {
       const syncUserData = async () => {
-         // Skip if we've already synced or have user data
-         if (syncedRef.current) {
+         // Skip if we've already synced globally or for this component instance
+         if (hasSyncedGlobally || syncedRef.current) {
             return
          }
+         
+         // Mark as synced globally immediately to prevent other instances from syncing
+         hasSyncedGlobally = true
 
          if (debugMode) console.log('🔄 syncUserData called - Checking conditions')
 
