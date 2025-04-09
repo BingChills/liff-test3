@@ -150,7 +150,6 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setStores(user?.stores || [{ name: 'Default Store', point: 0, color: 'blue' }])
       setSelectedStore(user?.stores[0] || stores[0])
       setStamina(user?.stamina || { current: 20, max: 20 })
-      setScore(user?.score || 0)
       setDatabaseScore(user?.score || 0)
       setPictureUrl(user?.pictureUrl || null)
       setDisplayName(user?.displayName || '')
