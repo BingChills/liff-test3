@@ -13,7 +13,8 @@ import {
    ChevronDown,
    Check,
    AlertTriangle,
-   QrCode
+   QrCode,
+   Save
 } from 'lucide-react'
 import { useGameState, Coupon, StoreCurrency } from '../state/gameState'
 import PageHeader from './PageHeader'
@@ -40,7 +41,7 @@ type BrandDictionary = {
 
 // FIXME: Brand information lookup - to be replaced with API data in future
 const brandInfo: BrandDictionary = {
-   'YumYum': {
+   YumYum: {
       name: 'YumYum Restaurant',
       image: 'https://placehold.co/100x100/orange/white?text=YumYum'
    }
@@ -76,7 +77,7 @@ const getBrand = (code: string) => {
 }
 
 const CouponPage = () => {
-   const { coupons, stores } = useGameState()
+   const { coupons, stores, testSaveUserData } = useGameState()
    const [selectedCoupon, setSelectedCoupon] = useState<EnhancedCoupon | null>(null)
    const [showFilters, setShowFilters] = useState(false)
    const [statusFilter, setStatusFilter] = useState<FilterStatus>('active')
@@ -86,17 +87,20 @@ const CouponPage = () => {
    const [selectedStore, setSelectedStore] = useState(stores[0])
 
    // Mock coupon for testing
-   const mockCoupons = useMemo(() => [
-      {
-         id: 'test-yumyum-001',
-         code: 'YumYum-20OFF',
-         discount: '20%',
-         expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-         image: 'https://placehold.co/200x200/orange/white?text=YumYum',
-         isUsed: false,
-         storeName: 'YumYum'
-      }
-   ], [])
+   const mockCoupons = useMemo(
+      () => [
+         {
+            id: 'test-yumyum-001',
+            code: 'YumYum-20OFF',
+            discount: '20%',
+            expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            image: 'https://placehold.co/200x200/orange/white?text=YumYum',
+            isUsed: false,
+            storeName: 'YumYum'
+         }
+      ],
+      []
+   )
 
    const filteredCoupons = useMemo(() => {
       return [...coupons, ...mockCoupons]
@@ -195,12 +199,27 @@ const CouponPage = () => {
 
    const counts = getCounts()
 
+   // Debug function for testing data save
+   const handleTestSave = () => {
+      console.log('🧪 Testing manual save function')
+      const result = testSaveUserData()
+      alert(
+         result ? 'Save test initiated! Check console for results.' : 'Unable to test save. See console for details.'
+      )
+   }
+
    return (
       <div className='min-h-screen bg-gradient-to-b from-blue-200 to-blue-300 pb-24'>
          {/* Use the shared PageHeader component */}
          <PageHeader />
-
-         {/* Page Title with Icon */}
+         {/* FIXME: for debugging  */}
+         <button
+            className='fixed right-4 top-20 z-50 flex items-center gap-1 bg-indigo-600 text-white px-2 py-1 rounded-md text-xs shadow-lg'
+            onClick={handleTestSave}
+         >
+            <Save size={14} /> Debug Save
+         </button>
+         ){/* Page Title with Icon */}
          <div className='mt-2 px-4 flex items-center gap-3'>
             <div className='w-14 h-14 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center'>
                <Ticket className='w-8 h-8 text-blue-600' />
@@ -210,7 +229,6 @@ const CouponPage = () => {
                <p className='text-gray-700 text-sm mt-1'>Use them before they expire!</p>
             </div>
          </div>
-
          {/* Search and Filter Row */}
          <div className='mt-4 px-4 flex gap-2'>
             <div className='flex-1 relative'>
@@ -248,7 +266,6 @@ const CouponPage = () => {
                )}
             </button>
          </div>
-
          {/* Filter Panel */}
          {showFilters && (
             <div className='mt-4 px-4'>
@@ -340,7 +357,6 @@ const CouponPage = () => {
                </div>
             </div>
          )}
-
          {/* Coupon List */}
          <div className='px-4 space-y-4 mt-4'>
             {filteredCoupons.length === 0 ? (
@@ -440,7 +456,6 @@ const CouponPage = () => {
                ))
             )}
          </div>
-
          {/* QR Code Modal */}
          {selectedCoupon && (
             <div

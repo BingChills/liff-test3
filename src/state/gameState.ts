@@ -79,6 +79,9 @@ interface GameState {
    setDisplayName: (name: string) => void
    statusMessage: string | null
    setStatusMessage: (message: string | null) => void
+   
+   // Debug function
+   testSaveUserData: () => boolean
 }
 
 // Create context with default values
@@ -111,7 +114,8 @@ const defaultContextValue: GameState = {
    displayName: '',
    setDisplayName: () => {},
    statusMessage: null,
-   setStatusMessage: () => {}
+   setStatusMessage: () => {},
+   testSaveUserData: () => false
 }
 
 // Export the context so it can be used by the useGameState hook
@@ -205,8 +209,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handleCouponCollected])
 
    // Save user data to MongoDB database on page close
-   // NOTE: still working on
-   const handlePageClose = useCallback(() => {
+   const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
       if (!userId) {
          console.log('❌ Skipping save - no userId')
          return
@@ -223,9 +226,8 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
       try {
          // Get base URL from config for consistency
-         // NOTE: investigating if this is a problem
-         // const baseUrl = apiClient.defaults.baseURL || ''
-         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}/beacon`
+         const baseUrl = apiClient.defaults.baseURL || ''
+         const url = `${baseUrl}/api/players/${userId}/beacon`
 
          const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
          navigator.sendBeacon(url, blob)
@@ -242,6 +244,51 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          window.removeEventListener('beforeunload', handlePageClose)
       }
    }, [handlePageClose])
+
+   // DEBUG FUNCTION: Test the save functionality
+   const testSaveUserData = useCallback(() => {
+      console.log('🧪 Testing user data save...')
+      if (!userId) {
+         console.log('❌ Cannot test save - no userId')
+         return false
+      }
+
+      const updatedUserData = {
+         score: totalScore,
+         stores,
+         stamina,
+         characters,
+         coupons,
+         updatedAt: Date.now()
+      }
+
+      try {
+         const baseUrl = apiClient.defaults.baseURL || ''
+         console.log('Using baseURL:', baseUrl)
+         const url = `${baseUrl}/api/players/${userId}/beacon`
+         console.log('Sending test data to:', url)
+
+         // For testing - use fetch instead of beacon so we can see the response
+         fetch(url, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedUserData)
+         })
+            .then(response => {
+               console.log('✅ Test save response:', response.status)
+               return response.json()
+            })
+            .then(data => console.log('Response data:', data))
+            .catch(error => console.error('❌ Test save error:', error))
+
+         return true
+      } catch (error) {
+         console.error('Error during test save:', error)
+         return false
+      }
+   }, [userId, totalScore, stores, stamina, characters, coupons])
 
    // Define the value object to be provided to consumers
    const value: GameState = {
@@ -273,7 +320,8 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       displayName,
       setDisplayName,
       statusMessage,
-      setStatusMessage
+      setStatusMessage,
+      testSaveUserData
    }
 
    // Use React.createElement instead of JSX to avoid TypeScript parsing issues
