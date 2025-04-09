@@ -209,38 +209,33 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handleCouponCollected])
 
    // Save user data to MongoDB database on page close
-   const handlePageClose = useCallback(
-      (event: BeforeUnloadEvent) => {
-         if (!userId) {
-            console.log('❌ Skipping save - no userId')
-            return
-         }
+   const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
+      if (!userId) {
+         console.log('❌ Skipping save - no userId')
+         return
+      }
 
-         const updatedUserData = {
-            score: totalScore,
-            stores,
-            stamina,
-            characters,
-            coupons,
-            updatedAt: Date.now()
-         }
+      const updatedUserData = {
+         score: totalScore,
+         stores,
+         stamina,
+         characters,
+         coupons,
+         updatedAt: Date.now()
+      }
 
-         try {
-            // Get base URL from config for consistency
-            const baseUrl = apiClient.defaults.baseURL || ''
-            // Remove any trailing slashes
-            const cleanBaseUrl = baseUrl.replace(/\/$/, '')
-            const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
+      try {
+         // Use the standard PUT endpoint instead of a custom beacon endpoint
+         // as we know this works reliably with Vercel
+         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}`
 
-            const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
-            navigator.sendBeacon(url, blob)
-            console.log('💾 Sending updated user data via beacon to:', url)
-         } catch (error) {
-            console.error('Error saving data on close:', error)
-         }
-      },
-      [totalScore, stores, stamina, characters, coupons, userId]
-   )
+         const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
+         navigator.sendBeacon(url, blob)
+         console.log('💾 Sending updated user data via beacon to:', url)
+      } catch (error) {
+         console.error('Error saving data on close:', error)
+      }
+   }, [totalScore, stores, stamina, characters, coupons, userId])
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
@@ -269,11 +264,14 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
 
       try {
-         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}/beacon`
+         // Instead of using a custom beacon endpoint, use the standard update endpoint
+         // which we know works with Vercel
+         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}`
+         console.log('Using standard update endpoint:', url)
 
          // For testing - use fetch instead of beacon so we can see the response
          fetch(url, {
-            method: 'POST',
+            method: 'PUT', // Use PUT instead of POST since we know this works
             headers: {
                'Content-Type': 'application/json'
             },
