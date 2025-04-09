@@ -207,7 +207,10 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    // NOTE: still working on
    const handlePageClose = useCallback(
       (event: BeforeUnloadEvent) => {
-         if (!userId) return
+         if (!userId) {
+            console.log('❌ Skipping save - no userId')
+            return
+         }
 
          const updatedUserData = {
             score: totalScore,
