@@ -79,9 +79,6 @@ interface GameState {
    setDisplayName: (name: string) => void
    statusMessage: string | null
    setStatusMessage: (message: string | null) => void
-
-   // Debug function
-   testSaveUserData: () => boolean
 }
 
 // Create context with default values
@@ -114,8 +111,7 @@ const defaultContextValue: GameState = {
    displayName: '',
    setDisplayName: () => {},
    statusMessage: null,
-   setStatusMessage: () => {},
-   testSaveUserData: () => false
+   setStatusMessage: () => {}
 }
 
 // Export the context so it can be used by the useGameState hook
@@ -209,29 +205,34 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handleCouponCollected])
 
    // Save user data to MongoDB database on page close
-   const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
+   // NOTE: still working on
+   const handlePageClose = useCallback(() => {
       if (!userId) {
          console.log('❌ Skipping save - no userId')
          return
       }
 
+      const updatedUserData = {
+         score: totalScore,
+         stores,
+         stamina,
+         characters,
+         coupons,
+         updatedAt: Date.now()
+      }
+
       try {
-         // In browsers where sendBeacon is available, use it to save score on page close
-         // This ensures the request completes even as the page is closing
-         
-         // Use the standard PUT endpoint instead of trying to use PATCH
-         const scoreUrl = `/api/players/${userId}`
-         // Format data as the server expects for a PUT request
-         const scoreData = { score: totalScore }
-         const scoreBlob = new Blob([JSON.stringify(scoreData)], { type: 'application/json' })
-         
-         // Send using beacon
-         const success = navigator.sendBeacon(scoreUrl, scoreBlob)
-         console.log('💾 Score update via beacon ' + (success ? 'initiated' : 'failed') + ':', totalScore)
+         // Get base URL from config for consistency
+         const baseUrl = apiClient.defaults.baseURL || ''
+         const url = `${baseUrl}/api/players/${userId}/beacon`
+
+         const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
+         navigator.sendBeacon(url, blob)
+         console.log('💾 Sending updated user data:', updatedUserData)
       } catch (error) {
          console.error('Error saving data on close:', error)
       }
-   }, [totalScore, userId])
+   }, [totalScore, stores, stamina, characters, coupons, userId])
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
@@ -240,37 +241,6 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          window.removeEventListener('beforeunload', handlePageClose)
       }
    }, [handlePageClose])
-
-   //FIXME: delete later
-   // DEBUG FUNCTION: Test the save functionality
-   const testSaveUserData = useCallback(() => {
-      console.log('🧪 Testing score update...')
-      if (!userId) {
-         console.log('❌ Cannot test save - no userId')
-         return false
-      }
-
-      try {
-         // Use apiClient directly - this is the same method used elsewhere in the app
-         // and we know it works
-         console.log('Sending score update using apiClient')
-         
-         // Use PUT instead of PATCH to avoid Vercel limitations
-         apiClient
-            .put(`/api/players/${userId}`, { score: totalScore })
-            .then((response) => {
-               console.log('✅ Score update successful:', response.status)
-               return response.data
-            })
-            .then((data) => console.log('Response data:', data))
-            .catch((error) => console.error('❌ Score update error:', error.message))
-
-         return true
-      } catch (error) {
-         console.error('Error during test save:', error)
-         return false
-      }
-   }, [userId, totalScore])
 
    // Define the value object to be provided to consumers
    const value: GameState = {
@@ -302,8 +272,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       displayName,
       setDisplayName,
       statusMessage,
-      setStatusMessage,
-      testSaveUserData
+      setStatusMessage
    }
 
    // Use React.createElement instead of JSX to avoid TypeScript parsing issues

@@ -23,16 +23,7 @@ router.post('/', setUserId, createPlayer);
 router.put('/:userId', setUserId, updatePlayer);
 
 // Special beacon route for page close data saving
-// Using explicit handler for beacon requests
-router.post('/:userId/beacon', (req, res) => {
-  console.log('📡 Beacon endpoint hit!');
-  req.userId = req.params.userId; // Set userId explicitly
-  console.log('userId from beacon:', req.userId);
-  console.log('Received data:', req.body);
-  
-  // Handle the update
-  updatePlayer(req, res);
-});
+router.post('/:userId/beacon', setUserId, updatePlayer);
 
 // Update specific player fields
 // Special case for score updates - more permissive to ensure score gets saved
