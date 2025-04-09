@@ -20,7 +20,7 @@ export const useUserSync = () => {
 
       // Set flag immediately to prevent duplicate calls
       userDataLoaded = true
-      
+
       const syncUserData = async () => {
          try {
             // Try to get user data from MongoDB
@@ -57,7 +57,7 @@ export const useUserSync = () => {
       }
 
       syncUserData()
-   }, [liff, userProfile])
+   })
 
    // Update user method that saves to database
    const updateUser = async (updatedUser: PlayerType) => {
@@ -73,3 +73,4 @@ export const useUserSync = () => {
 
    return { user, updateUser }
 }
+
