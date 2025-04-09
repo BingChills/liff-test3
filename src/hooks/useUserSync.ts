@@ -54,7 +54,7 @@ export const useUserSync = () => {
                      id: 'test-yumyum-001',
                      title: 'YumYum - 20% Discount',
                      description: 'Get 20% off your first order at YumYum restaurant',
-                     code: 'YUMYUM20',
+                     code: 'YumYum-20OFF',
                      expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
                      isUsed: false,
                      imageUrl: 'https://placehold.co/200x200/orange/white?text=YumYum',
