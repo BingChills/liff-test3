@@ -1,4 +1,5 @@
 // Next.js API route adapter for players endpoint
+import { connectToDatabase } from '../../../lib/mongodb';
 import { createPlayer } from '../../../../server/controllers/playerController';
 
 // This handler supports POST requests to create new players
@@ -16,6 +17,10 @@ export default async function handler(req, res) {
   // POST - Create a new player
   if (req.method === 'POST') {
     try {
+      // Connect to MongoDB first
+      await connectToDatabase();
+      console.log('MongoDB connection established for creating new player');
+      
       // Set userId from body for controller compatibility
       req.userId = req.body.userId;
       return await createPlayer(req, res);

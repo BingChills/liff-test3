@@ -1,4 +1,5 @@
 // Next.js API route adapter for field-specific updates (like score)
+import { connectToDatabase } from '../../../../lib/mongodb';
 import { updatePlayerField } from '../../../../../server/controllers/playerController';
 
 // This handler supports PATCH requests for updating specific fields
@@ -16,6 +17,10 @@ export default async function handler(req, res) {
   // PATCH - Update a specific field
   if (req.method === 'PATCH') {
     try {
+      // Connect to MongoDB first
+      await connectToDatabase();
+      console.log('MongoDB connection established for field update');
+      
       // Extract userId and field from the URL parameters
       const { userId, field } = req.query;
       

@@ -1,4 +1,5 @@
 // Next.js API route adapter for specific player operations
+import { connectToDatabase } from '../../../lib/mongodb';
 import { getPlayerByUserId, updatePlayer, updatePlayerField } from '../../../../server/controllers/playerController';
 
 // This handler supports GET, PUT, and PATCH requests for specific players
@@ -20,6 +21,10 @@ export default async function handler(req, res) {
   req.userId = userId;
   
   try {
+    // Connect to MongoDB first
+    await connectToDatabase();
+    console.log('MongoDB connection established for player operations');
+    
     // GET - Retrieve a player's data
     if (req.method === 'GET') {
       return await getPlayerByUserId(req, res);
