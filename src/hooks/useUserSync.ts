@@ -57,7 +57,7 @@ export const useUserSync = () => {
       }
 
       syncUserData()
-   })
+   }, [liff, userProfile])
 
    // Update user method that saves to database
    const updateUser = async (updatedUser: PlayerType) => {
