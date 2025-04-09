@@ -227,11 +227,13 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       try {
          // Get base URL from config for consistency
          const baseUrl = apiClient.defaults.baseURL || ''
-         const url = `${baseUrl}/api/players/${userId}/beacon`
+         // Remove any trailing slashes
+         const cleanBaseUrl = baseUrl.replace(/\/$/, '')
+         const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
 
          const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
          navigator.sendBeacon(url, blob)
-         console.log('💾 Sending updated user data:', updatedUserData)
+         console.log('💾 Sending updated user data via beacon to:', url)
       } catch (error) {
          console.error('Error saving data on close:', error)
       }
@@ -263,9 +265,15 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
 
       try {
+         // Get base URL from config or use default web endpoint
          const baseUrl = apiClient.defaults.baseURL || ''
-         console.log('Using baseURL:', baseUrl)
-         const url = `${baseUrl}/api/players/${userId}/beacon`
+         
+         // Make sure we have the right URL format
+         // Remove any trailing slashes from baseUrl
+         const cleanBaseUrl = baseUrl.replace(/\/$/, '')
+         const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
+         
+         console.log('Using baseURL:', cleanBaseUrl)
          console.log('Sending test data to:', url)
 
          // For testing - use fetch instead of beacon so we can see the response
