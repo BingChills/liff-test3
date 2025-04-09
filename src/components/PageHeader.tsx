@@ -12,7 +12,7 @@ interface PageHeaderProps {
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const { liff, userProfile } = useLiff()
-   const { user, updateUser } = useUserSync()
+   const { user, setUser } = useUserSync()
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
@@ -74,7 +74,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
       // Update user data in MongoDB
       if (user) {
          const updatedUser = { ...user, selectedStore: store }
-         updateUser(updatedUser)
+         setUser(updatedUser)
       }
 
       setShowStoreSelector(false)

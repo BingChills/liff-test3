@@ -1,55 +1,53 @@
 // src/hooks/useUserSync.ts
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useLiff } from '../context/LiffContext'
 import { PlayerType } from '../context/LiffContext'
 import apiClient from '../config/api'
 
-// Global variables to store user data and track loading status
-let globalUserData: PlayerType | null = null;
-let userDataLoaded = false;
-let userDataLoading = false;
-
 export const useUserSync = () => {
    const { liff, userProfile } = useLiff()
-   const [user, setUser] = useState<PlayerType | null>(globalUserData)
+   const [user, setUser] = useState<PlayerType | null>(null)
+   const syncedRef = useRef(false) // Track if we've already synced
+   const debugMode = false // Set to true only when debugging is needed
 
-   // Load user data once when the component mounts
+   // Main synchronization effect - MongoDB - Only runs ONCE when app loads
    useEffect(() => {
-      // If we already have global data, use it immediately
-      if (globalUserData) {
-         setUser(globalUserData)
-         return
-      }
-
-      // Skip if already loaded, currently loading, or missing user profile
-      if (userDataLoaded || userDataLoading || !userProfile || !liff) {
-         return
-      }
-
-      // Set loading flag immediately to prevent duplicate calls
-      userDataLoading = true
-      console.log('🔄 Starting user data synchronization...')
-      
       const syncUserData = async () => {
+         // Skip if we've already synced or have user data
+         if (syncedRef.current) {
+            return
+         }
+
+         if (debugMode) console.log('🔄 syncUserData called - Checking conditions')
+
+         // Only proceed if we have user profile data
+         if (!userProfile || !liff) {
+            if (debugMode)
+               console.log('❌ Cannot sync - userProfile or LIFF not available', {
+                  hasUserProfile: !!userProfile,
+                  hasLiff: !!liff
+               })
+            return
+         }
+
          try {
             // Try to get user data from MongoDB
+            if (debugMode) console.log('🌐 Attempting API call to fetch user:', userProfile.userId)
             try {
-               console.log('🔍 Fetching user data for:', userProfile.userId)
                const response = await apiClient.get(`/api/players/${userProfile.userId}`)
+               if (debugMode) console.log('🌐 API Response:', response.status)
                if (response.data) {
-                  const userData = response.data as PlayerType
-                  console.log('✅ User data loaded successfully')
-                  
-                  // Update both local and global state
-                  setUser(userData)
-                  globalUserData = userData
-                  userDataLoaded = true
-                  userDataLoading = false
+                  if (debugMode) console.log('✅ Found existing user data in database')
+                  setUser(response.data as PlayerType)
+                  syncedRef.current = true // Mark as synced
                   return
+               } else {
+                  if (debugMode) console.log('⚠️ API returned success but no data')
                }
             } catch (error) {
                // Player not found in database, will create a new one
-               console.log('⚠️ User not found, creating new profile')
+               if (debugMode) console.log('⚠️ API Error:', error)
+               if (debugMode) console.log('🔄 Player not found in database, creating new profile')
             }
 
             // Create new profile if we don't have one
@@ -66,39 +64,32 @@ export const useUserSync = () => {
             }
 
             // Save to database
-            console.log('🔍 Creating new user profile')
             const createResponse = await apiClient.post('/api/players', newProfile)
-            const userData = createResponse.data as PlayerType
-            console.log('✅ New user profile created')
-            
-            // Update both local and global state
-            setUser(userData)
-            globalUserData = userData
-            userDataLoaded = true
+            setUser(createResponse.data as PlayerType)
+            syncedRef.current = true // Mark as synced
+            if (debugMode) console.log('New user profile saved to database')
          } catch (error) {
-            console.error('❌ Database sync error:', error)
-            userDataLoading = false
+            if (debugMode) console.error('Database sync error:', error)
          }
       }
 
+      if (debugMode) console.log('🔄 Checking if sync is needed...')
       syncUserData()
-   }, [liff, userProfile])
+   }, [userProfile, liff, debugMode])
 
    // Update user method that saves to database
    const updateUser = async (updatedUser: PlayerType) => {
-      // Update both local and global state
       setUser(updatedUser)
-      globalUserData = updatedUser
-      
       try {
          // Save to database
+         if (debugMode) console.log('🔄 Updating user in database:', updatedUser.userId)
          const response = await apiClient.put(`/api/players/${updatedUser.userId}`, updatedUser)
-         console.log('✅ User updated successfully:', response.status)
+         if (debugMode) console.log('✅ User updated successfully:', response.status)
       } catch (error) {
          console.error('❌ Error updating user in database:', error)
       }
    }
 
-   return { user, updateUser }
+   return { user, setUser: updateUser }
 }
 
