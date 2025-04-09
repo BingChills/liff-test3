@@ -203,34 +203,34 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [handleCouponCollected])
 
-   // Save data to MongoDB database on page close
+   // Save user data to MongoDB database on page close
    // NOTE: still working on
    const handlePageClose = useCallback(
       (event: BeforeUnloadEvent) => {
          if (!userId) return
 
-         const playerData = {
-            userId,
-            score,
+         const updatedUserData = {
+            score: totalScore,
+            stores,
+            stamina,
             characters,
             coupons,
-            stores,
-            selectedStore,
-            stamina,
-            drawCount,
-            remainingDraws,
             updatedAt: Date.now()
          }
 
          try {
-            // Save to MongoDB database
-            saveUserToDatabase(playerData as any)
-            console.log('Player data saved to database on page close')
+            // Get base URL from config for consistency
+            const baseUrl = apiClient.defaults.baseURL || ''
+            const url = `${baseUrl}/api/players/${userId}/beacon`
+
+            const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
+            navigator.sendBeacon(url, blob)
+            console.log('💾 Sending updated user data:', updatedUserData)
          } catch (error) {
-            console.error('Error saving player data:', error)
+            console.error('Error saving data on close:', error)
          }
       },
-      [userId, score, characters, coupons, stores, selectedStore, stamina, drawCount, remainingDraws]
+      [totalScore, stores, stamina, characters, coupons, userId]
    )
 
    // Set up beforeunload event handler to save state on page close

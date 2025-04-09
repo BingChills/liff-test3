@@ -22,6 +22,9 @@ router.post('/', setUserId, createPlayer);
 // Update entire player data
 router.put('/:userId', setUserId, updatePlayer);
 
+// Special beacon route for page close data saving
+router.post('/:userId/beacon', setUserId, updatePlayer);
+
 // Update specific player fields
 // Special case for score updates - more permissive to ensure score gets saved
 router.patch('/:userId/score', (req, res, next) => {
