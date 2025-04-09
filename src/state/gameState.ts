@@ -143,7 +143,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    const loadGameState = useCallback(async () => {
       if (!user) return
 
-      console.log('🔄 Loading game data for user:', userId)
+      console.log('🔄 Loading game data for user:', user.displayName)
       setUserId(user?.userId || null)
       setCharacters(user?.characters || [])
       setCoupons(user?.coupons || [])
@@ -154,12 +154,13 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setPictureUrl(user?.pictureUrl || null)
       setDisplayName(user?.displayName || '')
       setStatusMessage(user?.statusMessage || null)
-   }, [userId, stores, user])
+   }, [stores, user])
 
    // Load player data when userId changes
    useEffect(() => {
       if (user) {
          loadGameState()
+         console.log('✅ Game data loaded')
       }
    }, [user, loadGameState])
 

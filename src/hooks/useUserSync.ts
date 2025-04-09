@@ -24,7 +24,6 @@ export const useUserSync = () => {
             console.log('🌐 Attempting API call to fetch user:', userProfile.userId)
             try {
                const response = await apiClient.get(`/api/players/${userProfile.userId}`)
-               console.log('🌐 API Response:', response.status)
                if (response.data) {
                   console.log('✅ Found existing user data in database')
                   setUser(response.data as PlayerType)
@@ -34,7 +33,6 @@ export const useUserSync = () => {
                   console.log('⚠️ API returned success but no data')
                }
             } catch (error) {
-               console.log('⚠️ API Error:', error)
                console.log('🔄 Player not found in database, creating new profile')
             }
 
@@ -74,3 +72,4 @@ export const useUserSync = () => {
 
    return { user }
 }
+
