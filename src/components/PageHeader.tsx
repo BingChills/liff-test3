@@ -13,19 +13,13 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const { liff, userProfile } = useLiff()
    const { user } = useUserSync()
-   const { score: sessionScore } = useGameState() // Get the current session score
+   const { totalScore } = useGameState() // Get the total score from GameState context
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
 
-   // Get data from MongoDB user object
-   console.log(user)
    const stores = user?.stores || []
    const stamina = user?.stamina || { current: 20, max: 20 }
-
-   // Combine database score with current session score
-   const databaseScore = user?.score || 0
-   const totalScore = databaseScore + sessionScore
    const [selectedStore, setSelectedStoreState] = useState<StoreCurrency>({ name: 'Default', point: 0, color: 'blue' })
 
    // Use profile picture from user data or LINE

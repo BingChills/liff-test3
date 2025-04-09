@@ -51,8 +51,8 @@ interface GameState {
    // Store data
    stores: StoreCurrency[]
    setStores: (stores: StoreCurrency[]) => void
-   selectedStore: StoreCurrency
-   setSelectedStore: (store: StoreCurrency) => void
+   selectedStore: StoreCurrency | null
+   setSelectedStore: (store: StoreCurrency | null) => void
 
    // Stamina
    stamina: {
@@ -69,8 +69,11 @@ interface GameState {
 
    // Score
    score: number
+   databaseScore: number
+   totalScore: number
    setScore: (score: number) => void
-   updateScore: (newScore: number) => void
+   setDatabaseScore: (score: number) => void
+   updateScore: (score: number) => void
 
    // User information
    userId: string | null
@@ -92,11 +95,7 @@ const defaultContextValue: GameState = {
    setCoupons: () => {},
    stores: [],
    setStores: () => {},
-   selectedStore: {
-      name: 'Default Store',
-      point: 0,
-      color: 'blue'
-   },
+   selectedStore: null,
    setSelectedStore: () => {},
    stamina: { current: 20, max: 20 },
    setStamina: () => {},
@@ -107,7 +106,10 @@ const defaultContextValue: GameState = {
    userId: null,
    setUserId: () => {},
    score: 0,
+   databaseScore: 0,
+   totalScore: 0,
    setScore: () => {},
+   setDatabaseScore: () => {},
    updateScore: () => {},
    isLoading: false
 }
@@ -123,13 +125,17 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    const [characters, setCharacters] = useState<Character[]>([])
    const [coupons, setCoupons] = useState<Coupon[]>([])
    const [stores, setStores] = useState<StoreCurrency[]>([{ name: 'Default Store', point: 0, color: 'blue' }])
-   const [selectedStore, setSelectedStore] = useState<StoreCurrency>(stores[0])
+   const [selectedStore, setSelectedStore] = useState<StoreCurrency | null>(stores[0])
    const [stamina, setStamina] = useState({ current: 20, max: 20 })
    const [drawCount, setDrawCount] = useState(0)
    const [remainingDraws, setRemainingDraws] = useState(0)
    const [score, setScore] = useState(0)
+   const [databaseScore, setDatabaseScore] = useState(0)
    const [userId, setUserId] = useState<string | null>(null)
    const [isLoading, setIsLoading] = useState(false)
+
+   // Calculate total score (database + session)
+   const totalScore = databaseScore + score
 
    // EMERGENCY MODE: Load player data from localStorage
    const loadGameState = useCallback(async () => {
@@ -208,10 +214,30 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [userId, loadGameState])
 
+   // NOTE: Listen for user ID updates and load database score
+   // NOTE: see if this cause problems
+   useEffect(() => {
+      if (userId) {
+         apiClient
+            .get(`/api/players/${userId}`)
+            .then((response) => {
+               if (response.data && response.data.score !== undefined) {
+                  // Update database score from user data
+                  setDatabaseScore(response.data.score)
+                  console.log('Loaded database score:', response.data.score)
+               }
+            })
+            .catch((error) => {
+               console.error('Error getting player score:', error)
+            })
+      }
+   }, [userId])
+
    // Handle score update event from the game - wrapped in useCallback to prevent recreation on every render
    const handleScoreUpdated = useCallback(
       (newScore: number) => {
-         setScore(newScore)
+         setScore(newScore) // Only update session score
+         console.log('Score updated from game:', newScore)
       },
       [setScore]
    )
@@ -263,7 +289,6 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          EventBus.removeListener('couponCollected', handleCouponCollected)
       }
    }, [handleCouponCollected])
-
 
    // Save data to MongoDB database on page close
    const handlePageClose = useCallback(
@@ -339,7 +364,10 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       userId,
       setUserId,
       score,
+      databaseScore,
+      totalScore,
       setScore,
+      setDatabaseScore,
       updateScore,
       isLoading
    }
