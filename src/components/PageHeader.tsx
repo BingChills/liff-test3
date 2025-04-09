@@ -11,37 +11,25 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
-   const { liff, userProfile } = useLiff()
-   const { user } = useUserSync()
-   const { totalScore } = useGameState() // Get the total score from GameState context
+   const { userProfile } = useLiff()
+   const { stores, selectedStore, setSelectedStore, stamina, totalScore, pictureUrl, displayName, statusMessage } =
+      useGameState()
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
 
-   const stores = user?.stores || []
-   const stamina = user?.stamina || { current: 20, max: 20 }
-   const [selectedStore, setSelectedStoreState] = useState<StoreCurrency>({ name: 'Default', point: 0, color: 'blue' })
-
    // Use profile picture from user data or LINE
    useEffect(() => {
-      if (user?.pictureUrl) {
-         // Priority 1: Use picture from MongoDB user data
-         setProfilePicture(user.pictureUrl)
-      } else if (userProfile?.pictureUrl) {
-         // Priority 2: Use picture from LIFF context
+      if (userProfile?.pictureUrl) {
+         // Priority 1: Use picture from LIFF context
          setProfilePicture(userProfile.pictureUrl)
-      } else if (liff && liff.isLoggedIn()) {
-         // Priority 3: Fetch directly from LINE API as fallback
-         liff
-            .getProfile()
-            .then((profile) => {
-               setProfilePicture(profile.pictureUrl || null)
-            })
-            .catch((err) => console.error('Error getting profile:', err))
+      } else if (pictureUrl) {
+         // Priority 2: Use picture from MongoDB user data
+         setProfilePicture(pictureUrl)
       } else {
          setProfilePicture(null) // Will use default image in UI rendering
       }
-   }, [liff, userProfile, user]) // Run when any of these dependencies change
+   }, [pictureUrl, userProfile?.pictureUrl]) // Run when any of these dependencies change
 
    const getStoreColor = (color: string) => {
       switch (color) {
@@ -60,13 +48,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
 
    // Initialize selectedStore when user data is loaded
    useEffect(() => {
-      if (user?.stores && user.stores.length > 0 && !selectedStore) {
-         setSelectedStoreState(user.stores[0])
+      if (stores.length > 0 && !selectedStore) {
+         setSelectedStore(stores[0])
       }
-   }, [user, selectedStore])
+   }, [stores, selectedStore, setSelectedStore])
 
    const handleStoreSelect = (store: StoreCurrency) => {
-      setSelectedStoreState(store)
+      setSelectedStore(store)
       setShowStoreSelector(false)
    }
 
@@ -155,7 +143,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
          </div>
 
          {/* Player Information Modal */}
-         {showProfileModal && user && (
+         {showProfileModal && (
             <div
                className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
                onClick={() => setShowProfileModal(false)}
@@ -187,11 +175,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                            </div>
                         )}
                      </div>
-                     <h2 className='text-xl font-bold text-gray-800'>{user.displayName}</h2>
-                     {user.statusMessage && (
+                     <h2 className='text-xl font-bold text-gray-800'>{displayName}</h2>
+                     {statusMessage && (
                         <div className='flex items-center justify-center mt-1 text-gray-500'>
                            <MessageCircle size={14} className='mr-1' />
-                           <p className='text-sm italic'>{user.statusMessage}</p>
+                           <p className='text-sm italic'>{statusMessage}</p>
                         </div>
                      )}
                   </div>
@@ -221,7 +209,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                               <span className='text-gray-700'>Energy</span>
                            </div>
                            <span className='font-bold text-gray-900'>
-                              {user?.stamina?.current || 0}/{user?.stamina?.max || 0}
+                              {stamina.current || 0}/{stamina.max || 0}
                            </span>
                         </div>
                      </div>
@@ -232,7 +220,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      <h3 className='text-sm font-semibold text-gray-500 mb-3'>STORE POINTS</h3>
 
                      <div className='space-y-3'>
-                        {user?.stores?.map((store) => (
+                        {stores?.map((store) => (
                            <div key={store.name} className='flex items-center justify-between'>
                               <div className='flex items-center'>
                                  <div

@@ -73,6 +73,12 @@ interface GameState {
    // User information
    userId: string | null
    setUserId: (id: string | null) => void
+   pictureUrl: string | null
+   setPictureUrl: (url: string | null) => void
+   displayName: string
+   setDisplayName: (name: string) => void
+   statusMessage: string | null
+   setStatusMessage: (message: string | null) => void
 }
 
 // Create context with default values
@@ -99,7 +105,13 @@ const defaultContextValue: GameState = {
    databaseScore: 0,
    totalScore: 0,
    setScore: () => {},
-   setDatabaseScore: () => {}
+   setDatabaseScore: () => {},
+   pictureUrl: null,
+   setPictureUrl: () => {},
+   displayName: '',
+   setDisplayName: () => {},
+   statusMessage: null,
+   setStatusMessage: () => {}
 }
 
 // Export the context so it can be used by the useGameState hook
@@ -119,6 +131,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    const [score, setScore] = useState(0)
    const [databaseScore, setDatabaseScore] = useState(0)
    const [userId, setUserId] = useState<string | null>(null)
+   const [pictureUrl, setPictureUrl] = useState<string | null>(null)
+   const [displayName, setDisplayName] = useState<string>('')
+   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
    // Calculate total score (database + session)
    const totalScore = databaseScore + score
@@ -137,6 +152,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setStamina(user?.stamina || { current: 20, max: 20 })
       setScore(user?.score || 0)
       setDatabaseScore(user?.score || 0)
+      setPictureUrl(user?.pictureUrl || null)
+      setDisplayName(user?.displayName || '')
+      setStatusMessage(user?.statusMessage || null)
    }, [userId, stores, user])
 
    // Load player data when userId changes
@@ -248,7 +266,13 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       databaseScore,
       totalScore,
       setScore,
-      setDatabaseScore
+      setDatabaseScore,
+      pictureUrl,
+      setPictureUrl,
+      displayName,
+      setDisplayName,
+      statusMessage,
+      setStatusMessage
    }
 
    // Use React.createElement instead of JSX to avoid TypeScript parsing issues
