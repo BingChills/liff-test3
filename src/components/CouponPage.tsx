@@ -85,8 +85,21 @@ const CouponPage = () => {
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [selectedStore, setSelectedStore] = useState(stores[0])
 
+   // Mock coupon for testing
+   const mockCoupons = useMemo(() => [
+      {
+         id: 'test-yumyum-001',
+         code: 'YumYum-20OFF',
+         discount: '20%',
+         expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+         image: 'https://placehold.co/200x200/orange/white?text=YumYum',
+         isUsed: false,
+         storeName: 'YumYum'
+      }
+   ], [])
+
    const filteredCoupons = useMemo(() => {
-      return coupons
+      return [...coupons, ...mockCoupons]
          .map((coupon) => {
             // Add expiresIn property to each coupon
             const expiresIn = getDaysLeft(coupon)
@@ -119,7 +132,7 @@ const CouponPage = () => {
 
             return true
          })
-   }, [coupons, statusFilter, daysFilter, searchQuery])
+   }, [coupons, mockCoupons, statusFilter, daysFilter, searchQuery])
 
    const getStoreColor = (color: string) => {
       switch (color) {
