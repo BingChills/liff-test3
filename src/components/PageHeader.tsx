@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { User, Coins, Timer, Gem, ChevronDown, X, MessageCircle, Calendar, Award } from 'lucide-react'
 import { useLiff } from '../context/LiffContext'
-import { StoreCurrency } from '../state/gameState'
+import { StoreCurrency, useGameState } from '../state/gameState'
 import { useUserSync } from '../hooks/useUserSync'
 
 interface PageHeaderProps {
@@ -13,6 +13,7 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const { liff, userProfile } = useLiff()
    const { user, setUser } = useUserSync()
+   const { score: sessionScore } = useGameState() // Get the current session score
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
@@ -21,7 +22,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    console.log(user)
    const stores = user?.stores || []
    const stamina = user?.stamina || { current: 20, max: 20 }
-   const score = user?.score || 0
+   
+   // Combine database score with current session score
+   const databaseScore = user?.score || 0
+   const totalScore = databaseScore + sessionScore
    const [selectedStore, setSelectedStoreState] = useState<StoreCurrency>({ name: 'Default', point: 0, color: 'blue' })
 
    // Use profile picture from user data or LINE
@@ -148,7 +152,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      <div className='w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center'>
                         <Coins className='w-2.5 h-2.5 text-white' />
                      </div>
-                     <span className='text-sm font-bold text-white'>{score || 0}</span>
+                     <span className='text-sm font-bold text-white'>{totalScore || 0}</span>
                   </div>
 
                   {/* Energy/Stamina */}
@@ -219,7 +223,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                               </div>
                               <span className='text-gray-700'>Total Score</span>
                            </div>
-                           <span className='font-bold text-gray-900'>{user?.score || 0}</span>
+                           <span className='font-bold text-gray-900'>{totalScore || 0}</span>
                         </div>
 
                         {/* Stamina */}
