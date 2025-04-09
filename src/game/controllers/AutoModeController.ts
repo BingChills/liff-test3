@@ -17,10 +17,10 @@ export class AutoModeController {
     }
 
     public createAutoModeButton(): void {
-        // Create a container for the button - position it in the bottom right corner
+        // Create a container for the button - position it higher in the right side
         this.autoModeButton = this.scene.add.container(
             this.scene.cameras.main.width - 70,
-            this.scene.cameras.main.height - 50
+            this.scene.cameras.main.height - 120 // Moved up from -50 to -120
         );
 
         // Create a rounded rectangle background (pill shape) for the button
