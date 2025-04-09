@@ -10,11 +10,11 @@ export const useUserSync = () => {
    const syncedRef = useRef(false) // Track if we've already synced
    const debugMode = false // Set to true only when debugging is needed
 
-   // Main synchronization effect - MongoDB
+   // Main synchronization effect - MongoDB - Only runs ONCE when app loads
    useEffect(() => {
       const syncUserData = async () => {
          // Skip if we've already synced or have user data
-         if (syncedRef.current || user) {
+         if (syncedRef.current) {
             return
          }
 
@@ -75,7 +75,7 @@ export const useUserSync = () => {
 
       if (debugMode) console.log('🔄 Checking if sync is needed...')
       syncUserData()
-   }, [userProfile, liff, user, debugMode])
+   }, [userProfile, liff, debugMode])
 
    // Update user method that saves to database
    const updateUser = async (updatedUser: PlayerType) => {
