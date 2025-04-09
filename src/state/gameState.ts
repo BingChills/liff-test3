@@ -218,12 +218,14 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       try {
          // In browsers where sendBeacon is available, use it to save score on page close
          // This ensures the request completes even as the page is closing
-         const scoreUrl = `/api/players/${userId}/score`
-         // Make sure it's in the format the API expects
-         const scoreData = { value: totalScore }
+         
+         // Use the standard PUT endpoint instead of trying to use PATCH
+         const scoreUrl = `/api/players/${userId}`
+         // Format data as the server expects for a PUT request
+         const scoreData = { score: totalScore }
          const scoreBlob = new Blob([JSON.stringify(scoreData)], { type: 'application/json' })
          
-         // The second parameter to sendBeacon should match what the server expects for a PATCH
+         // Send using beacon
          const success = navigator.sendBeacon(scoreUrl, scoreBlob)
          console.log('💾 Score update via beacon ' + (success ? 'initiated' : 'failed') + ':', totalScore)
       } catch (error) {
@@ -253,9 +255,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          // and we know it works
          console.log('Sending score update using apiClient')
          
-         // Score updates must be PATCH requests with {value: score} format
+         // Use PUT instead of PATCH to avoid Vercel limitations
          apiClient
-            .patch(`/api/players/${userId}/score`, { value: totalScore })
+            .put(`/api/players/${userId}`, { score: totalScore })
             .then((response) => {
                console.log('✅ Score update successful:', response.status)
                return response.data
