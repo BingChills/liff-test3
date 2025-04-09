@@ -264,6 +264,23 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [handleCouponCollected])
 
+   // Listen for score updates from the game
+   useEffect(() => {
+      // Handler for score updates from the game
+      const handleScoreUpdate = (newScore: number) => {
+         console.log('Score updated from game:', newScore);
+         setScore(newScore);
+      };
+      
+      // Add event listener for score updates
+      EventBus.on('scoreUpdated', handleScoreUpdate);
+      
+      // Clean up the event listener when component unmounts
+      return () => {
+         EventBus.off('scoreUpdated', handleScoreUpdate);
+      };
+   }, [])
+
    // Save data to MongoDB database on page close
    const handlePageClose = useCallback(
       (event: BeforeUnloadEvent) => {
