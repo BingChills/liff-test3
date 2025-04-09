@@ -223,8 +223,9 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
       try {
          // Get base URL from config for consistency
-         const baseUrl = apiClient.defaults.baseURL || ''
-         const url = `${baseUrl}/api/players/${userId}/beacon`
+         // NOTE: investigating if this is a problem
+         // const baseUrl = apiClient.defaults.baseURL || ''
+         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}/beacon`
 
          const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
          navigator.sendBeacon(url, blob)
