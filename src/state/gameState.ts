@@ -216,11 +216,16 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
 
       try {
-         // Use relative URL path for beacon call
+         // In browsers where sendBeacon is available, use it to save score on page close
+         // This ensures the request completes even as the page is closing
          const scoreUrl = `/api/players/${userId}/score`
-         const scoreBlob = new Blob([JSON.stringify({ value: totalScore })], { type: 'application/json' })
-         navigator.sendBeacon(scoreUrl, scoreBlob)
-         console.log('💾 Sending score update via beacon:', totalScore)
+         // Make sure it's in the format the API expects
+         const scoreData = { value: totalScore }
+         const scoreBlob = new Blob([JSON.stringify(scoreData)], { type: 'application/json' })
+         
+         // The second parameter to sendBeacon should match what the server expects for a PATCH
+         const success = navigator.sendBeacon(scoreUrl, scoreBlob)
+         console.log('💾 Score update via beacon ' + (success ? 'initiated' : 'failed') + ':', totalScore)
       } catch (error) {
          console.error('Error saving data on close:', error)
       }
@@ -237,31 +242,26 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    //FIXME: delete later
    // DEBUG FUNCTION: Test the save functionality
    const testSaveUserData = useCallback(() => {
-      console.log('🧪 Testing user data save...')
+      console.log('🧪 Testing score update...')
       if (!userId) {
          console.log('❌ Cannot test save - no userId')
          return false
       }
 
       try {
-         // Use relative URL to avoid CORS issues
-         const scoreUrl = `/api/players/${userId}/score`
-         console.log('Using relative URL for score update:', scoreUrl)
-
-         // For testing - use standard fetch
-         fetch(scoreUrl, {
-            method: 'PATCH',
-            headers: {
-               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ value: totalScore })
-         })
+         // Use apiClient directly - this is the same method used elsewhere in the app
+         // and we know it works
+         console.log('Sending score update using apiClient')
+         
+         // Score updates must be PATCH requests with {value: score} format
+         apiClient
+            .patch(`/api/players/${userId}/score`, { value: totalScore })
             .then((response) => {
-               console.log('✅ Test save response:', response.status)
-               return response.json()
+               console.log('✅ Score update successful:', response.status)
+               return response.data
             })
             .then((data) => console.log('Response data:', data))
-            .catch((error) => console.error('❌ Test save error:', error))
+            .catch((error) => console.error('❌ Score update error:', error.message))
 
          return true
       } catch (error) {
