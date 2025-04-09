@@ -160,7 +160,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    useEffect(() => {
       if (user) {
          loadGameState()
-         console.log('✅ Game data loaded')
+         console.log('✅ User data loaded')
       }
    }, [user, loadGameState])
 
@@ -206,36 +206,33 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
    // Save user data to MongoDB database on page close
    // NOTE: still working on
-   const handlePageClose = useCallback(
-      (event: BeforeUnloadEvent) => {
-         if (!userId) {
-            console.log('❌ Skipping save - no userId')
-            return
-         }
+   const handlePageClose = useCallback(() => {
+      if (!userId) {
+         console.log('❌ Skipping save - no userId')
+         return
+      }
 
-         const updatedUserData = {
-            score: totalScore,
-            stores,
-            stamina,
-            characters,
-            coupons,
-            updatedAt: Date.now()
-         }
+      const updatedUserData = {
+         score: totalScore,
+         stores,
+         stamina,
+         characters,
+         coupons,
+         updatedAt: Date.now()
+      }
 
-         try {
-            // Get base URL from config for consistency
-            const baseUrl = apiClient.defaults.baseURL || ''
-            const url = `${baseUrl}/api/players/${userId}/beacon`
+      try {
+         // Get base URL from config for consistency
+         const baseUrl = apiClient.defaults.baseURL || ''
+         const url = `${baseUrl}/api/players/${userId}/beacon`
 
-            const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
-            navigator.sendBeacon(url, blob)
-            console.log('💾 Sending updated user data:', updatedUserData)
-         } catch (error) {
-            console.error('Error saving data on close:', error)
-         }
-      },
-      [totalScore, stores, stamina, characters, coupons, userId]
-   )
+         const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
+         navigator.sendBeacon(url, blob)
+         console.log('💾 Sending updated user data:', updatedUserData)
+      } catch (error) {
+         console.error('Error saving data on close:', error)
+      }
+   }, [totalScore, stores, stamina, characters, coupons, userId])
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
