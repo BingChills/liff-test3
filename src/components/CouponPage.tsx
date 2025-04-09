@@ -39,7 +39,12 @@ type BrandDictionary = {
 }
 
 // FIXME: Brand information lookup - to be replaced with API data in future
-const brandInfo: BrandDictionary = {}
+const brandInfo: BrandDictionary = {
+   'YumYum': {
+      name: 'YumYum Restaurant',
+      image: 'https://placehold.co/100x100/orange/white?text=YumYum'
+   }
+}
 
 // Helper function to get days left from expiry date
 const getDaysLeft = (coupon: Coupon) => {
