@@ -10,15 +10,13 @@ export const useUserSync = () => {
 
    useEffect(() => {
       const syncUserData = async () => {
-         if (syncedRef.current) return
-
-         console.log('🔄 syncUserData called - Checking conditions')
+         if (syncedRef.current) {
+            console.log('🔄 Skipping sync - already synced')
+            return
+         }
 
          if (!userProfile || !liff) {
-            console.log('❌ Cannot sync - userProfile or LIFF not available', {
-               hasUserProfile: !!userProfile,
-               hasLiff: !!liff
-            })
+            console.log('❌ Cannot sync - userProfile or LIFF not available')
             return
          }
 
@@ -71,21 +69,8 @@ export const useUserSync = () => {
          }
       }
 
-      console.log('🔄 Checking if sync is needed...')
       syncUserData()
    }, [userProfile, liff])
 
-   const updateUser = async (updatedUser: PlayerType) => {
-      setUser(updatedUser)
-      try {
-         console.log('🔄 Updating user in database:', updatedUser.userId)
-         const response = await apiClient.put(`/api/players/${updatedUser.userId}`, updatedUser)
-         console.log('✅ User updated successfully:', response.status)
-      } catch (error) {
-         console.error('❌ Error updating user in database:', error)
-      }
-   }
-
-   return { user, setUser: updateUser }
+   return { user }
 }
-
