@@ -1,60 +1,38 @@
 // src/hooks/useUserSync.ts
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiff } from '../context/LiffContext'
 import { PlayerType } from '../context/LiffContext'
 import apiClient from '../config/api'
 
-// Global flag to track if sync has already been initialized
-// This prevents multiple syncs when navigating between pages
-let hasSyncedGlobally = false
+// Global flag to prevent multiple API calls when navigating between pages
+let userDataLoaded = false
 
 export const useUserSync = () => {
    const { liff, userProfile } = useLiff()
    const [user, setUser] = useState<PlayerType | null>(null)
-   const syncedRef = useRef(false) // Track if we've already synced
-   const debugMode = false // Set to true only when debugging is needed
 
-   // Main synchronization effect - MongoDB - Only runs ONCE when app loads
+   // Load user data once when the component mounts
    useEffect(() => {
+      // Skip if already loaded or missing user profile
+      if (userDataLoaded || !userProfile || !liff) {
+         return
+      }
+
+      // Set flag immediately to prevent duplicate calls
+      userDataLoaded = true
+      
       const syncUserData = async () => {
-         // Skip if we've already synced globally or for this component instance
-         if (hasSyncedGlobally || syncedRef.current) {
-            return
-         }
-         
-         // Mark as synced globally immediately to prevent other instances from syncing
-         hasSyncedGlobally = true
-
-         if (debugMode) console.log('🔄 syncUserData called - Checking conditions')
-
-         // Only proceed if we have user profile data
-         if (!userProfile || !liff) {
-            if (debugMode)
-               console.log('❌ Cannot sync - userProfile or LIFF not available', {
-                  hasUserProfile: !!userProfile,
-                  hasLiff: !!liff
-               })
-            return
-         }
-
          try {
             // Try to get user data from MongoDB
-            if (debugMode) console.log('🌐 Attempting API call to fetch user:', userProfile.userId)
             try {
                const response = await apiClient.get(`/api/players/${userProfile.userId}`)
-               if (debugMode) console.log('🌐 API Response:', response.status)
                if (response.data) {
-                  if (debugMode) console.log('✅ Found existing user data in database')
                   setUser(response.data as PlayerType)
-                  syncedRef.current = true // Mark as synced
                   return
-               } else {
-                  if (debugMode) console.log('⚠️ API returned success but no data')
                }
             } catch (error) {
                // Player not found in database, will create a new one
-               if (debugMode) console.log('⚠️ API Error:', error)
-               if (debugMode) console.log('🔄 Player not found in database, creating new profile')
+               console.log('⚠️ API Error:', error)
             }
 
             // Create new profile if we don't have one
@@ -73,30 +51,25 @@ export const useUserSync = () => {
             // Save to database
             const createResponse = await apiClient.post('/api/players', newProfile)
             setUser(createResponse.data as PlayerType)
-            syncedRef.current = true // Mark as synced
-            if (debugMode) console.log('New user profile saved to database')
          } catch (error) {
-            if (debugMode) console.error('Database sync error:', error)
+            console.error('Database sync error:', error)
          }
       }
 
-      if (debugMode) console.log('🔄 Checking if sync is needed...')
       syncUserData()
-   }, [userProfile, liff, debugMode])
+   }, [liff, userProfile])
 
    // Update user method that saves to database
    const updateUser = async (updatedUser: PlayerType) => {
       setUser(updatedUser)
       try {
          // Save to database
-         if (debugMode) console.log('🔄 Updating user in database:', updatedUser.userId)
          const response = await apiClient.put(`/api/players/${updatedUser.userId}`, updatedUser)
-         if (debugMode) console.log('✅ User updated successfully:', response.status)
+         console.log('✅ User updated successfully:', response.status)
       } catch (error) {
          console.error('❌ Error updating user in database:', error)
       }
    }
 
-   return { user, setUser: updateUser }
+   return { user, updateUser }
 }
-

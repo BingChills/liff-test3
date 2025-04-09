@@ -4,8 +4,6 @@ import { useLiffInit } from '../hooks/useLiffInit'
 import { useUserSync } from '../hooks/useUserSync'
 import { LiffProvider } from '../context/LiffContext'
 
-// Simple component that calls useUserSync
-// The hook itself now has a global flag to only run once
 const UserSyncManager = () => {
    useUserSync()
    return null
