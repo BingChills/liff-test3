@@ -12,7 +12,7 @@ interface PageHeaderProps {
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const { liff, userProfile } = useLiff()
-   const { user, setUser } = useUserSync()
+   const { user } = useUserSync()
    const { score: sessionScore } = useGameState() // Get the current session score
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
@@ -22,7 +22,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    console.log(user)
    const stores = user?.stores || []
    const stamina = user?.stamina || { current: 20, max: 20 }
-   
+
    // Combine database score with current session score
    const databaseScore = user?.score || 0
    const totalScore = databaseScore + sessionScore
@@ -72,15 +72,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    }, [user, selectedStore])
 
    const handleStoreSelect = (store: StoreCurrency) => {
-      // Update selectedStore state
       setSelectedStoreState(store)
-
-      // Update user data in MongoDB
-      if (user) {
-         const updatedUser = { ...user, selectedStore: store }
-         setUser(updatedUser)
-      }
-
       setShowStoreSelector(false)
    }
 
