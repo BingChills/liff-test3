@@ -3,6 +3,7 @@ import { User, Coins, Timer, Gem, ChevronDown, X, MessageCircle, Calendar, Award
 import { useLiff } from '../context/LiffContext'
 import { StoreCurrency } from '../state/gameState'
 import { useUserSync } from '../hooks/useUserSync'
+import { useGameEvents } from '../hooks/useGameEvents'
 
 interface PageHeaderProps {
    title?: string
@@ -16,6 +17,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
+   
+   // Initialize game events listeners to sync score updates from the game
+   useGameEvents()
 
    // Get data from MongoDB user object
    console.log(user)

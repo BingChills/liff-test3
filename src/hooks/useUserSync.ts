@@ -30,7 +30,10 @@ export const useUserSync = () => {
             // Try to get user data from MongoDB
             if (debugMode) console.log('🌐 Attempting API call to fetch user:', userProfile.userId)
             try {
-               const response = await apiClient.get(`/api/players/${userProfile.userId}`)
+               // Use query parameter instead of path parameter - works better with Vercel
+               const response = await apiClient.get('/api/player', {
+                  params: { userId: userProfile.userId }
+               })
                if (debugMode) console.log('🌐 API Response:', response.status)
                if (response.data) {
                   if (debugMode) console.log('✅ Found existing user data in database')
@@ -79,7 +82,9 @@ export const useUserSync = () => {
       try {
          // Save to database
          if (debugMode) console.log('🔄 Updating user in database:', updatedUser.userId)
-         const response = await apiClient.put(`/api/players/${updatedUser.userId}`, updatedUser)
+         const response = await apiClient.put('/api/player', updatedUser, {
+            params: { userId: updatedUser.userId }
+         })
          if (debugMode) console.log('✅ User updated successfully:', response.status)
       } catch (error) {
          console.error('❌ Error updating user in database:', error)
