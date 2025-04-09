@@ -134,20 +134,20 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    // EMERGENCY MODE: Load player data from localStorage
    const loadGameState = useCallback(async () => {
       if (!userId) return
-      
+
       setIsLoading(true)
       console.log('🔄 Loading game data for user:', userId)
-      
+
       try {
          // Try to load from localStorage first
          const savedData = localStorage.getItem('gameData')
-         
+
          if (savedData) {
             console.log('✅ Found saved data in localStorage')
-            
+
             try {
                const playerData = JSON.parse(savedData)
-               
+
                // Verify this is the correct user's data
                if (playerData.userId === userId) {
                   // Set all game state from localStorage data
@@ -155,24 +155,24 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
                   setPoint(playerData.point || 0)
                   setCharacters(playerData.characters || [])
                   setCoupons(playerData.coupons || [])
-                  
+
                   if (playerData.stores && playerData.stores.length > 0) {
                      setStores(playerData.stores)
                      setSelectedStore(playerData.stores[0])
                   }
-                  
+
                   if (playerData.stamina) {
                      setStamina(playerData.stamina)
                   }
-                  
+
                   if (playerData.drawCount !== undefined) {
                      setDrawCount(playerData.drawCount)
                   }
-                  
+
                   if (playerData.remainingDraws !== undefined) {
                      setRemainingDraws(playerData.remainingDraws)
                   }
-                  
+
                   console.log('🎮 Game data loaded successfully from localStorage')
                } else {
                   // Wrong user data - create new profile
@@ -194,7 +194,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          setIsLoading(false)
       }
    }, [userId])
-   
+
    // Helper function to create new player data
    const createNewPlayerData = () => {
       console.log('🆕 Creating new player data')
@@ -208,21 +208,27 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [userId, loadGameState])
 
-   // Handle score update event from the game
-   const handleScoreUpdated = (newScore: number) => {
-      setScore(newScore)
-   }
+   // Handle score update event from the game - wrapped in useCallback to prevent recreation on every render
+   const handleScoreUpdated = useCallback(
+      (newScore: number) => {
+         setScore(newScore)
+      },
+      [setScore]
+   )
 
-   // Handle point collection event from the game
-   const handlePointCollected = (amount: number) => {
-      const newPoint = point + amount;
-      setPoint(newPoint);
-      
-      // Save updated point to database
-      if (userId) {
-         updateUserField(userId, 'point', newPoint);
-      }
-   }
+   // Handle point collection event from the game - wrapped in useCallback to prevent recreation on every render
+   const handlePointCollected = useCallback(
+      (amount: number) => {
+         const newPoint = point + amount
+         setPoint(newPoint)
+
+         // Save updated point to database
+         if (userId) {
+            updateUserField(userId, 'point', newPoint)
+         }
+      },
+      [point, setPoint, userId]
+   )
 
    // Set up event listeners for game events
    useEffect(() => {
@@ -235,16 +241,19 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [handleScoreUpdated, handlePointCollected])
 
-   // Handle coupon collection event from the game
-   const handleCouponCollected = (coupon: Coupon) => {
-      const updatedCoupons = [...coupons, coupon];
-      setCoupons(updatedCoupons);
-      
-      // Save updated coupons to database
-      if (userId) {
-         updateUserField(userId, 'coupons', updatedCoupons);
-      }
-   }
+   // Handle coupon collection event from the game - wrapped in useCallback to prevent recreation on every render
+   const handleCouponCollected = useCallback(
+      (coupon: Coupon) => {
+         const updatedCoupons = [...coupons, coupon]
+         setCoupons(updatedCoupons)
+
+         // Save updated coupons to database
+         if (userId) {
+            updateUserField(userId, 'coupons', updatedCoupons)
+         }
+      },
+      [coupons, setCoupons, userId]
+   )
 
    // Set up event listeners for coupon events
    useEffect(() => {
@@ -256,35 +265,34 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handleCouponCollected])
 
    // Save data to MongoDB database on page close
-   const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
-      if (!userId) return
-      
-      const playerData = {
-         userId,
-         score,
-         point,
-         characters,
-         coupons,
-         stores,
-         selectedStore,
-         stamina,
-         drawCount,
-         remainingDraws,
-         updatedAt: Date.now()
-      }
-      
-      try {
-         // Save to MongoDB database
-         saveUserToDatabase(playerData as any)
-         
-         // Also save to localStorage as backup
-         localStorage.setItem('gameData', JSON.stringify(playerData))
-         localStorage.setItem('lastSave', Date.now().toString())
-         console.log('Player data saved to database and localStorage on page close')
-      } catch (error) {
-         console.error('Error saving player data:', error)
-      }
-   }, [userId, score, point, characters, coupons, stores, selectedStore, stamina, drawCount, remainingDraws])
+   const handlePageClose = useCallback(
+      (event: BeforeUnloadEvent) => {
+         if (!userId) return
+
+         const playerData = {
+            userId,
+            score,
+            point,
+            characters,
+            coupons,
+            stores,
+            selectedStore,
+            stamina,
+            drawCount,
+            remainingDraws,
+            updatedAt: Date.now()
+         }
+
+         try {
+            // Save to MongoDB database
+            saveUserToDatabase(playerData as any)
+            console.log('Player data saved to database on page close')
+         } catch (error) {
+            console.error('Error saving player data:', error)
+         }
+      },
+      [userId, score, point, characters, coupons, stores, selectedStore, stamina, drawCount, remainingDraws]
+   )
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
@@ -295,14 +303,17 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handlePageClose])
 
    // Score update function that also syncs with MongoDB
-   const updateScore = useCallback((newScore: number) => {
-      setScore(newScore)
-      
-      // Save score to MongoDB database
-      if (userId) {
-         updateUserField(userId, 'score', newScore)
-      }
-   }, [userId])
+   const updateScore = useCallback(
+      (newScore: number) => {
+         setScore(newScore)
+
+         // Save score to MongoDB database
+         if (userId) {
+            updateUserField(userId, 'score', newScore)
+         }
+      },
+      [userId]
+   )
 
    // Define the value object to be provided to consumers
    const value: GameState = {
@@ -338,3 +349,4 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
 
 // Custom hook to use the game state
 export const useGameState = () => useContext(GameStateContext)
+
