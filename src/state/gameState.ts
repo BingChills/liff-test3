@@ -79,7 +79,7 @@ interface GameState {
    setDisplayName: (name: string) => void
    statusMessage: string | null
    setStatusMessage: (message: string | null) => void
-   
+
    // Debug function
    testSaveUserData: () => boolean
 }
@@ -209,35 +209,38 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    }, [handleCouponCollected])
 
    // Save user data to MongoDB database on page close
-   const handlePageClose = useCallback((event: BeforeUnloadEvent) => {
-      if (!userId) {
-         console.log('❌ Skipping save - no userId')
-         return
-      }
+   const handlePageClose = useCallback(
+      (event: BeforeUnloadEvent) => {
+         if (!userId) {
+            console.log('❌ Skipping save - no userId')
+            return
+         }
 
-      const updatedUserData = {
-         score: totalScore,
-         stores,
-         stamina,
-         characters,
-         coupons,
-         updatedAt: Date.now()
-      }
+         const updatedUserData = {
+            score: totalScore,
+            stores,
+            stamina,
+            characters,
+            coupons,
+            updatedAt: Date.now()
+         }
 
-      try {
-         // Get base URL from config for consistency
-         const baseUrl = apiClient.defaults.baseURL || ''
-         // Remove any trailing slashes
-         const cleanBaseUrl = baseUrl.replace(/\/$/, '')
-         const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
+         try {
+            // Get base URL from config for consistency
+            const baseUrl = apiClient.defaults.baseURL || ''
+            // Remove any trailing slashes
+            const cleanBaseUrl = baseUrl.replace(/\/$/, '')
+            const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
 
-         const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
-         navigator.sendBeacon(url, blob)
-         console.log('💾 Sending updated user data via beacon to:', url)
-      } catch (error) {
-         console.error('Error saving data on close:', error)
-      }
-   }, [totalScore, stores, stamina, characters, coupons, userId])
+            const blob = new Blob([JSON.stringify(updatedUserData)], { type: 'application/json' })
+            navigator.sendBeacon(url, blob)
+            console.log('💾 Sending updated user data via beacon to:', url)
+         } catch (error) {
+            console.error('Error saving data on close:', error)
+         }
+      },
+      [totalScore, stores, stamina, characters, coupons, userId]
+   )
 
    // Set up beforeunload event handler to save state on page close
    useEffect(() => {
@@ -247,6 +250,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
    }, [handlePageClose])
 
+   //FIXME: delete later
    // DEBUG FUNCTION: Test the save functionality
    const testSaveUserData = useCallback(() => {
       console.log('🧪 Testing user data save...')
@@ -265,16 +269,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
 
       try {
-         // Get base URL from config or use default web endpoint
-         const baseUrl = apiClient.defaults.baseURL || ''
-         
-         // Make sure we have the right URL format
-         // Remove any trailing slashes from baseUrl
-         const cleanBaseUrl = baseUrl.replace(/\/$/, '')
-         const url = `${cleanBaseUrl}/api/players/${userId}/beacon`
-         
-         console.log('Using baseURL:', cleanBaseUrl)
-         console.log('Sending test data to:', url)
+         const url = `https://linkz-gameplay.vercel.app/api/players/${userId}/beacon`
 
          // For testing - use fetch instead of beacon so we can see the response
          fetch(url, {
@@ -284,12 +279,12 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
             },
             body: JSON.stringify(updatedUserData)
          })
-            .then(response => {
+            .then((response) => {
                console.log('✅ Test save response:', response.status)
                return response.json()
             })
-            .then(data => console.log('Response data:', data))
-            .catch(error => console.error('❌ Test save error:', error))
+            .then((data) => console.log('Response data:', data))
+            .catch((error) => console.error('❌ Test save error:', error))
 
          return true
       } catch (error) {
