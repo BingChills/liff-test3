@@ -7,6 +7,44 @@ const CharactersPage = () => {
     const { characters, stores, selectedStore, setSelectedStore, setCharacters } = useGameState();
     const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    
+    // Mock characters for testing using useMemo to prevent dependency changes
+    const mockCharacters = React.useMemo(() => [
+        {
+            id: 'yumyum-char-001',
+            name: 'Chef Yum',
+            image: 'https://placehold.co/150x150/orange/white?text=Chef',
+            rarity: 'rare' as const,
+            discount: '10%',
+            isUsing: true,
+            storeName: 'YumYum'
+        },
+        {
+            id: 'yumyum-char-002',
+            name: 'Noodle Master',
+            image: 'https://placehold.co/150x150/orange/white?text=Noodle',
+            rarity: 'epic' as const,
+            discount: '15%',
+            isUsing: false,
+            storeName: 'YumYum'
+        },
+        {
+            id: 'yumyum-char-003',
+            name: 'Golden Wok',
+            image: 'https://placehold.co/150x150/gold/white?text=Wok',
+            rarity: 'legendary' as const,
+            discount: '25%',
+            isUsing: false,
+            storeName: 'YumYum'
+        }
+    ], []);
+    
+    // Add mock characters to the real ones if there are none
+    React.useEffect(() => {
+        if (characters.length === 0) {
+            setCharacters(mockCharacters);
+        }
+    }, [characters.length, setCharacters, mockCharacters]);
 
     // Filter characters based on store
     const filteredCharacters = selectedStore

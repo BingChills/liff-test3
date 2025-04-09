@@ -81,6 +81,41 @@ const SummonPage = () => {
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [showEggAnimation, setShowEggAnimation] = useState(false);
     const [drawCount, setDrawCount] = useState(1);
+    
+    // Add mock points for YumYum store for testing
+    React.useEffect(() => {
+        // Only add test points if stores exist but have no points
+        if (stores.length > 0) {
+            // Check if we need to add the YumYum store or update it
+            const yumYumIndex = stores.findIndex(store => store.name === 'YumYum');
+            
+            if (yumYumIndex === -1) {
+                // YumYum store doesn't exist, add it
+                const newStores = [...stores, {
+                    name: 'YumYum',
+                    point: 5000, // Give enough points for multiple 10x draws
+                    color: 'orange'
+                }];
+                setStores(newStores);
+                // Set YumYum as selected store if no store is selected
+                if (!selectedStore) {
+                    setSelectedStore(newStores[newStores.length - 1]);
+                }
+            } else if (stores[yumYumIndex].point < 100) {
+                // YumYum exists but has too few points, add more
+                const newStores = [...stores];
+                newStores[yumYumIndex] = {
+                    ...newStores[yumYumIndex],
+                    point: 5000
+                };
+                setStores(newStores);
+                // Update the selected store if it's YumYum
+                if (selectedStore && selectedStore.name === 'YumYum') {
+                    setSelectedStore(newStores[yumYumIndex]);
+                }
+            }
+        }
+    }, [stores, setStores, selectedStore, setSelectedStore]);
 
     const getStoreColor = (color: string) => {
         switch (color) {
