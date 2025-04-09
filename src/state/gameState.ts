@@ -216,8 +216,8 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       }
 
       try {
-         // Update score using a proven endpoint
-         const scoreUrl = `https://linkz-gameplay.vercel.app/api/players/${userId}/score`
+         // Use relative URL path for beacon call
+         const scoreUrl = `/api/players/${userId}/score`
          const scoreBlob = new Blob([JSON.stringify({ value: totalScore })], { type: 'application/json' })
          navigator.sendBeacon(scoreUrl, scoreBlob)
          console.log('💾 Sending score update via beacon:', totalScore)
@@ -243,13 +243,12 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
          return false
       }
 
-      // We know the score endpoint works, so let's use that
       try {
-         // Use the score endpoint which we know works from previous code
-         const scoreUrl = `https://linkz-gameplay.vercel.app/api/players/${userId}/score`
-         console.log('Using score update endpoint:', scoreUrl)
+         // Use relative URL to avoid CORS issues
+         const scoreUrl = `/api/players/${userId}/score`
+         console.log('Using relative URL for score update:', scoreUrl)
 
-         // Send just the score first to test if the endpoint works
+         // For testing - use standard fetch
          fetch(scoreUrl, {
             method: 'PATCH',
             headers: {
