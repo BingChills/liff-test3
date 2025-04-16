@@ -18,11 +18,13 @@ export interface Coupon {
 export interface Character {
    id: string
    name: string
+   storeName: string
    image: string
    rarity: 'common' | 'rare' | 'epic' | 'legendary'
    discount: string
    isUsing: boolean
-   storeName: string
+   couponDropRate: number // Chance to drop a coupon when breaking a chest
+   couponType: string // Type of coupon/discount provided
 }
 
 export interface StoreCurrency {
@@ -148,7 +150,7 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       if (!user) return
 
       console.log('🔄 Loading game data for user:', user.displayName)
-      
+
       // Only load basic user data from database
       setUserId(user?.userId || null)
       setStamina(user?.stamina || { current: 20, max: 20 })
@@ -156,11 +158,11 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setPictureUrl(user?.pictureUrl || null)
       setDisplayName(user?.displayName || '')
       setStatusMessage(user?.statusMessage || null)
-      
+
       // Use mock data for gameplay elements (temporary)
       setCharacters([])
       setCoupons([])
-      
+
       // Always use our default stores with 5000 points each for testing
       const defaultStores = [
          { name: 'Parabola', point: 5000, color: 'blue' },

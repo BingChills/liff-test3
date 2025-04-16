@@ -1,0 +1,24 @@
+.perspective-500 {
+   perspective: 500px;
+}
+
+.backface-hidden {
+   backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+   transform: rotateY(180deg);
+}
+
+.rotate-y-0 {
+   transform: rotateY(0deg);
+}
+
+.animate-scale-up {
+   animation: scale-up 0.2s ease-out forwards;
+}
+
+@keyframes scale-up {
+   from { transform: scale(0.8); opacity: 0; }
+   to { transform: scale(1); opacity: 1; }
+}
