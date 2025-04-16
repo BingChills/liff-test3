@@ -148,22 +148,28 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       if (!user) return
 
       console.log('🔄 Loading game data for user:', user.displayName)
+      
+      // Only load basic user data from database
       setUserId(user?.userId || null)
-      setCharacters(user?.characters || [])
-      setCoupons(user?.coupons || [])
-      // If user has no stores, use our default stores with 5000 points each
-      setStores(user?.stores?.length ? user.stores : [
-         { name: 'Parabola', point: 5000, color: 'blue' },
-         { name: 'KFZ', point: 5000, color: 'red' },
-         { name: 'PizzaHat', point: 5000, color: 'orange' }
-      ])
-      setSelectedStore(user?.stores[0] || stores[0])
       setStamina(user?.stamina || { current: 20, max: 20 })
       setDatabaseScore(user?.score || 0)
       setPictureUrl(user?.pictureUrl || null)
       setDisplayName(user?.displayName || '')
       setStatusMessage(user?.statusMessage || null)
-   }, [stores, user])
+      
+      // Use mock data for gameplay elements (temporary)
+      setCharacters([])
+      setCoupons([])
+      
+      // Always use our default stores with 5000 points each for testing
+      const defaultStores = [
+         { name: 'Parabola', point: 5000, color: 'blue' },
+         { name: 'KFZ', point: 5000, color: 'red' },
+         { name: 'PizzaHat', point: 5000, color: 'orange' }
+      ]
+      setStores(defaultStores)
+      setSelectedStore(defaultStores[0])
+   }, [user])
 
    // Load player data when userId changes
    useEffect(() => {
