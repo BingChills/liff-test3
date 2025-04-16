@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Store, Gem, ChevronDown, Percent, Box, Ticket } from 'lucide-react';
 import { useGameState, Character, StoreCurrency } from '../state/gameState';
 import PageHeader from './PageHeader';
+import { updateUserField } from '../utils/dbSync';
+import { useLiff } from '../context/LiffContext';
 
 // Define rarity type for consistency
 type CharacterRarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -186,6 +188,7 @@ const determineRarity = (rand: number): CharacterRarity => {
 const SummonPage = () => {
     const { stores, setStores, selectedStore, setSelectedStore, characters, setCharacters } =
         useGameState();
+    const { userProfile } = useLiff();
     const [showDropRates, setShowDropRates] = useState(false);
     const [showStoreSelector, setShowStoreSelector] = useState(false);
     const [showEggAnimation, setShowEggAnimation] = useState(false);
@@ -262,8 +265,24 @@ const SummonPage = () => {
         const existingIds = new Set(characters.map(char => char.id));
         const uniqueNewCharacters = newCharacters.filter(char => !existingIds.has(char.id));
         
-        // Merge with existing characters
-        setCharacters([...characters, ...uniqueNewCharacters]);
+        // Merge with existing characters 
+        const updatedCharacters = [...characters, ...uniqueNewCharacters];
+        
+        // Update local state
+        setCharacters(updatedCharacters);
+        
+        // Synchronize with database if we have a user profile
+        if (userProfile?.userId) {
+            // Update characters in database
+            updateUserField(userProfile.userId, 'characters', updatedCharacters);
+            
+            // Also ensure stores (points) are synchronized
+            updateUserField(userProfile.userId, 'stores', stores);
+            
+            console.log('✅ Synchronized character and store data with database');
+        } else {
+            console.error('❌ Cannot update database: No user profile available');
+        }
         
         // Show a summary of what was drawn
         console.log('Drew characters:', newCharacters.map(c => `${c.name} (${c.rarity})`).join(', '));
