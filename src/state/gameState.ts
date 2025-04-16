@@ -123,7 +123,11 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
    const [activeTab, setActiveTab] = useState('coupon')
    const [characters, setCharacters] = useState<Character[]>([])
    const [coupons, setCoupons] = useState<Coupon[]>([])
-   const [stores, setStores] = useState<StoreCurrency[]>([{ name: 'Default Store', point: 0, color: 'blue' }])
+   const [stores, setStores] = useState<StoreCurrency[]>([
+      { name: 'Parabola', point: 5000, color: 'blue' },
+      { name: 'KFZ', point: 5000, color: 'red' },
+      { name: 'PizzaHat', point: 5000, color: 'orange' }
+   ])
    const [selectedStore, setSelectedStore] = useState<StoreCurrency | null>(stores[0])
    const [stamina, setStamina] = useState({ current: 20, max: 20 })
    const [drawCount, setDrawCount] = useState(0)
@@ -147,7 +151,12 @@ export const GameStateProvider = (props: { children: ReactNode }) => {
       setUserId(user?.userId || null)
       setCharacters(user?.characters || [])
       setCoupons(user?.coupons || [])
-      setStores(user?.stores || [{ name: 'Default Store', point: 0, color: 'blue' }])
+      // If user has no stores, use our default stores with 5000 points each
+      setStores(user?.stores?.length ? user.stores : [
+         { name: 'Parabola', point: 5000, color: 'blue' },
+         { name: 'KFZ', point: 5000, color: 'red' },
+         { name: 'PizzaHat', point: 5000, color: 'orange' }
+      ])
       setSelectedStore(user?.stores[0] || stores[0])
       setStamina(user?.stamina || { current: 20, max: 20 })
       setDatabaseScore(user?.score || 0)

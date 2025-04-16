@@ -8,13 +8,122 @@ type CharacterRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 // Define rarity rates
 const RARITY_RATES: Record<CharacterRarity, number> = {
-    legendary: 0.01,
-    epic: 0.09,
-    rare: 0.2,
-    common: 0.7,
+    legendary: 0.05,
+    epic: 0.10,
+    rare: 0.15,
+    common: 0.70,
 };
 
-// We'll use characters from the game state instead of hardcoded data
+// Character pool for summoning
+const CHARACTER_POOL = [
+    {
+        id: "1",
+        name: "Skyfluff",
+        image: "https://i.ibb.co/JwVPKc3t/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-77deb4f6-3d84-45d1-add6-6091387.png",
+        rarity: "common" as CharacterRarity,
+        dropRate: 70.0,
+        amount: 20,
+        description: "A winged, fluffy fox-like creature with a rainbow tail."
+    },
+    {
+        id: "2",
+        name: "Snugglebear",
+        image: "https://i.ibb.co/jk9sNPyg/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-105f6dab-d6d9-47d1-8a76-19c220c.png",
+        rarity: "common" as CharacterRarity,
+        dropRate: 70.0,
+        amount: 50,
+        description: "A cozy bear wearing a warm scarf."
+    },
+    {
+        id: "3",
+        name: "Solowl",
+        image: "https://i.ibb.co/Tx0sDqNB/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-62afc714-dd40-478f-9b1c-4b0949f.png",
+        rarity: "common" as CharacterRarity,
+        dropRate: 70.0,
+        amount: 100,
+        description: "A glowing, golden owl with mystical patterns on its wings."
+    },
+    {
+        id: "4",
+        name: "Shadowcrow",
+        image: "https://i.ibb.co/wh5jTWms/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-0b6c54ca-4bf7-4e15-8c86-2251c23.png",
+        rarity: "common" as CharacterRarity,
+        dropRate: 70.0,
+        amount: 200,
+        description: "A mysterious, dark crow with glowing blue energy."
+    },
+    {
+        id: "5",
+        name: "Snowpup",
+        image: "https://i.ibb.co/Zz13Xhck/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-066071be-391b-448d-b1bb-d543c8f.png",
+        rarity: "common" as CharacterRarity,
+        dropRate: 70.0,
+        amount: 50,
+        description: "A soft, white puppy with sparkly blue eyes."
+    },
+    {
+        id: "6",
+        name: "Aquapuff",
+        image: "https://i.ibb.co/vxnshZYC/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-0158338b-3fd6-4619-b9df-adec2e1.png",
+        rarity: "rare" as CharacterRarity,
+        dropRate: 15.0,
+        amount: 20,
+        description: "A shimmering fish-like creature with flowing fins."
+    },
+    {
+        id: "7",
+        name: "Bloomtail",
+        image: "https://i.ibb.co/v6NFjj8y/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-ed4dba3d-c0e2-4d3c-8cef-458ad0d.png",
+        rarity: "rare" as CharacterRarity,
+        dropRate: 15.0,
+        amount: 100,
+        description: "A leafy, nature-inspired critter with flowers and vines."
+    },
+    {
+        id: "8",
+        name: "Blazion",
+        image: "https://i.ibb.co/kfYNXs2/u9994361495-httpss-mj-runcx-JKl-V3-Wk-Jk-httpss-mj-runl-Pa-Feh-Bvg-QY-05546006-0625-4234-9599-a05c0e.png",
+        rarity: "rare" as CharacterRarity,
+        dropRate: 15.0,
+        amount: 50,
+        description: "A majestic lion with a fiery mane."
+    },
+    {
+        id: "9",
+        name: "Starnyx",
+        image: "https://i.ibb.co/VYj2RTzt/u9994361495-httpss-mj-runqq-Shh-Q7w1-Vw-httpss-mj-runl-Pa-Feh-Bvg-QY-64a9ab0e-c88c-4c45-a2a4-eaef36e.png",
+        rarity: "epic" as CharacterRarity,
+        dropRate: 10.0,
+        amount: 200,
+        description: "A sleek, galaxy-themed cat with cosmic sparkles."
+    },
+    {
+        id: "10",
+        name: "Prickletoes",
+        image: "https://i.ibb.co/bMscQm8d/u9994361495-httpss-mj-runqq-Shh-Q7w1-Vw-httpss-mj-runl-Pa-Feh-Bvg-QY-4495ea61-d18f-4a3b-ba16-e5dbb5f.png",
+        rarity: "epic" as CharacterRarity,
+        dropRate: 10.0,
+        amount: 20,
+        description: "An adorable hedgehog bundled in a scarf."
+    },
+    {
+        id: "11",
+        name: "Lunafluff",
+        image: "https://i.ibb.co/WpsypscR/u9994361495-httpss-mj-runqq-Shh-Q7w1-Vw-httpss-mj-runl-Pa-Feh-Bvg-QY-26693c8e-33bb-4f1d-b81b-c9c4778.png",
+        rarity: "legendary" as CharacterRarity,
+        dropRate: 5.0,
+        amount: 20,
+        description: "the gentle glow of the moon"
+    }
+];
+
+// Group characters by rarity for easier selection
+const CHARACTERS_BY_RARITY = {
+    common: CHARACTER_POOL.filter(char => char.rarity === 'common'),
+    rare: CHARACTER_POOL.filter(char => char.rarity === 'rare'),
+    epic: CHARACTER_POOL.filter(char => char.rarity === 'epic'),
+    legendary: CHARACTER_POOL.filter(char => char.rarity === 'legendary')
+};
 
 interface EggAnimationProps {
     isVisible: boolean;
@@ -82,40 +191,13 @@ const SummonPage = () => {
     const [showEggAnimation, setShowEggAnimation] = useState(false);
     const [drawCount, setDrawCount] = useState(1);
     
-    // Add mock points for YumYum store for testing
+    // Ensure a store is selected for summoning
     React.useEffect(() => {
-        // Only add test points if stores exist but have no points
-        if (stores.length > 0) {
-            // Check if we need to add the YumYum store or update it
-            const yumYumIndex = stores.findIndex(store => store.name === 'YumYum');
-            
-            if (yumYumIndex === -1) {
-                // YumYum store doesn't exist, add it
-                const newStores = [...stores, {
-                    name: 'YumYum',
-                    point: 5000, // Give enough points for multiple 10x draws
-                    color: 'orange'
-                }];
-                setStores(newStores);
-                // Set YumYum as selected store if no store is selected
-                if (!selectedStore) {
-                    setSelectedStore(newStores[newStores.length - 1]);
-                }
-            } else if (stores[yumYumIndex].point < 100) {
-                // YumYum exists but has too few points, add more
-                const newStores = [...stores];
-                newStores[yumYumIndex] = {
-                    ...newStores[yumYumIndex],
-                    point: 5000
-                };
-                setStores(newStores);
-                // Update the selected store if it's YumYum
-                if (selectedStore && selectedStore.name === 'YumYum') {
-                    setSelectedStore(newStores[yumYumIndex]);
-                }
-            }
+        if (stores.length > 0 && !selectedStore) {
+            // Set the first store as selected if none is selected
+            setSelectedStore(stores[0]);
         }
-    }, [stores, setStores, selectedStore, setSelectedStore]);
+    }, [stores, selectedStore, setSelectedStore]);
 
     const getStoreColor = (color: string) => {
         switch (color) {
@@ -175,8 +257,16 @@ const SummonPage = () => {
 
     const handleAnimationEnd = (newCharacters: Character[]) => {
         setShowEggAnimation(false);
-        // In a real app, you would merge these new characters with the existing characters in state
-        setCharacters([...characters, ...newCharacters]);
+        
+        // Check for duplicate characters and only add new ones
+        const existingIds = new Set(characters.map(char => char.id));
+        const uniqueNewCharacters = newCharacters.filter(char => !existingIds.has(char.id));
+        
+        // Merge with existing characters
+        setCharacters([...characters, ...uniqueNewCharacters]);
+        
+        // Show a summary of what was drawn
+        console.log('Drew characters:', newCharacters.map(c => `${c.name} (${c.rarity})`).join(', '));
     };
 
     return (
@@ -349,55 +439,60 @@ const SummonPage = () => {
 };
 
 export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAnimationProps) {
-    const { characters: gameCharacters, selectedStore } = useGameState();
+    const { selectedStore } = useGameState();
     const [showCharacters, setShowCharacters] = useState(false);
     const [characters, setCharacters] = useState<Character[]>([]);
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
     const [highestRarity, setHighestRarity] = useState<CharacterRarity>('common');
     const [showAllCards, setShowAllCards] = useState(false);
 
+    // This effect generates characters when the animation becomes visible
     useEffect(() => {
-        if (isVisible && !showCharacters) {
-            // Generate characters based on rarity rates
-            const newCharacters = Array.from({ length: drawCount }, () => {
+        if (isVisible && characters.length === 0) {
+            // Generate characters using our CHARACTER_POOL data
+            const newCharacters: Character[] = [];
+            
+            for (let i = 0; i < drawCount; i++) {
+                // Generate random number to determine rarity
                 const rand = Math.random();
-                const selectedRarity = determineRarity(rand);
-
-                // FIXME: This is a temporary fix
-                // Function to generate a character with the selected rarity
-                const generateCharacter = (rarity: CharacterRarity): Character => {
-                    return {
-                        id: `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                        name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Character`,
-                        image: `https://placehold.co/400x400/gray/white?text=${rarity
-                            .substring(0, 2)
-                            .toUpperCase()}`,
-                        rarity: rarity,
-                        discount: `${Math.round(RARITY_RATES[rarity] * 100)}% discount`,
-                        isUsing: false,
-                        //FIXME: This is a temporary fix
-                        storeName: selectedStore?.name || 'Default Store', // Associate character with selected store
-                    };
-                };
-
-                // Try to find characters of the selected rarity from game state that belong to the current store
-                const availableCharacters = gameCharacters.filter(
-                    (c: Character) =>
-                        c.rarity === selectedRarity &&
-                        c.storeName === (selectedStore?.name || 'Default Store') //FIXME:
-                );
-
-                // If we have available characters of this rarity, pick a random one
+                const rarity = determineRarity(rand);
+                
+                // Get all characters of that rarity
+                const availableCharacters = CHARACTERS_BY_RARITY[rarity];
+                
                 if (availableCharacters.length > 0) {
-                    return availableCharacters[
-                        Math.floor(Math.random() * availableCharacters.length)
-                    ];
+                    // Select a random character from that rarity pool
+                    const randomIndex = Math.floor(Math.random() * availableCharacters.length);
+                    const selectedCharacter = availableCharacters[randomIndex];
+                    
+                    // Create a new character with the selected store
+                    const newChar: Character = {
+                        id: selectedCharacter.id,
+                        name: selectedCharacter.name,
+                        image: selectedCharacter.image,
+                        rarity: selectedCharacter.rarity,
+                        discount: `${selectedCharacter.amount}%`,
+                        isUsing: false,
+                        storeName: selectedStore?.name || 'Pet Store' // Use the selected store for the character
+                    };
+                    
+                    newCharacters.push(newChar);
+                } else {
+                    // Fallback in case we don't have characters of the drawn rarity
+                    const newChar: Character = {
+                        id: `draw-${Date.now()}-${i}`,
+                        name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Creature`,
+                        image: `https://placehold.co/150x150/${getRarityColor(rarity).replace('bg-', '').replace('-100', '')}/white?text=${rarity}`,
+                        rarity: rarity,
+                        discount: `${(Math.floor(Math.random() * 5) + 1) * 5}%`,
+                        isUsing: false,
+                        storeName: selectedStore?.name || 'Pet Store'
+                    };
+                    
+                    newCharacters.push(newChar);
                 }
-
-                // Otherwise generate a new one
-                return generateCharacter(selectedRarity);
-            });
-
+            }
+            
             // Find highest rarity for animation
             const rarityOrder: Record<CharacterRarity, number> = {
                 common: 0,
@@ -414,23 +509,24 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
 
             setHighestRarity(highest);
             setCharacters(newCharacters);
-            setCurrentCharacterIndex(0);
-            setShowAllCards(false);
-
-            // Show egg cracking animation for 1.5 seconds, then reveal characters
+            
+            // Show egg animation for 2 seconds, then reveal characters
             setTimeout(() => {
                 setShowCharacters(true);
-            }, 1500);
+            }, 2000);
         }
 
         return () => {
-            setShowCharacters(false);
-            setCharacters([]);
-            setCurrentCharacterIndex(0);
-            setHighestRarity('common');
-            setShowAllCards(false);
+            if (!isVisible) {
+                // Reset animation state when component hides
+                setShowCharacters(false);
+                setCharacters([]);
+                setCurrentCharacterIndex(0);
+                setHighestRarity('common');
+                setShowAllCards(false);
+            }
         };
-    }, [isVisible, drawCount, gameCharacters, showCharacters, selectedStore?.name]);
+    }, [isVisible, drawCount, selectedStore?.name, characters.length]);
 
     const handleNext = () => {
         if (currentCharacterIndex < characters.length - 1) {
@@ -488,9 +584,9 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                                 } rounded-[45%] shadow-xl ${
                                     highestRarity === 'legendary'
                                         ? 'animate-legendary-pulse'
-                                        : highestRarity === 'epic'
+                                        : characters[0]?.rarity === 'epic'
                                           ? 'animate-epic-pulse'
-                                          : highestRarity === 'rare'
+                                          : characters[0]?.rarity === 'rare'
                                             ? 'animate-rare-pulse'
                                             : 'animate-pulse'
                                 }`}
@@ -498,11 +594,11 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div
                                         className={`text-6xl font-bold ${
-                                            highestRarity === 'legendary'
+                                            characters[0]?.rarity === 'legendary'
                                                 ? 'text-yellow-300'
-                                                : highestRarity === 'epic'
+                                                : characters[0]?.rarity === 'epic'
                                                   ? 'text-purple-300'
-                                                  : highestRarity === 'rare'
+                                                  : characters[0]?.rarity === 'rare'
                                                     ? 'text-blue-300'
                                                     : 'text-gray-400'
                                         } animate-pulse`}
@@ -513,13 +609,13 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                             </div>
 
                             {/* Sparkles for legendary and epic */}
-                            {(highestRarity === 'legendary' || highestRarity === 'epic') && (
+                            {(characters[0]?.rarity === 'legendary' || characters[0]?.rarity === 'epic') && (
                                 <>
                                     {[...Array(6)].map((_, i) => (
                                         <div
                                             key={i}
                                             className={`absolute w-4 h-4 rounded-full ${
-                                                highestRarity === 'legendary'
+                                                characters[0]?.rarity === 'legendary'
                                                     ? 'bg-yellow-300'
                                                     : 'bg-purple-300'
                                             } animate-sparkle`}
