@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react'
 import type { Liff } from '@line/liff'
 import { UserInformation } from '../context/LiffContext'
 
+// Flag to enable development mode which bypasses LINE login
+const DEV_MODE = process.env.NODE_ENV === 'development'
+
 // Type for user profile data from LIFF SDK
 export type UserProfile = {
    userId: string
@@ -19,13 +22,27 @@ export type LiffState = {
    idToken: string | null
 }
 
+// Mock user data for development mode
+const mockUserProfile: UserProfile = {
+   userId: 'dev-user-123456789',
+   displayName: 'Developer User',
+   pictureUrl: '',
+   statusMessage: 'Developing without LINE login'
+}
+
 export const useLiffInit = (): LiffState => {
    const [liffObject, setLiffObject] = useState<Liff | null>(null)
    const [liffError, setLiffError] = useState<string | null>(null)
-   const [profile, setProfile] = useState<UserProfile | null>(null)
-   const [idToken, setIdToken] = useState<string | null>(null)
+   const [profile, setProfile] = useState<UserProfile | null>(DEV_MODE ? mockUserProfile : null)
+   const [idToken, setIdToken] = useState<string | null>(DEV_MODE ? 'mock-id-token-for-development' : null)
 
    useEffect(() => {
+      // If in development mode, skip real LIFF initialization
+      if (DEV_MODE) {
+         console.log('🔧 Running in DEVELOPMENT mode with mock LIFF data')
+         return
+      }
+
       // Initialize LIFF and gather user data
       const initLiff = async () => {
          try {
@@ -81,7 +98,10 @@ export const useLiffInit = (): LiffState => {
          }
       }
 
-      initLiff()
+      // Only call initLiff in production mode
+      if (!DEV_MODE) {
+         initLiff()
+      }
    }, [])
 
    return {

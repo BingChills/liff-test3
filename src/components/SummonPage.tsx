@@ -211,6 +211,8 @@ const SummonPage = () => {
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [showEggAnimation, setShowEggAnimation] = useState(false)
    const [drawCount, setDrawCount] = useState(1)
+   // Add a key to force the EggAnimation component to fully re-mount between draws
+   const [animationKey, setAnimationKey] = useState(0)
 
    // Ensure a store is selected for summoning
    React.useEffect(() => {
@@ -245,6 +247,9 @@ const SummonPage = () => {
       const characterCost = 100
       const count = isTenDraw ? 10 : 1
       const drawCost = characterCost * count
+      
+      // Increment the animation key to force a fresh component on each draw
+      setAnimationKey(prev => prev + 1)
 
       // Check if user has enough points in the selected store
       if (!selectedStore || selectedStore.point < drawCost) {
@@ -277,15 +282,12 @@ const SummonPage = () => {
    const handleAnimationEnd = (newCharacters: Character[]) => {
       setShowEggAnimation(false)
 
-      // Check for duplicate characters and only add new ones
-      const existingIds = new Set(characters.map((char) => char.id))
-      const uniqueNewCharacters = newCharacters.filter((char) => !existingIds.has(char.id))
-
-      // Merge with existing characters
-      setCharacters([...characters, ...uniqueNewCharacters])
+      // Simply add all new characters to the existing collection
+      // This allows duplicates to be properly counted in the CharactersPage component
+      setCharacters([...characters, ...newCharacters])
 
       // Show a summary of what was drawn
-      console.log('Drew characters:', newCharacters.map((c) => `${c.name} (${c.rarity})`).join(', '))
+      console.log('Drew characters:', newCharacters.map((c) => `${c.name} (${c.rarity}) from ${c.storeName}`).join(', '))
    }
 
    return (
@@ -430,8 +432,13 @@ const SummonPage = () => {
             {/* Recent summons would go here */}
          </div>
 
-         {/* Egg Animation */}
-         <EggAnimation isVisible={showEggAnimation} onAnimationEnd={handleAnimationEnd} drawCount={drawCount} />
+         {/* Egg Animation - with key to ensure fresh state between draws */}
+         <EggAnimation 
+            key={animationKey}
+            isVisible={showEggAnimation} 
+            onAnimationEnd={handleAnimationEnd} 
+            drawCount={drawCount} 
+         />
       </div>
    )
 }
@@ -443,10 +450,23 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
    const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0)
    const [highestRarity, setHighestRarity] = useState<CharacterRarity>('common')
    const [showAllCards, setShowAllCards] = useState(false)
-
-   // This effect generates characters when the animation becomes visible
+   
+   // Reset the component state completely when visibility changes
    useEffect(() => {
-      if (isVisible && characters.length === 0) {
+      if (!isVisible) {
+         // Reset animation state when component hides
+         setShowCharacters(false)
+         setCharacters([])
+         setCurrentCharacterIndex(0)
+         setHighestRarity('common')
+         setShowAllCards(false)
+      }
+   }, [isVisible])
+
+      // This effect generates characters when the animation becomes visible
+   useEffect(() => {
+      // Only proceed if animation is visible and no characters have been generated yet
+      if (isVisible && characters.length === 0 && selectedStore) {
          // Generate characters using our CHARACTER_POOL data
          const newCharacters: Character[] = []
 
@@ -464,14 +484,16 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                const selectedCharacter = availableCharacters[randomIndex]
 
                 // Create a new character with the selected store
+                // Use just the base character ID to allow duplicates to be counted correctly
+                // We'll use the basic ID and let the CharactersPage component handle the counting
                 const newChar: Character = {
-                   id: selectedCharacter.id,
+                   id: selectedCharacter.id, // Use the original character ID
                    name: selectedCharacter.name,
                    image: selectedCharacter.image,
                    rarity: selectedCharacter.rarity,
                    discount: `${selectedCharacter.amount}%`,
                    isUsing: false,
-                   storeName: selectedStore?.name || 'Pet Store', // Use the selected store for the character
+                   storeName: selectedStore?.name || '', // Ensure store name is never empty
                    couponDropRate: selectedCharacter.couponDropRate,
                    couponType: selectedCharacter.couponType
                 }
@@ -479,14 +501,17 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                newCharacters.push(newChar)
             } else {
                 // Fallback in case we don't have characters of the drawn rarity
+                // Add the timestamp and store name to ensure each fallback character is unique
+                const storeNameSafe = selectedStore?.name || ''
+                const uniqueId = `draw-${storeNameSafe}-${Date.now()}-${i}`
                 const newChar: Character = {
-                   id: `draw-${Date.now()}-${i}`,
+                   id: uniqueId,
                    name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Creature`,
                    image: `https://placehold.co/150x150/${getRarityColor(rarity).replace('bg-', '').replace('-100', '')}/white?text=${rarity}`,
                    rarity: rarity,
                    discount: `${(Math.floor(Math.random() * 5) + 1) * 5}%`,
-                   isUsing: false,
-                   storeName: selectedStore?.name || 'Pet Store',
+                   isUsing: false, 
+                   storeName: storeNameSafe,
                    // Generate random values for fallback characters based on rarity
                    couponDropRate: rarity === 'legendary' ? 20 : rarity === 'epic' ? 15 : rarity === 'rare' ? 10 : 5,
                    couponType: `${(Math.floor(Math.random() * 5) + (rarity === 'legendary' ? 10 : rarity === 'epic' ? 6 : rarity === 'rare' ? 4 : 1)) * 5}%`
@@ -519,17 +544,8 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
          }, 2000)
       }
 
-      return () => {
-         if (!isVisible) {
-            // Reset animation state when component hides
-            setShowCharacters(false)
-            setCharacters([])
-            setCurrentCharacterIndex(0)
-            setHighestRarity('common')
-            setShowAllCards(false)
-         }
-      }
-   }, [isVisible, drawCount, selectedStore?.name, characters.length])
+      // No cleanup needed here anymore, moved to a separate effect above
+   }, [isVisible, drawCount, selectedStore, characters.length])
 
    const handleNext = () => {
       if (currentCharacterIndex < characters.length - 1) {

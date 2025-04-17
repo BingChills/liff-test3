@@ -3,12 +3,48 @@ import { useLiff } from '../context/LiffContext'
 import { PlayerType } from '../context/LiffContext'
 import apiClient from '../config/api'
 
+// Flag to enable development mode which bypasses API calls
+const DEV_MODE = process.env.NODE_ENV === 'development'
+
+// Mock player data for development mode
+const mockPlayerData: PlayerType = {
+   userId: 'dev-user-123456789',
+   displayName: 'Developer User',
+   pictureUrl: '',
+   statusMessage: 'Developing without LINE login',
+   score: 1500,
+   stores: [
+      { name: 'Parabola', point: 5000, color: 'blue' },
+      { name: 'KFZ', point: 5000, color: 'red' },
+      { name: 'PizzaHat', point: 5000, color: 'orange' }
+   ],
+   selectedStore: { name: 'Parabola', point: 5000, color: 'blue' },
+   stamina: { current: 20, max: 20 },
+   characters: [],
+   coupons: [
+      {
+         id: 'dev-coupon-001',
+         code: 'DEV20OFF',
+         discount: '20% off',
+         expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+         isUsed: false,
+         storeName: 'Parabola'
+      }
+   ]
+}
+
 export const useUserSync = () => {
    const { liff, userProfile } = useLiff()
-   const [user, setUser] = useState<PlayerType | null>(null)
-   const syncedRef = useRef(false)
+   const [user, setUser] = useState<PlayerType | null>(DEV_MODE ? mockPlayerData : null)
+   const syncedRef = useRef(DEV_MODE)
 
    useEffect(() => {
+      // Skip API sync in development mode
+      if (DEV_MODE) {
+         console.log('🔧 Using mock player data in development mode')
+         return
+      }
+
       const syncUserData = async () => {
          if (syncedRef.current) {
             console.log('🔄 Skipping sync - already synced')
@@ -67,8 +103,11 @@ export const useUserSync = () => {
          }
       }
 
-      syncUserData()
-   }, [userProfile, liff])
+      // Only perform API sync in production
+      if (!DEV_MODE) {
+         syncUserData()
+      }
+   }, [liff, userProfile])
 
    return { user }
 }

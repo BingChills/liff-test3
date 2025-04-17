@@ -16,14 +16,16 @@ const CharactersPage = () => {
 
    // Empty initial state - characters will be obtained through summons
 
-   // Handle card flip
-   const toggleCardFlip = (id: string) => {
+   // Handle card flip - Use both ID and store name to ensure unique flipping
+   const toggleCardFlip = (id: string, storeName: string) => {
+      // Create a composite key using both the ID and store name
+      const cardKey = `${id}-${storeName}`
       setFlippedCards((prev) => {
          const newSet = new Set(prev)
-         if (newSet.has(id)) {
-            newSet.delete(id)
+         if (newSet.has(cardKey)) {
+            newSet.delete(cardKey)
          } else {
-            newSet.add(id)
+            newSet.add(cardKey)
          }
          return newSet
       })
@@ -44,11 +46,12 @@ const CharactersPage = () => {
       ? characters.filter((char) => char.storeName === selectedCompany)
       : characters
 
-   // Group characters by ID to handle duplicates
+   // Group characters by ID and store name to handle duplicates correctly
    const groupCharacters = (chars: Character[]): CharacterWithCount[] => {
       const grouped = chars.reduce(
          (acc, char) => {
-            const key = `${char.id}-${char.isUsing ? 'using' : 'inventory'}`
+            // Include the store name in the key to ensure characters from different stores are treated separately
+            const key = `${char.id}-${char.storeName}-${char.isUsing ? 'using' : 'inventory'}`
             if (!acc[key]) {
                acc[key] = { ...char, count: 1 }
             } else {
@@ -66,11 +69,12 @@ const CharactersPage = () => {
    const usingCharacters = groupCharacters(filteredCharacters.filter((char) => char.isUsing))
    const inventoryCharacters = groupCharacters(filteredCharacters.filter((char) => !char.isUsing))
 
-   const toggleCharacterUse = (id: string) => {
+   const toggleCharacterUse = (id: string, storeName: string) => {
       const usingCount = characters.filter((char) => char.isUsing).length
 
       const newCharacters = characters.map((char) => {
-         if (char.id === id) {
+         // Only toggle the character with the matching ID AND store name
+         if (char.id === id && char.storeName === storeName) {
             if (!char.isUsing && usingCount >= 3) {
                return char
             }
@@ -165,13 +169,13 @@ const CharactersPage = () => {
                   <div
                      key={char.id}
                      className={`relative h-[160px] w-full ${styles.perspective500}`}
-                     onClick={() => toggleCardFlip(char.id)}
+                     onClick={() => toggleCardFlip(char.id, char.storeName)}
                   >
                      {/* Card front */}
                      <div
                         className={`absolute inset-0 w-full h-full ${getRarityColor(char.rarity)} rounded-xl p-2 shadow-lg cartoon-border 
                         transform transition-transform duration-300 ${styles.backfaceHidden} 
-                        ${flippedCards.has(char.id) ? styles.rotateY180 : styles.rotateY0}`}
+                        ${flippedCards.has(`${char.id}-${char.storeName}`) ? styles.rotateY180 : styles.rotateY0}`}
                      >
                         {/* Character count badge (if more than 1) */}
                         {char.count > 1 && (
@@ -208,15 +212,15 @@ const CharactersPage = () => {
                      <div
                         className={`absolute inset-0 w-full h-full ${getRarityColor(char.rarity)} rounded-xl p-3 shadow-lg cartoon-border 
                         transform transition-transform duration-300 ${styles.backfaceHidden} ${styles.rotateY180} 
-                        ${flippedCards.has(char.id) ? styles.rotateY0 : styles.rotateY180} 
+                        ${flippedCards.has(`${char.id}-${char.storeName}`) ? styles.rotateY0 : styles.rotateY180} 
                         flex flex-col justify-center items-center gap-2`}
                      >
                         <h3 className='font-bold text-sm text-center mb-2'>{char.name}</h3>
                         <button
                            onClick={(e) => {
                               e.stopPropagation()
-                              toggleCharacterUse(char.id)
-                              toggleCardFlip(char.id)
+                              toggleCharacterUse(char.id, char.storeName)
+                              toggleCardFlip(char.id, char.storeName)
                            }}
                            className='w-full py-2 rounded-lg bg-red-500 text-white text-xs font-medium flex items-center justify-center gap-1'
                         >
@@ -247,7 +251,9 @@ const CharactersPage = () => {
          {/* Inventory Section */}
          <div className='px-3'>
             <div className='w-full bg-white/90 rounded-xl p-2.5 mb-3 shadow-lg'>
-               <span className='text-lg font-bold'>Backpack ({inventoryCharacters.length})</span>
+               <span className='text-lg font-bold'>
+                  Backpack ({filteredCharacters.filter(char => !char.isUsing).length})
+               </span>
             </div>
 
             <div className='grid grid-cols-3 gap-3'>
@@ -255,13 +261,13 @@ const CharactersPage = () => {
                   <div
                      key={char.id}
                      className={`relative h-[160px] w-full ${styles.perspective500}`}
-                     onClick={() => toggleCardFlip(char.id)}
+                     onClick={() => toggleCardFlip(char.id, char.storeName)}
                   >
                      {/* Card front */}
                      <div
                         className={`absolute inset-0 w-full h-full ${getRarityColor(char.rarity)} rounded-xl p-2 shadow-lg cartoon-border 
                         transform transition-transform duration-300 ${styles.backfaceHidden} 
-                        ${flippedCards.has(char.id) ? styles.rotateY180 : styles.rotateY0}`}
+                        ${flippedCards.has(`${char.id}-${char.storeName}`) ? styles.rotateY180 : styles.rotateY0}`}
                      >
                         {/* Character count badge (if more than 1) */}
                         {char.count > 1 && (
@@ -298,7 +304,7 @@ const CharactersPage = () => {
                      <div
                         className={`absolute inset-0 w-full h-full ${getRarityColor(char.rarity)} rounded-xl p-3 shadow-lg cartoon-border 
                         transform transition-transform duration-300 ${styles.backfaceHidden} ${styles.rotateY180} 
-                        ${flippedCards.has(char.id) ? styles.rotateY0 : styles.rotateY180} 
+                        ${flippedCards.has(`${char.id}-${char.storeName}`) ? styles.rotateY0 : styles.rotateY180} 
                         flex flex-col justify-center items-center gap-2`}
                      >
                         <h3 className='font-bold text-sm text-center mb-2'>{char.name}</h3>
@@ -306,8 +312,8 @@ const CharactersPage = () => {
                            onClick={(e) => {
                               e.stopPropagation()
                               if (usingCharacters.length < 3) {
-                                 toggleCharacterUse(char.id)
-                                 toggleCardFlip(char.id)
+                                 toggleCharacterUse(char.id, char.storeName)
+                                 toggleCardFlip(char.id, char.storeName)
                               }
                            }}
                            disabled={usingCharacters.length >= 3}

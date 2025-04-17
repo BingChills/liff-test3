@@ -25,10 +25,13 @@ interface StoreCurrency {
 }
 
 interface TradeCharacter {
+    id: string;
     name: string;
     image: string;
-    discount: string;
     rarity: CharacterRarity;
+    couponDropRate: number;
+    couponType: string;
+    description: string;
 }
 
 interface TradeOffer {
@@ -59,156 +62,103 @@ export function TradePage() {
     ]);
     const [selectedStore, setSelectedStore] = useState(stores[0]);
 
-    const [tradeOffers] = useState<TradeOffer[]>([
+    const MOCK_CHARACTERS: TradeCharacter[] = [
         {
             id: '1',
-            have: {
-                name: 'Phoenix Bird',
-                image: 'https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80',
-                discount: '50% Off Any Order',
-                rarity: 'legendary',
-            },
-            want: {
-                name: 'Dragon Spirit',
-                image: 'https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 1 Get 2 Free',
-                rarity: 'legendary',
-            },
-        },
-        {
-            id: '2',
-            have: {
-                name: 'Spirit Tiger',
-                image: 'https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 2 Get 1 Free',
-                rarity: 'epic',
-            },
-            want: {
-                name: 'Crystal Fox',
-                image: 'https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80',
-                discount: '40% Weekend Discount',
-                rarity: 'epic',
-            },
-        },
-        {
-            id: '3',
-            have: {
-                name: 'Mystic Wolf',
-                image: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=200&q=80',
-                discount: '30% Off Everything',
-                rarity: 'epic',
-            },
-            want: {
-                name: 'Ancient Guardian',
-                image: 'https://images.unsplash.com/photo-1533582437341-eac7c1f8229c?auto=format&fit=crop&w=200&q=80',
-                discount: '70% Special Discount',
-                rarity: 'legendary',
-            },
-        },
-        {
-            id: '4',
-            have: {
-                name: 'Golden Retriever',
-                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80',
-                discount: '15% Discount',
-                rarity: 'rare',
-            },
-            want: {
-                name: 'Arctic Fox',
-                image: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80',
-                discount: '20% Off',
-                rarity: 'rare',
-            },
-        },
-        {
-            id: '5',
-            have: {
-                name: 'Mysterious Cat',
-                image: 'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 1 Get 1 Free',
-                rarity: 'rare',
-            },
-            want: {
-                name: 'Spirit Tiger',
-                image: 'https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 2 Get 1 Free',
-                rarity: 'epic',
-            },
+            name: 'Skyfluff',
+            image: 'https://i.ibb.co/JwVPKc3t/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-77deb4f6-3d84-45d1-add6-6091387.png',
+            rarity: 'common',
+            couponDropRate: 2,
+            couponType: '5%',
+            description: 'A winged, fluffy fox-like creature with a rainbow tail.',
         },
         {
             id: '6',
-            have: {
-                name: 'Red Panda',
-                image: 'https://images.unsplash.com/photo-1590692464430-96ff0b53f82f?auto=format&fit=crop&w=200&q=80',
-                discount: 'Free Appetizer',
-                rarity: 'rare',
-            },
-            want: {
-                name: 'Crystal Fox',
-                image: 'https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=200&q=80',
-                discount: '40% Weekend Discount',
-                rarity: 'epic',
-            },
-        },
-        {
-            id: '7',
-            have: {
-                name: 'Friendly Hamster',
-                image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=200&q=80',
-                discount: '10% Discount',
-                rarity: 'common',
-            },
-            want: {
-                name: 'Mysterious Cat',
-                image: 'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 1 Get 1 Free',
-                rarity: 'rare',
-            },
-        },
-        {
-            id: '8',
-            have: {
-                name: 'Sleepy Cat',
-                image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=200&q=80',
-                discount: '5% Off',
-                rarity: 'common',
-            },
-            want: {
-                name: 'Golden Retriever',
-                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=200&q=80',
-                discount: '15% Discount',
-                rarity: 'rare',
-            },
+            name: 'Aquapuff',
+            image: 'https://i.ibb.co/vxnshZYC/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-0158338b-3fd6-4619-b9df-adec2e1.png',
+            rarity: 'rare',
+            couponDropRate: 7,
+            couponType: '15%',
+            description: 'A shimmering fish-like creature with flowing fins.',
         },
         {
             id: '9',
-            have: {
-                name: 'Playful Puppy',
-                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80',
-                discount: 'Free Drink',
-                rarity: 'common',
-            },
-            want: {
-                name: 'Arctic Fox',
-                image: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=200&q=80',
-                discount: '20% Off',
-                rarity: 'rare',
-            },
+            name: 'Starnyx',
+            image: 'https://i.ibb.co/VYj2RTzt/u9994361495-httpss-mj-runqq-Shh-Q7w1-Vw-httpss-mj-runl-Pa-Feh-Bvg-QY-64a9ab0e-c88c-4c45-a2a4-eaef36e.png',
+            rarity: 'epic',
+            couponDropRate: 12,
+            couponType: '25%',
+            description: 'A sleek, galaxy-themed cat with cosmic sparkles.',
         },
         {
-            id: '10',
-            have: {
-                name: 'Dragon Spirit',
-                image: 'https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&w=200&q=80',
-                discount: 'Buy 1 Get 2 Free',
-                rarity: 'legendary',
-            },
-            want: {
-                name: 'Phoenix Bird',
-                image: 'https://images.unsplash.com/photo-1557401620-67270b61ea81?auto=format&fit=crop&w=200&q=80',
-                discount: '50% Off Any Order',
-                rarity: 'legendary',
-            },
+            id: '4',
+            name: 'Shadowcrow',
+            image: 'https://i.ibb.co/wh5jTWms/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-0b6c54ca-4bf7-4e15-8c86-2251c23.png',
+            rarity: 'common',
+            couponDropRate: 4,
+            couponType: '12%',
+            description: 'A mysterious, dark crow with glowing blue energy.',
+        },
+        {
+            id: '7',
+            name: 'Bloomtail',
+            image: 'https://i.ibb.co/v6NFjj8y/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-ed4dba3d-c0e2-4d3c-8cef-458ad0d.png',
+            rarity: 'rare',
+            couponDropRate: 8,
+            couponType: '18%',
+            description: 'A leafy, nature-inspired critter with flowers and vines.',
+        },
+        {
+            id: '3',
+            name: 'Solowl',
+            image: 'https://i.ibb.co/Tx0sDqNB/u9994361495-httpss-mj-run13-Mfb-Ot-QXr-I-httpss-mj-runqq-Shh-Q7w1-Vw-62afc714-dd40-478f-9b1c-4b0949f.png',
+            rarity: 'common',
+            couponDropRate: 3,
+            couponType: '10%',
+            description: 'A glowing, golden owl with mystical patterns on its wings.',
+        },
+    ];
+
+    const LEGENDARY_CHARACTER: TradeCharacter = {
+        id: '10',
+        name: 'Celestial Dragon',
+        image: 'https://i.ibb.co/kfYNXs2/u9994361495-httpss-mj-runcx-JKl-V3-Wk-Jk-httpss-mj-runl-Pa-Feh-Bvg-QY-05546006-0625-4234-9599-a05c0e.png',
+        rarity: 'legendary',
+        couponDropRate: 20,
+        couponType: '40%',
+        description: 'A majestic celestial dragon with cosmic powers.',
+    };
+
+    const [tradeOffers] = useState<TradeOffer[]>([
+        {
+            id: '1',
+            have: MOCK_CHARACTERS[0], // Skyfluff
+            want: MOCK_CHARACTERS[1], // Aquapuff
+        },
+        {
+            id: '2',
+            have: MOCK_CHARACTERS[1], // Aquapuff
+            want: MOCK_CHARACTERS[2], // Starnyx
+        },
+        {
+            id: '3',
+            have: MOCK_CHARACTERS[2], // Starnyx
+            want: LEGENDARY_CHARACTER, // Legendary character
+        },
+        {
+            id: '4',
+            have: MOCK_CHARACTERS[3], // Shadowcrow
+            want: MOCK_CHARACTERS[0], // Skyfluff
+        },
+        {
+            id: '5',
+            have: MOCK_CHARACTERS[4], // Bloomtail
+            want: MOCK_CHARACTERS[3], // Shadowcrow
+        },
+        {
+            id: '6',
+            have: MOCK_CHARACTERS[5], // Solowl
+            want: MOCK_CHARACTERS[2], // Starnyx
         },
     ]);
 
@@ -252,18 +202,16 @@ export function TradePage() {
         return result;
     }, [tradeOffers, searchQuery, selectedRarities, sortBy]);
 
-    const getRarityStyle = (rarity: string) => {
+    const getRarityStyle = (rarity: CharacterRarity) => {
         switch (rarity) {
-            case 'common':
-                return 'from-gray-100 to-gray-200 text-gray-700 ring-gray-300';
-            case 'rare':
-                return 'from-blue-100 to-blue-200 text-blue-700 ring-blue-300';
-            case 'epic':
-                return 'from-purple-100 to-purple-200 text-purple-700 ring-purple-300';
             case 'legendary':
-                return 'from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300';
+                return 'ring-yellow-400 from-yellow-100 to-yellow-200 text-yellow-700';
+            case 'epic':
+                return 'ring-purple-400 from-purple-100 to-purple-200 text-purple-700';
+            case 'rare':
+                return 'ring-blue-400 from-blue-100 to-blue-200 text-blue-700';
             default:
-                return 'from-gray-100 to-gray-200 text-gray-700 ring-gray-300';
+                return 'ring-gray-400 from-gray-100 to-gray-200 text-gray-700';
         }
     };
 
@@ -378,13 +326,7 @@ export function TradePage() {
                                     onClick={() => toggleRarity(rarity)}
                                     className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
                                         selectedRarities.includes(rarity)
-                                            ? rarity === 'legendary'
-                                                ? 'bg-yellow-100 text-yellow-700'
-                                                : rarity === 'epic'
-                                                  ? 'bg-purple-100 text-purple-700'
-                                                  : rarity === 'rare'
-                                                    ? 'bg-blue-100 text-blue-700'
-                                                    : 'bg-gray-100 text-gray-700'
+                                            ? getRarityStyle(rarity as CharacterRarity)
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                     }`}
                                 >
@@ -447,9 +389,9 @@ export function TradePage() {
                         </button>
                     </div>
                 ) : (
-                    filteredOffers.map((offer) => (
+                    filteredOffers.map((trade) => (
                         <div
-                            key={offer.id}
+                            key={trade.id}
                             className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden"
                         >
                             <div className="p-4">
@@ -475,94 +417,66 @@ export function TradePage() {
                                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div
-                                                className={`w-16 h-16 rounded-xl overflow-hidden ring-2 bg-gradient-to-br ${getRarityStyle(
-                                                    offer.have.rarity
+                                                className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${getRarityStyle(
+                                                    trade.have.rarity
                                                 )}`}
                                             >
                                                 <img
-                                                    src={offer.have.image}
-                                                    alt={offer.have.name}
-                                                    className="w-full h-full object-cover"
+                                                    src={trade.have.image}
+                                                    alt={trade.have.name}
+                                                    className="w-full h-full object-cover rounded-xl"
                                                 />
                                             </div>
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-gray-800">
-                                                        {offer.have.name}
+                                                <h3 className="text-sm font-bold">{trade.have.name}</h3>
+                                                <p className="text-xs font-medium">
+                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
+                                                        [
                                                     </span>
-                                                    <div
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                                            offer.have.rarity === 'legendary'
-                                                                ? 'bg-yellow-100 text-yellow-700'
-                                                                : offer.have.rarity === 'epic'
-                                                                  ? 'bg-purple-100 text-purple-700'
-                                                                  : offer.have.rarity === 'rare'
-                                                                    ? 'bg-blue-100 text-blue-700'
-                                                                    : 'bg-gray-100 text-gray-700'
-                                                        }`}
-                                                    >
-                                                        {offer.have.rarity.charAt(0).toUpperCase() +
-                                                            offer.have.rarity.slice(1)}
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    className={`text-sm font-medium ${
-                                                        getRarityStyle(offer.have.rarity).split(
-                                                            ' '
-                                                        )[2]
-                                                    } block mt-1`}
-                                                >
-                                                    {offer.have.discount}
-                                                </span>
+                                                    <span className="text-purple-600 font-semibold">
+                                                        {trade.have.couponDropRate}%
+                                                    </span>
+                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
+                                                        ]
+                                                    </span>
+                                                    <span> {trade.have.couponType} 🏷️</span>
+                                                </p>
                                             </div>
                                         </div>
+                                        <p className="text-sm text-gray-600">{trade.have.description}</p>
                                     </div>
 
                                     {/* Want Card */}
-                                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3">
+                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div
-                                                className={`w-16 h-16 rounded-xl overflow-hidden ring-2 bg-gradient-to-br ${getRarityStyle(
-                                                    offer.want.rarity
+                                                className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${getRarityStyle(
+                                                    trade.want.rarity
                                                 )}`}
                                             >
                                                 <img
-                                                    src={offer.want.image}
-                                                    alt={offer.want.name}
-                                                    className="w-full h-full object-cover"
+                                                    src={trade.want.image}
+                                                    alt={trade.want.name}
+                                                    className="w-full h-full object-cover rounded-xl"
                                                 />
                                             </div>
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-gray-800">
-                                                        {offer.want.name}
+                                                <h3 className="text-sm font-bold">{trade.want.name}</h3>
+                                                <p className="text-xs font-medium">
+                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
+                                                        [
                                                     </span>
-                                                    <div
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                                            offer.want.rarity === 'legendary'
-                                                                ? 'bg-yellow-100 text-yellow-700'
-                                                                : offer.want.rarity === 'epic'
-                                                                  ? 'bg-purple-100 text-purple-700'
-                                                                  : offer.want.rarity === 'rare'
-                                                                    ? 'bg-blue-100 text-blue-700'
-                                                                    : 'bg-gray-100 text-gray-700'
-                                                        }`}
-                                                    >
-                                                        {offer.want.rarity.charAt(0).toUpperCase() +
-                                                            offer.want.rarity.slice(1)}
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    className={`text-sm font-medium ${
-                                                        getRarityStyle(offer.want.rarity).split(
-                                                            ' '
-                                                        )[2]
-                                                    } block mt-1`}
-                                                >
-                                                    {offer.want.discount}
-                                                </span>
+                                                    <span className="text-purple-600 font-semibold">
+                                                        {trade.want.couponDropRate}%
+                                                    </span>
+                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
+                                                        ]
+                                                    </span>
+                                                    <span> {trade.want.couponType} 🏷️</span>
+                                                </p>
                                             </div>
                                         </div>
+                                        <p className="text-sm text-gray-600">{trade.want.description}</p>
                                     </div>
                                 </div>
                             </div>
