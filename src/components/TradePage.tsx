@@ -400,21 +400,25 @@ export function TradePage() {
                                     <div className="flex items-center gap-2">
                                         <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-blue-500 to-blue-600" />
                                         <h3 className="text-lg font-bold text-gray-700">
-                                            Trade Offer
+                                            Trade Offer #{trade.id}
                                         </h3>
                                     </div>
                                     <div className="bg-blue-100 rounded-full px-3 py-1 flex items-center gap-1.5">
                                         <ArrowRightLeft className="w-4 h-4 text-blue-600" />
                                         <span className="text-xs font-semibold text-blue-600">
-                                            Exchange
+                                            Character Exchange
                                         </span>
                                     </div>
                                 </div>
 
                                 {/* Character Cards */}
                                 <div className="flex flex-col gap-4">
-                                    {/* Have Card */}
-                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
+                                    {/* Have Card - Your Offer */}
+                                    <div className="rounded-xl p-3 border-2 border-blue-500">
+                                        <div className="bg-blue-500 text-white rounded-t-lg px-3 py-1.5 -mt-3 -mx-3 mb-3 flex items-center justify-between">
+                                            <span className="font-bold text-sm">YOU OFFER</span>
+                                            <span className="bg-white text-blue-600 px-2 py-0.5 rounded-lg text-xs font-semibold uppercase">{trade.have.rarity}</span>
+                                        </div>
                                         <div className="flex items-center gap-3 mb-3">
                                             <div
                                                 className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${getRarityStyle(
@@ -429,15 +433,10 @@ export function TradePage() {
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="text-sm font-bold">{trade.have.name}</h3>
+                                                <p className="text-xs text-gray-500 mb-1">Rarity: <span className="font-semibold capitalize">{trade.have.rarity}</span></p>
                                                 <p className="text-xs font-medium">
                                                     <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
-                                                        [
-                                                    </span>
-                                                    <span className="text-purple-600 font-semibold">
-                                                        {trade.have.couponDropRate}%
-                                                    </span>
-                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
-                                                        ]
+                                                        [{trade.have.couponDropRate}%]
                                                     </span>
                                                     <span> {trade.have.couponType} 🏷️</span>
                                                 </p>
@@ -446,8 +445,12 @@ export function TradePage() {
                                         <p className="text-sm text-gray-600">{trade.have.description}</p>
                                     </div>
 
-                                    {/* Want Card */}
-                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
+                                    {/* Want Card - What You Want */}
+                                    <div className="rounded-xl p-3 border-2 border-green-500">
+                                        <div className="bg-green-500 text-white rounded-t-lg px-3 py-1.5 -mt-3 -mx-3 mb-3 flex items-center justify-between">
+                                            <span className="font-bold text-sm">YOU WANT</span>
+                                            <span className="bg-white text-green-600 px-2 py-0.5 rounded-lg text-xs font-semibold uppercase">{trade.want.rarity}</span>
+                                        </div>
                                         <div className="flex items-center gap-3 mb-3">
                                             <div
                                                 className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${getRarityStyle(
@@ -462,15 +465,10 @@ export function TradePage() {
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="text-sm font-bold">{trade.want.name}</h3>
+                                                <p className="text-xs text-gray-500 mb-1">Rarity: <span className="font-semibold capitalize">{trade.want.rarity}</span></p>
                                                 <p className="text-xs font-medium">
                                                     <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
-                                                        [
-                                                    </span>
-                                                    <span className="text-purple-600 font-semibold">
-                                                        {trade.want.couponDropRate}%
-                                                    </span>
-                                                    <span className="text-blue-600 font-bold bg-blue-100 px-1 rounded">
-                                                        ]
+                                                        [{trade.want.couponDropRate}%]
                                                     </span>
                                                     <span> {trade.want.couponType} 🏷️</span>
                                                 </p>
