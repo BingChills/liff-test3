@@ -17,6 +17,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [profilePicture, setProfilePicture] = useState<string | null>(null)
    const [showProfileModal, setShowProfileModal] = useState(false)
+   const [showScoreInfo, setShowScoreInfo] = useState(false)
+   const [showStaminaInfo, setShowStaminaInfo] = useState(false)
 
    // Use profile picture from user data or LINE
    useEffect(() => {
@@ -127,47 +129,83 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                   </div>
 
                   {/* Score */}
-                  <div className='flex items-center gap-1 bg-gray-800 px-3 py-1.5 rounded-full'>
-                     <div className='w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center'>
-                        <Coins className='w-2.5 h-2.5 text-white' />
-                     </div>
-                     <span className='text-sm font-bold text-white'>{totalScore || 0}</span>
+                  <div className='relative'>
+                     <button
+                        onClick={() => setShowScoreInfo(!showScoreInfo)}
+                        className='flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-full'
+                     >
+                        <div className='w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center'>
+                           <Award className='w-2.5 h-2.5 text-white' />
+                        </div>
+                        <span className='text-sm font-bold text-white'>{totalScore || 0}</span>
+                     </button>
+
+                     {showScoreInfo && (
+                        <div className='absolute top-12 right-0 bg-white rounded-2xl shadow-lg p-2 w-64 z-50'>
+                           <div className='text-center font-semibold text-sm text-gray-700 mb-2 py-1 border-b border-gray-100'>
+                              Score
+                           </div>
+                           <p className='text-xs text-gray-600 mb-2 px-2'>
+                              Earn score by breaking chests in the game. Higher scores help you compete with other players on the leaderboard.
+                           </p>
+                           <div className='flex items-center justify-between text-xs bg-blue-50 p-2 mx-2 mb-1 rounded-lg'>
+                              <span className='text-blue-700'>Current Rank:</span>
+                              <span className='font-bold text-blue-900'>28th</span>
+                           </div>
+                        </div>
+                     )}
                   </div>
 
-                  {/* Energy/Stamina */}
-                  <div className='flex items-center gap-1 bg-gray-800 px-3 py-1.5 rounded-full'>
-                     <div className='w-4 h-4 rounded-full bg-red-400 flex items-center justify-center'>
-                        <Timer className='w-2.5 h-2.5 text-white' />
-                     </div>
-                     <span className='text-sm font-bold text-white'>
-                        {stamina.current || 0}/{stamina.max || 0}
-                     </span>
+                  {/* Stamina */}
+                  <div className='relative'>
+                     <button
+                        onClick={() => setShowStaminaInfo(!showStaminaInfo)}
+                        className='flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-full'
+                     >
+                        <div className='w-4 h-4 rounded-full bg-red-400 flex items-center justify-center'>
+                           <Timer className='w-2.5 h-2.5 text-white' />
+                        </div>
+                        <span className='text-sm font-bold text-white'>
+                           {stamina.current || 0}/{stamina.max || 0}
+                        </span>
+                     </button>
+
+                     {showStaminaInfo && (
+                        <div className='absolute top-12 right-0 bg-white rounded-2xl shadow-lg p-2 w-64 z-50'>
+                           <div className='text-center font-semibold text-sm text-gray-700 mb-2 py-1 border-b border-gray-100'>
+                              Stamina
+                           </div>
+                           <p className='text-xs text-gray-600 mb-2 px-2'>
+                              Stamina is used for auto play in the game. Conserve your stamina for the best gameplay experience.
+                           </p>
+                        </div>
+                     )}
                   </div>
                </div>
             </div>
          </div>
 
-         {/* Player Information Modal */}
+         {/* Profile Modal */}
          {showProfileModal && (
             <div
-               className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
+               className='fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50'
                onClick={() => setShowProfileModal(false)}
             >
                <div
-                  className='bg-white w-[85%] max-w-sm rounded-3xl p-6 transform transition-all'
+                  className='bg-white w-[90%] max-w-md rounded-3xl shadow-2xl overflow-hidden'
                   onClick={(e) => e.stopPropagation()}
                >
                   {/* Close button */}
                   <button
-                     className='absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors'
                      onClick={() => setShowProfileModal(false)}
+                     className='absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 flex items-center justify-center text-white z-10'
                   >
-                     <X size={20} className='text-gray-500' />
+                     <X className='w-5 h-5' />
                   </button>
 
-                  {/* Profile header */}
-                  <div className='text-center mb-6'>
-                     <div className='w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-blue-100'>
+                  {/* Profile info */}
+                  <div className='flex flex-col items-center pt-8 px-6'>
+                     <div className='w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white'>
                         {profilePicture ? (
                            <img
                               src={profilePicture}
@@ -194,15 +232,38 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      <h3 className='text-sm font-semibold text-gray-500 mb-3'>PLAYER STATS</h3>
 
                      <div className='space-y-3'>
-                        {/* Score */}
-                        <div className='flex items-center justify-between'>
-                           <div className='flex items-center'>
-                              <div className='w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3'>
-                                 <Award className='w-4 h-4 text-yellow-600' />
+                        {/* Score section with explanation */}
+                        <div className='relative'>
+                           <button
+                              onClick={() => setShowScoreInfo(prev => !prev)}
+                              className='w-full flex items-center justify-between mb-1'
+                           >
+                              <div className='flex items-center'>
+                                 <div className='w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3'>
+                                    <Award className='w-4 h-4 text-yellow-600' />
+                                 </div>
+                                 <span className='text-gray-700'>Total Score</span>
                               </div>
-                              <span className='text-gray-700'>Total Score</span>
-                           </div>
-                           <span className='font-bold text-gray-900'>{totalScore || 0}</span>
+                              <div className='flex items-center gap-1'>
+                                 <span className='font-bold text-gray-900'>{totalScore || 0}</span>
+                                 <ChevronDown className='w-3 h-3 text-gray-400' />
+                              </div>
+                           </button>
+                           
+                           {showScoreInfo && (
+                              <div className='bg-white rounded-xl p-3 shadow-md mt-2 mb-3'>
+                                 <div className='text-center font-semibold text-sm text-gray-700 mb-2 py-1 border-b border-gray-100'>
+                                    Score
+                                 </div>
+                                 <p className='text-sm text-gray-600 mb-2'>
+                                    Earn score by breaking chests in the game. Higher scores help you compete with other players and rise in the leaderboard rankings.
+                                 </p>
+                                 <div className='flex items-center justify-between text-xs bg-blue-50 p-2 rounded-lg'>
+                                    <span className='text-blue-700'>Current Rank:</span>
+                                    <span className='font-bold text-blue-900'>28th</span>
+                                 </div>
+                              </div>
+                           )}
                         </div>
 
                         {/* Stamina */}
@@ -211,7 +272,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                               <div className='w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3'>
                                  <Timer className='w-4 h-4 text-red-600' />
                               </div>
-                              <span className='text-gray-700'>Energy</span>
+                              <span className='text-gray-700'>Stamina</span>
                            </div>
                            <span className='font-bold text-gray-900'>
                               {stamina.current || 0}/{stamina.max || 0}
