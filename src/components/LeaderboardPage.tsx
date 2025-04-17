@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Coins, User, Trophy, Gift, Crown, Star, Medal, Gem, ChevronDown, Timer } from 'lucide-react'
 import PageHeader from './PageHeader'
+import { useGameState } from '../state/gameState'
 
 interface LeaderboardEntry {
    rank: number
@@ -109,9 +110,6 @@ const generateLeaderboardData = (): LeaderboardEntry[] => {
    return [...topEntries, ...additionalEntries]
 }
 
-const leaderboardData = generateLeaderboardData()
-const currentUserEntry = leaderboardData.find((entry) => entry.isCurrentUser)
-
 export function LeaderboardPage() {
    const [scrollPosition, setScrollPosition] = React.useState(0)
    const [selectedRank, setSelectedRank] = useState<number | null>(null)
@@ -123,6 +121,14 @@ export function LeaderboardPage() {
       { name: 'Pizza Hut', gems: 950, color: 'orange' }
    ])
    const [selectedStore, setSelectedStore] = React.useState(stores[0])
+   const { pictureUrl } = useGameState()
+
+   const leaderboardData = generateLeaderboardData()
+   // Update current user's avatar with their actual profile picture if available
+   const currentUserEntry = leaderboardData.find((entry) => entry.isCurrentUser)
+   if (currentUserEntry && pictureUrl) {
+      currentUserEntry.avatar = pictureUrl
+   }
 
    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
       setScrollPosition(e.currentTarget.scrollTop)

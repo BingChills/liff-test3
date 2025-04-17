@@ -97,16 +97,21 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon }) => {
                      </button>
 
                      {showStoreSelector && (
-                        <div className='absolute top-full mt-2 right-0 w-48 bg-white rounded-xl shadow-xl overflow-hidden z-50'>
+                        <div className='absolute top-12 right-0 bg-white rounded-2xl shadow-lg p-2 w-48 z-50'>
+                           <div className='text-center font-semibold text-sm text-gray-700 mb-2 py-1 border-b border-gray-100'>
+                              Points
+                           </div>
                            {stores.map((store) => (
                               <button
                                  key={store.name}
                                  onClick={() => handleStoreSelect(store)}
-                                 className='w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors'
+                                 className={`flex items-center justify-between w-full px-3 py-2 rounded-xl transition-colors ${
+                                    selectedStore?.name === store.name ? 'bg-gray-100' : 'hover:bg-gray-50'
+                                 }`}
                               >
                                  <div className='flex items-center gap-2'>
                                     <div
-                                       className={`w-4 h-4 rounded-full ${getStoreColor(
+                                       className={`w-6 h-6 rounded-full ${getStoreColor(
                                           store.color
                                        )} flex items-center justify-center`}
                                     >
