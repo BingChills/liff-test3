@@ -4,7 +4,7 @@ import { GameStateProvider, useGameState } from './state/gameState'
 import TabNavigation from './components/TabNavigation'
 import CouponPage from './components/CouponPage'
 import CharactersPage from './components/CharactersPage'
-import SummonPage from './components/SummonPage'
+import SummonPage from './components/GachaPage'
 import TradePage from './components/TradePage'
 import LeaderboardPage from './components/LeaderboardPage'
 import PageHeader from './components/PageHeader'
@@ -163,3 +163,4 @@ function AppContent() {
 }
 
 export default AppWrapper
+

@@ -14,7 +14,7 @@ const RARITY_RATES: Record<CharacterRarity, number> = {
    common: 0.7
 }
 
-// Character pool for summoning
+// Character pool for gacha
 const CHARACTER_POOL = [
    {
       id: '1',
@@ -205,16 +205,16 @@ const determineRarity = (rand: number): CharacterRarity => {
    return 'common'
 }
 
-const SummonPage = () => {
+const GachaPage = () => {
    const { stores, setStores, selectedStore, setSelectedStore, characters, setCharacters } = useGameState()
    const [showDropRates, setShowDropRates] = useState(false)
    const [showStoreSelector, setShowStoreSelector] = useState(false)
    const [showEggAnimation, setShowEggAnimation] = useState(false)
    const [drawCount, setDrawCount] = useState(1)
-   // Add a key to force the EggAnimation component to fully re-mount between draws
+   // Add a key to force the EggAnimation component to fully re-mount between gachas
    const [animationKey, setAnimationKey] = useState(0)
 
-   // Ensure a store is selected for summoning
+   // Ensure a store is selected for gacha
    React.useEffect(() => {
       if (stores.length > 0 && !selectedStore) {
          // Set the first store as selected if none is selected
@@ -242,14 +242,14 @@ const SummonPage = () => {
       setShowStoreSelector(false)
    }
 
-   const handleSummon = (isTenDraw: boolean) => {
+   const handleGacha = (isTenDraw: boolean) => {
       // Each character costs 100 points regardless of store
       const characterCost = 100
       const count = isTenDraw ? 10 : 1
       const drawCost = characterCost * count
-      
-      // Increment the animation key to force a fresh component on each draw
-      setAnimationKey(prev => prev + 1)
+
+      // Increment the animation key to force a fresh component on each gacha
+      setAnimationKey((prev) => prev + 1)
 
       // Check if user has enough points in the selected store
       if (!selectedStore || selectedStore.point < drawCost) {
@@ -287,7 +287,10 @@ const SummonPage = () => {
       setCharacters([...characters, ...newCharacters])
 
       // Show a summary of what was drawn
-      console.log('Drew characters:', newCharacters.map((c) => `${c.name} (${c.rarity}) from ${c.storeName}`).join(', '))
+      console.log(
+         'Drew characters:',
+         newCharacters.map((c) => `${c.name} (${c.rarity}) from ${c.storeName}`).join(', ')
+      )
    }
 
    return (
@@ -301,7 +304,7 @@ const SummonPage = () => {
                <Store className='w-8 h-8 text-blue-600' />
             </div>
             <div>
-               <h1 className='text-3xl font-black text-gray-800 drop-shadow-sm'>Summon</h1>
+               <h1 className='text-3xl font-black text-gray-800 drop-shadow-sm'>Gacha</h1>
                <p className='text-gray-700 text-sm mt-1'>Get new characters for your collection</p>
             </div>
          </div>
@@ -323,7 +326,7 @@ const SummonPage = () => {
                   <div>
                      <h3 className='font-bold'>{selectedStore?.name || 'Select Store'}</h3>
                      <p className='text-sm text-gray-500'>
-                        {selectedStore ? `${selectedStore.point} points available` : 'Choose a store to summon from'}
+                        {selectedStore ? `${selectedStore.point} points available` : 'Choose a store to gacha from'}
                      </p>
                   </div>
                </div>
@@ -356,11 +359,11 @@ const SummonPage = () => {
             )}
          </div>
 
-         {/* Summon content */}
+         {/* Gacha content */}
          <div className='px-4 mt-4 pb-20'>
             <div className='bg-white/90 rounded-xl p-6 shadow-lg'>
                <div className='text-center mb-6'>
-                  <h2 className='text-2xl font-bold text-gray-800 mb-2'>{selectedStore?.name || 'Character'} Summon</h2>
+                  <h2 className='text-2xl font-bold text-gray-800 mb-2'>{selectedStore?.name || 'Character'} Gacha</h2>
                   <p className='text-gray-600'>
                      Spend points to get characters {selectedStore ? `from ${selectedStore.name}` : ''}
                   </p>
@@ -374,7 +377,7 @@ const SummonPage = () => {
 
                <div className='flex flex-col gap-4 mb-6'>
                   <button
-                     onClick={() => handleSummon(false)}
+                     onClick={() => handleGacha(false)}
                      disabled={!selectedStore || selectedStore.point < 100}
                      className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
                         !selectedStore || selectedStore.point < 100 ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
@@ -384,7 +387,7 @@ const SummonPage = () => {
                   </button>
 
                   <button
-                     onClick={() => handleSummon(true)}
+                     onClick={() => handleGacha(true)}
                      disabled={!selectedStore || selectedStore.point < 1000}
                      className={`w-full py-3 rounded-xl font-bold text-white shadow-md ${
                         !selectedStore || selectedStore.point < 1000 ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
@@ -429,15 +432,15 @@ const SummonPage = () => {
                )}
             </div>
 
-            {/* Recent summons would go here */}
+            {/* Recent gachas would go here */}
          </div>
 
-         {/* Egg Animation - with key to ensure fresh state between draws */}
-         <EggAnimation 
+         {/* Egg Animation - with key to ensure fresh state between gachas */}
+         <EggAnimation
             key={animationKey}
-            isVisible={showEggAnimation} 
-            onAnimationEnd={handleAnimationEnd} 
-            drawCount={drawCount} 
+            isVisible={showEggAnimation}
+            onAnimationEnd={handleAnimationEnd}
+            drawCount={drawCount}
          />
       </div>
    )
@@ -450,7 +453,7 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
    const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0)
    const [highestRarity, setHighestRarity] = useState<CharacterRarity>('common')
    const [showAllCards, setShowAllCards] = useState(false)
-   
+
    // Reset the component state completely when visibility changes
    useEffect(() => {
       if (!isVisible) {
@@ -463,7 +466,7 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
       }
    }, [isVisible])
 
-      // This effect generates characters when the animation becomes visible
+   // This effect generates characters when the animation becomes visible
    useEffect(() => {
       // Only proceed if animation is visible and no characters have been generated yet
       if (isVisible && characters.length === 0 && selectedStore) {
@@ -483,39 +486,39 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
                const randomIndex = Math.floor(Math.random() * availableCharacters.length)
                const selectedCharacter = availableCharacters[randomIndex]
 
-                // Create a new character with the selected store
-                // Use just the base character ID to allow duplicates to be counted correctly
-                // We'll use the basic ID and let the CharactersPage component handle the counting
-                const newChar: Character = {
-                   id: selectedCharacter.id, // Use the original character ID
-                   name: selectedCharacter.name,
-                   image: selectedCharacter.image,
-                   rarity: selectedCharacter.rarity,
-                   discount: `${selectedCharacter.amount}%`,
-                   isUsing: false,
-                   storeName: selectedStore?.name || '', // Ensure store name is never empty
-                   couponDropRate: selectedCharacter.couponDropRate,
-                   couponType: selectedCharacter.couponType
-                }
+               // Create a new character with the selected store
+               // Use just the base character ID to allow duplicates to be counted correctly
+               // We'll use the basic ID and let the CharactersPage component handle the counting
+               const newChar: Character = {
+                  id: selectedCharacter.id, // Use the original character ID
+                  name: selectedCharacter.name,
+                  image: selectedCharacter.image,
+                  rarity: selectedCharacter.rarity,
+                  discount: `${selectedCharacter.amount}%`,
+                  isUsing: false,
+                  storeName: selectedStore?.name || '', // Ensure store name is never empty
+                  couponDropRate: selectedCharacter.couponDropRate,
+                  couponType: selectedCharacter.couponType
+               }
 
                newCharacters.push(newChar)
             } else {
-                // Fallback in case we don't have characters of the drawn rarity
-                // Add the timestamp and store name to ensure each fallback character is unique
-                const storeNameSafe = selectedStore?.name || ''
-                const uniqueId = `draw-${storeNameSafe}-${Date.now()}-${i}`
-                const newChar: Character = {
-                   id: uniqueId,
-                   name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Creature`,
-                   image: `https://placehold.co/150x150/${getRarityColor(rarity).replace('bg-', '').replace('-100', '')}/white?text=${rarity}`,
-                   rarity: rarity,
-                   discount: `${(Math.floor(Math.random() * 5) + 1) * 5}%`,
-                   isUsing: false, 
-                   storeName: storeNameSafe,
-                   // Generate random values for fallback characters based on rarity
-                   couponDropRate: rarity === 'legendary' ? 20 : rarity === 'epic' ? 15 : rarity === 'rare' ? 10 : 5,
-                   couponType: `${(Math.floor(Math.random() * 5) + (rarity === 'legendary' ? 10 : rarity === 'epic' ? 6 : rarity === 'rare' ? 4 : 1)) * 5}%`
-                }
+               // Fallback in case we don't have characters of the drawn rarity
+               // Add the timestamp and store name to ensure each fallback character is unique
+               const storeNameSafe = selectedStore?.name || ''
+               const uniqueId = `draw-${storeNameSafe}-${Date.now()}-${i}`
+               const newChar: Character = {
+                  id: uniqueId,
+                  name: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Creature`,
+                  image: `https://placehold.co/150x150/${getRarityColor(rarity).replace('bg-', '').replace('-100', '')}/white?text=${rarity}`,
+                  rarity: rarity,
+                  discount: `${(Math.floor(Math.random() * 5) + 1) * 5}%`,
+                  isUsing: false,
+                  storeName: storeNameSafe,
+                  // Generate random values for fallback characters based on rarity
+                  couponDropRate: rarity === 'legendary' ? 20 : rarity === 'epic' ? 15 : rarity === 'rare' ? 10 : 5,
+                  couponType: `${(Math.floor(Math.random() * 5) + (rarity === 'legendary' ? 10 : rarity === 'epic' ? 6 : rarity === 'rare' ? 4 : 1)) * 5}%`
+               }
 
                newCharacters.push(newChar)
             }
@@ -795,5 +798,4 @@ export function EggAnimation({ isVisible, onAnimationEnd, drawCount = 1 }: EggAn
    )
 }
 
-export default SummonPage
-
+export default GachaPage
